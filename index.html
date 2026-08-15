@@ -655,7 +655,7 @@
 
             <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
             <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
-                <div class="add-pen-card">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">📐 Mahsulot O'lchami va Narxi</div>
                     <div class="form-row">
                         <div class="form-group">
@@ -663,12 +663,36 @@
                             <input type="text" id="poligrafiyaSizeLabelInput" placeholder="97x210mm">
                         </div>
                         <div class="form-group">
-                            <label>Baza narxi (so'm/dona):</label>
+                            <label>Baza narxi (agar qog'oz grammaji kiritilmagan bo'lsa ishlatiladi):</label>
                             <input type="number" id="poligrafiyaBasePriceInput" value="0">
                         </div>
                     </div>
                     <div class="form-actions">
                         <button class="btn btn-success" onclick="savePoligrafiyaSize()">💾 Saqlash</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">⚖️ Qog'oz Grammaji va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Ushbu mahsulot uchun qog'oz grammajlarini (masalan 115gr, 130gr) va har biriga mos birlik narxini kiriting. "Standart" ustunida mijoz ekranida avtomatik tanlanadigan grammajni belgilang.</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px;">Grammaj (g)</th>
+                                    <th style="width: 160px;">Narxi (so'm/dona)</th>
+                                    <th style="width: 90px; text-align:center;">Standart</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPoligrafiyaGsmTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" style="background: #4f46e5;" onclick="addPoligrafiyaGsmRow()">+ Yangi grammaj qo'shish</button>
+                        <button class="btn btn-success" onclick="saveAllPoligrafiyaGsm()">💾 Barcha grammajlarni saqlash</button>
                     </div>
                 </div>
             </div>
@@ -883,6 +907,28 @@
         kubarik: "90x90x90mm"
     };
 
+    let poligrafiyaGsmDatabase = {
+        flayer: [
+            { gsm: 115, price: 280, isDefault: false },
+            { gsm: 130, price: 300, isDefault: true },
+            { gsm: 150, price: 340, isDefault: false },
+            { gsm: 170, price: 380, isDefault: false }
+        ],
+        listovka: [
+            { gsm: 115, price: 230, isDefault: false },
+            { gsm: 130, price: 250, isDefault: true },
+            { gsm: 150, price: 290, isDefault: false },
+            { gsm: 170, price: 330, isDefault: false }
+        ],
+        buklet: [
+            { gsm: 150, price: 750, isDefault: false },
+            { gsm: 170, price: 800, isDefault: true },
+            { gsm: 200, price: 900, isDefault: false },
+            { gsm: 300, price: 1100, isDefault: false }
+        ]
+    };
+    let selectedPoligrafiyaGsmIndex = -1;
+
     let pensDatabase = {};
     let activeProductType = '';
     let currentManagingProduct = null;
@@ -933,6 +979,11 @@
         let savedPoligrafiyaSizeLabels = localStorage.getItem('erp_poligrafiya_size_labels');
         if (savedPoligrafiyaSizeLabels) {
             poligrafiyaSizeLabels = { ...poligrafiyaSizeLabels, ...JSON.parse(savedPoligrafiyaSizeLabels) };
+        }
+
+        let savedPoligrafiyaGsm = localStorage.getItem('erp_poligrafiya_gsm_db');
+        if (savedPoligrafiyaGsm) {
+            poligrafiyaGsmDatabase = { ...poligrafiyaGsmDatabase, ...JSON.parse(savedPoligrafiyaGsm) };
         }
 
         renderAdminCategoryGrid();
@@ -1013,6 +1064,7 @@
         if (isPoligrafiya) {
             document.getElementById('poligrafiyaBasePriceInput').value = defaultPrices[key] || 0;
             document.getElementById('poligrafiyaSizeLabelInput').value = poligrafiyaSizeLabels[key] || '';
+            renderAdminPoligrafiyaGsmTable();
             return;
         }
 
@@ -1232,6 +1284,72 @@
         localStorage.setItem('erp_poligrafiya_size_labels', JSON.stringify(poligrafiyaSizeLabels));
 
         showToast("💾 Saqlandi!");
+    }
+
+    function renderAdminPoligrafiyaGsmTable() {
+        let tbody = document.getElementById('adminPoligrafiyaGsmTableBody');
+        if (!tbody) return;
+        let list = poligrafiyaGsmDatabase[currentManagingProduct] || [];
+
+        if (list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding:20px;">Hozircha grammaj kiritilmagan. Kiritilmasa, baza narxi ishlatiladi.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = list.map((g, index) => `
+            <tr>
+                <td><input type="number" id="polgsm_gsm_${index}" value="${g.gsm}"></td>
+                <td><input type="number" id="polgsm_price_${index}" value="${g.price}"></td>
+                <td style="text-align:center;"><input type="radio" name="polgsm_default" id="polgsm_default_${index}" ${g.isDefault ? 'checked' : ''} style="width:16px; height:16px; accent-color: var(--primary);"></td>
+                <td style="text-align: right;">
+                    <div class="action-btns" style="justify-content: flex-end;">
+                        <button class="btn btn-danger" title="O'chirish" onclick="deletePoligrafiyaGsmRow(${index})">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function addPoligrafiyaGsmRow() {
+        if (!currentManagingProduct) return;
+        if (!poligrafiyaGsmDatabase[currentManagingProduct]) poligrafiyaGsmDatabase[currentManagingProduct] = [];
+        let list = poligrafiyaGsmDatabase[currentManagingProduct];
+        list.push({ gsm: 130, price: defaultPrices[currentManagingProduct] || 0, isDefault: list.length === 0 });
+        renderAdminPoligrafiyaGsmTable();
+    }
+
+    function deletePoligrafiyaGsmRow(index) {
+        let list = poligrafiyaGsmDatabase[currentManagingProduct] || [];
+        if (!list[index]) return;
+        if (confirm("Ushbu grammajni o'chirmoqchimisiz?")) {
+            let wasDefault = list[index].isDefault;
+            list.splice(index, 1);
+            if (wasDefault && list.length > 0) list[0].isDefault = true;
+            renderAdminPoligrafiyaGsmTable();
+        }
+    }
+
+    function saveAllPoligrafiyaGsm() {
+        if (!currentManagingProduct) return;
+        let list = poligrafiyaGsmDatabase[currentManagingProduct] || [];
+        let updated = [];
+        for (let index = 0; index < list.length; index++) {
+            let gsmInput = document.getElementById(`polgsm_gsm_${index}`);
+            if (!gsmInput) continue;
+            let priceInput = document.getElementById(`polgsm_price_${index}`);
+            let defaultInput = document.getElementById(`polgsm_default_${index}`);
+            updated.push({
+                gsm: parseInt(gsmInput.value) || 0,
+                price: parseFloat(priceInput.value) || 0,
+                isDefault: defaultInput.checked
+            });
+        }
+        if (updated.length > 0 && !updated.some(g => g.isDefault)) updated[0].isDefault = true;
+
+        poligrafiyaGsmDatabase[currentManagingProduct] = updated;
+        localStorage.setItem('erp_poligrafiya_gsm_db', JSON.stringify(poligrafiyaGsmDatabase));
+        renderAdminPoligrafiyaGsmTable();
+        showToast("💾 Grammajlar saqlandi!");
     }
 
     function renderAdminPensTable() {
@@ -1890,20 +2008,31 @@
         } 
         else {
             let sizeLabel = poligrafiyaSizeLabels[type] || '';
+            let gsmList = poligrafiyaGsmDatabase[type] || [];
+            let gsmHtml = '';
+            if (gsmList.length > 0) {
+                let defaultIdx = gsmList.findIndex(g => g.isDefault);
+                selectedPoligrafiyaGsmIndex = defaultIdx >= 0 ? defaultIdx : 0;
+                gsmHtml = `
+                    <div class="step-title">Qog'oz grammaji:</div>
+                    <div class="options-group" id="poligrafiyaGsmGroup"></div>
+                `;
+            }
+
             html = `
                 ${sizeLabel ? `
                 <div class="form-group" style="margin-bottom:12px;">
                     <label>Standart o'lcham:</label>
                     <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sizeLabel}</div>
                 </div>` : ''}
-                <div class="form-group" style="margin-bottom:12px;">
-                    <label>Bosma Turi:</label>
-                    <select id="inpSides" onchange="calculate()">
-                        <option value="1">Bir tomonlama (4+0)</option>
-                        <option value="1.6">Ikki tomonlama (4+4)</option>
-                    </select>
+                ${gsmHtml}
+                <div class="step-title">Bosma Turi:</div>
+                <div class="options-group" id="poligrafiyaSideGroup">
+                    <button class="opt-btn active" onclick="selectPoligrafiyaSide(1, this)">Bir tomonlama (4+0)</button>
+                    <button class="opt-btn" onclick="selectPoligrafiyaSide(1.6, this)">Ikki tomonlama (4+4)</button>
                 </div>
-                <div class="form-group">
+                <input type="hidden" id="inpSides" value="1">
+                <div class="form-group" style="margin-top: 12px;">
                     <label>Adad (dona):</label>
                     <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
                 </div>
@@ -1911,6 +2040,34 @@
         }
 
         form.innerHTML = html;
+
+        let gsmListForRender = poligrafiyaGsmDatabase[type] || [];
+        if (gsmListForRender.length > 0 && document.getElementById('poligrafiyaGsmGroup')) {
+            renderPoligrafiyaGsmOptions(gsmListForRender);
+        }
+    }
+
+    function renderPoligrafiyaGsmOptions(gsmList) {
+        const group = document.getElementById('poligrafiyaGsmGroup');
+        if (!group) return;
+        group.innerHTML = gsmList.map((g, idx) => `
+            <button class="opt-btn ${idx === selectedPoligrafiyaGsmIndex ? 'active' : ''}" onclick="selectPoligrafiyaGsm(${idx})">${g.gsm}gr</button>
+        `).join('');
+    }
+
+    function selectPoligrafiyaGsm(index) {
+        selectedPoligrafiyaGsmIndex = index;
+        document.querySelectorAll('#poligrafiyaGsmGroup .opt-btn').forEach((btn, idx) => {
+            btn.classList.toggle('active', idx === index);
+        });
+        calculate();
+    }
+
+    function selectPoligrafiyaSide(value, btn) {
+        document.getElementById('inpSides').value = value;
+        document.querySelectorAll('#poligrafiyaSideGroup .opt-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        calculate();
     }
 
     function renderDigitalPublicTable() {
@@ -2542,12 +2699,20 @@
             }
             else {
                 let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
-                let rate = baseCost * sideFactor;
+                let gsmList = poligrafiyaGsmDatabase[activeProductType] || [];
+                let unitBase = baseCost;
+                let gsmLabel = '';
+                if (gsmList.length > 0) {
+                    let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList[0];
+                    unitBase = g.price;
+                    gsmLabel = ` | ${g.gsm}gr`;
+                }
+                let rate = unitBase * sideFactor;
                 if (qty >= 5000) rate *= 0.75;
                 else if (qty >= 1000) rate *= 0.85;
                 baseUnitPrice = rate;
                 let sizeLabel = poligrafiyaSizeLabels[activeProductType];
-                details = sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish";
+                details = (sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish") + gsmLabel;
             }
         }
 
