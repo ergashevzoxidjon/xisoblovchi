@@ -666,6 +666,13 @@
                             <label>Baza narxi (agar qog'oz grammaji kiritilmagan bo'lsa ishlatiladi):</label>
                             <input type="number" id="poligrafiyaBasePriceInput" value="0">
                         </div>
+                        <div class="form-group">
+                            <label>Bosma turi (standart):</label>
+                            <select id="poligrafiyaSideTypeInput">
+                                <option value="1">Bir tomonlama (4+0)</option>
+                                <option value="1.6">Ikki tomonlama (4+4)</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button class="btn btn-success" onclick="savePoligrafiyaSize()">💾 Saqlash</button>
@@ -907,6 +914,11 @@
         kubarik: "90x90x90mm"
     };
 
+    let poligrafiyaSideTypes = {
+        flayer: 1.6, listovka: 1.6, doorhanger: 1.6, buklet: 1.6, bloknot: 1.6,
+        paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6
+    };
+
     let poligrafiyaGsmDatabase = {
         flayer: [
             { gsm: 115, price: 280, isDefault: false },
@@ -984,6 +996,11 @@
         let savedPoligrafiyaGsm = localStorage.getItem('erp_poligrafiya_gsm_db');
         if (savedPoligrafiyaGsm) {
             poligrafiyaGsmDatabase = { ...poligrafiyaGsmDatabase, ...JSON.parse(savedPoligrafiyaGsm) };
+        }
+
+        let savedPoligrafiyaSideTypes = localStorage.getItem('erp_poligrafiya_side_types');
+        if (savedPoligrafiyaSideTypes) {
+            poligrafiyaSideTypes = { ...poligrafiyaSideTypes, ...JSON.parse(savedPoligrafiyaSideTypes) };
         }
 
         renderAdminCategoryGrid();
@@ -1064,6 +1081,7 @@
         if (isPoligrafiya) {
             document.getElementById('poligrafiyaBasePriceInput').value = defaultPrices[key] || 0;
             document.getElementById('poligrafiyaSizeLabelInput').value = poligrafiyaSizeLabels[key] || '';
+            document.getElementById('poligrafiyaSideTypeInput').value = poligrafiyaSideTypes[key] ?? 1.6;
             renderAdminPoligrafiyaGsmTable();
             return;
         }
@@ -1282,6 +1300,9 @@
 
         poligrafiyaSizeLabels[currentManagingProduct] = document.getElementById('poligrafiyaSizeLabelInput').value.trim();
         localStorage.setItem('erp_poligrafiya_size_labels', JSON.stringify(poligrafiyaSizeLabels));
+
+        poligrafiyaSideTypes[currentManagingProduct] = parseFloat(document.getElementById('poligrafiyaSideTypeInput').value) || 1.6;
+        localStorage.setItem('erp_poligrafiya_side_types', JSON.stringify(poligrafiyaSideTypes));
 
         showToast("💾 Saqlandi!");
     }
@@ -2019,6 +2040,9 @@
                 `;
             }
 
+            let sideTypeVal = poligrafiyaSideTypes[type] ?? 1.6;
+            let sideTypeLabel = sideTypeVal === 1 ? "Bir tomonlama (4+0)" : "Ikki tomonlama (4+4)";
+
             html = `
                 ${sizeLabel ? `
                 <div class="form-group" style="margin-bottom:12px;">
@@ -2026,13 +2050,11 @@
                     <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sizeLabel}</div>
                 </div>` : ''}
                 ${gsmHtml}
-                <div class="step-title">Bosma Turi:</div>
-                <div class="options-group" id="poligrafiyaSideGroup">
-                    <button class="opt-btn active" onclick="selectPoligrafiyaSide(1, this)">Bir tomonlama (4+0)</button>
-                    <button class="opt-btn" onclick="selectPoligrafiyaSide(1.6, this)">Ikki tomonlama (4+4)</button>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Bosma turi:</label>
+                    <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sideTypeLabel}</div>
                 </div>
-                <input type="hidden" id="inpSides" value="1">
-                <div class="form-group" style="margin-top: 12px;">
+                <div class="form-group">
                     <label>Adad (dona):</label>
                     <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
                 </div>
@@ -2063,12 +2085,6 @@
         calculate();
     }
 
-    function selectPoligrafiyaSide(value, btn) {
-        document.getElementById('inpSides').value = value;
-        document.querySelectorAll('#poligrafiyaSideGroup .opt-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        calculate();
-    }
 
     function renderDigitalPublicTable() {
         let tbody = document.getElementById('digitalPublicTableBody');
@@ -2698,7 +2714,7 @@
                 details = "Textile tayyorlash + Pechat";
             }
             else {
-                let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
+                let sideFactor = poligrafiyaSideTypes[activeProductType] ?? 1.6;
                 let gsmList = poligrafiyaGsmDatabase[activeProductType] || [];
                 let unitBase = baseCost;
                 let gsmLabel = '';
