@@ -655,30 +655,6 @@
 
             <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
             <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
-                <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">📐 Mahsulot O'lchami va Narxi</div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Standart o'lcham (masalan: 97x210mm):</label>
-                            <input type="text" id="poligrafiyaSizeLabelInput" placeholder="97x210mm">
-                        </div>
-                        <div class="form-group">
-                            <label>Baza narxi (agar qog'oz grammaji kiritilmagan bo'lsa ishlatiladi):</label>
-                            <input type="number" id="poligrafiyaBasePriceInput" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Bosma turi (standart):</label>
-                            <select id="poligrafiyaSideTypeInput">
-                                <option value="1">Bir tomonlama (4+0)</option>
-                                <option value="1.6">Ikki tomonlama (4+4)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn btn-success" onclick="savePoligrafiyaSize()">💾 Saqlash</button>
-                    </div>
-                </div>
-
                 <div class="add-pen-card">
                     <div class="add-pen-card-title">⚖️ Qog'oz Grammaji va Narxlari</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Ushbu mahsulot uchun qog'oz grammajlarini (masalan 115gr, 130gr) va har biriga mos birlik narxini kiriting. "Standart" ustunida mijoz ekranida avtomatik tanlanadigan grammajni belgilang.</p>
@@ -1079,9 +1055,6 @@
             return;
         }
         if (isPoligrafiya) {
-            document.getElementById('poligrafiyaBasePriceInput').value = defaultPrices[key] || 0;
-            document.getElementById('poligrafiyaSizeLabelInput').value = poligrafiyaSizeLabels[key] || '';
-            document.getElementById('poligrafiyaSideTypeInput').value = poligrafiyaSideTypes[key] ?? 1.6;
             renderAdminPoligrafiyaGsmTable();
             return;
         }
@@ -1290,21 +1263,6 @@
             renderAdminDigitalPaperTable();
             showToast("🗑️ O'chirildi.");
         }
-    }
-
-    function savePoligrafiyaSize() {
-        if (!currentManagingProduct) return;
-
-        defaultPrices[currentManagingProduct] = parseFloat(document.getElementById('poligrafiyaBasePriceInput').value) || 0;
-        localStorage.setItem('erp_default_prices', JSON.stringify(defaultPrices));
-
-        poligrafiyaSizeLabels[currentManagingProduct] = document.getElementById('poligrafiyaSizeLabelInput').value.trim();
-        localStorage.setItem('erp_poligrafiya_size_labels', JSON.stringify(poligrafiyaSizeLabels));
-
-        poligrafiyaSideTypes[currentManagingProduct] = parseFloat(document.getElementById('poligrafiyaSideTypeInput').value) || 1.6;
-        localStorage.setItem('erp_poligrafiya_side_types', JSON.stringify(poligrafiyaSideTypes));
-
-        showToast("💾 Saqlandi!");
     }
 
     function renderAdminPoligrafiyaGsmTable() {
