@@ -2384,7 +2384,17 @@
                 perSheet = count2;
                 isRotated = true;
             }
-            if (perSheet < 1) perSheet = 1;
+
+            if (perSheet <= 0) {
+                showToast("⚠️ Kiritilgan mahsulot o'lchami tanlangan pechat maydonidan katta, sig'maydi!");
+                let previewBoxEl = document.getElementById('previewBox');
+                if (previewBoxEl) previewBoxEl.innerHTML = '<span style="color:#e31c79; font-weight:700; font-size:0.8rem; text-align:center; padding: 20px;">Bu o\'lcham tanlangan qog\'ozga sig\'maydi!</span>';
+                document.getElementById('resDigitalSheetInfo').innerText = `1 ta listga sig'adigan mahsulot: 0 dona`;
+                document.getElementById('resDigitalListCount').innerText = `Kerakli listlar soni: 0 dona`;
+                document.getElementById('resDigitalTotal').innerText = `Umumiy narx: 0 so'm`;
+                currentCalcResult = { details: "Sig'maydi", qty, unitPrice: 0, totalPrice: 0, name: "Raqamli Pechat", imageUrl: '' };
+                return;
+            }
 
             let sheetsNeeded = Math.ceil(qty / perSheet);
             let unitPaperPrice = (printSidesDigital === 1) ? currentPaper.price1 : currentPaper.price2;
