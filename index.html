@@ -653,6 +653,26 @@
                 </div>
             </div>
 
+            <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
+            <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📐 Mahsulot O'lchami va Narxi</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Standart o'lcham (masalan: 97x210mm):</label>
+                            <input type="text" id="poligrafiyaSizeLabelInput" placeholder="97x210mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Baza narxi (so'm/dona):</label>
+                            <input type="number" id="poligrafiyaBasePriceInput" value="0">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-success" onclick="savePoligrafiyaSize()">💾 Saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="add-pen-card" id="adminModelAddForm">
                 <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
                 <input type="hidden" id="editPenIndex" value="-1">
@@ -849,6 +869,19 @@
 
     const souvenirKeys = allCategories.souvenir.map(item => item.key);
     const noTisneniyaSouvenirs = ['brelok', 'bakal', 'suv_idishlar', 'beyjik', 'powerbanklar'];
+    const poligrafiyaKeys = allCategories.poligrafiya.map(item => item.key);
+
+    let poligrafiyaSizeLabels = {
+        flayer: "97x210mm",
+        listovka: "148x210mm",
+        doorhanger: "90x200mm",
+        buklet: "210x297mm",
+        bloknot: "105x148mm",
+        paket: "250x350mm",
+        kalendar: "297x420mm",
+        papka: "220x310mm",
+        kubarik: "90x90x90mm"
+    };
 
     let pensDatabase = {};
     let activeProductType = '';
@@ -895,6 +928,11 @@
         let savedOfsetMachineSettings = localStorage.getItem('erp_ofset_machine_settings');
         if (savedOfsetMachineSettings) {
             ofsetMachineSettings = { ...ofsetMachineSettings, ...JSON.parse(savedOfsetMachineSettings) };
+        }
+
+        let savedPoligrafiyaSizeLabels = localStorage.getItem('erp_poligrafiya_size_labels');
+        if (savedPoligrafiyaSizeLabels) {
+            poligrafiyaSizeLabels = { ...poligrafiyaSizeLabels, ...JSON.parse(savedPoligrafiyaSizeLabels) };
         }
 
         renderAdminCategoryGrid();
@@ -955,11 +993,13 @@
 
         let isDigital = (key === 'sifravoy_pechat');
         let isOfset = (key === 'ofset_pechat');
+        let isPoligrafiya = poligrafiyaKeys.includes(key);
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
         document.getElementById('digitalAdminPanelBox').style.display = isDigital ? 'block' : 'none';
-        document.getElementById('adminModelAddForm').style.display = (isDigital || isOfset) ? 'none' : 'block';
-        document.getElementById('adminModelTableCard').style.display = (isDigital || isOfset) ? 'none' : 'block';
+        document.getElementById('poligrafiyaSizeAdminBox').style.display = isPoligrafiya ? 'block' : 'none';
+        document.getElementById('adminModelAddForm').style.display = (isDigital || isOfset || isPoligrafiya) ? 'none' : 'block';
+        document.getElementById('adminModelTableCard').style.display = (isDigital || isOfset || isPoligrafiya) ? 'none' : 'block';
 
         if (isOfset) {
             renderAdminOfsetPapersMatrix();
@@ -968,6 +1008,11 @@
         }
         if (isDigital) {
             renderAdminDigitalPaperTable();
+            return;
+        }
+        if (isPoligrafiya) {
+            document.getElementById('poligrafiyaBasePriceInput').value = defaultPrices[key] || 0;
+            document.getElementById('poligrafiyaSizeLabelInput').value = poligrafiyaSizeLabels[key] || '';
             return;
         }
 
@@ -1175,6 +1220,18 @@
             renderAdminDigitalPaperTable();
             showToast("🗑️ O'chirildi.");
         }
+    }
+
+    function savePoligrafiyaSize() {
+        if (!currentManagingProduct) return;
+
+        defaultPrices[currentManagingProduct] = parseFloat(document.getElementById('poligrafiyaBasePriceInput').value) || 0;
+        localStorage.setItem('erp_default_prices', JSON.stringify(defaultPrices));
+
+        poligrafiyaSizeLabels[currentManagingProduct] = document.getElementById('poligrafiyaSizeLabelInput').value.trim();
+        localStorage.setItem('erp_poligrafiya_size_labels', JSON.stringify(poligrafiyaSizeLabels));
+
+        showToast("💾 Saqlandi!");
     }
 
     function renderAdminPensTable() {
@@ -1832,7 +1889,13 @@
             `;
         } 
         else {
+            let sizeLabel = poligrafiyaSizeLabels[type] || '';
             html = `
+                ${sizeLabel ? `
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Standart o'lcham:</label>
+                    <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sizeLabel}</div>
+                </div>` : ''}
                 <div class="form-group" style="margin-bottom:12px;">
                     <label>Bosma Turi:</label>
                     <select id="inpSides" onchange="calculate()">
@@ -2483,7 +2546,8 @@
                 if (qty >= 5000) rate *= 0.75;
                 else if (qty >= 1000) rate *= 0.85;
                 baseUnitPrice = rate;
-                details = "Poligrafiya chop etish";
+                let sizeLabel = poligrafiyaSizeLabels[activeProductType];
+                details = sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish";
             }
         }
 
