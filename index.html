@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bosmaxona ERP v3.8 - To'liq Versiya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0090d4;
+            --primary-hover: #0072ab;
+            --ink: #12141c;
+            --magenta: #e31c79;
+            --yellow: #f5c518;
+            --bg-main: #f7f6f1;
+            --surface: #ffffff;
+            --text-main: #14171f;
+            --text-muted: #62636b;
+            --border: #e1ddd0;
+            --radius: 10px;
+            --font-display: 'Big Shoulders Display', system-ui, sans-serif;
+            --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+            --shadow: 0 4px 6px -1px rgba(18, 20, 28, 0.05), 0 2px 4px -2px rgba(18, 20, 28, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 40px;
+            background-image: radial-gradient(circle, rgba(18,20,28,0.06) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        ::selection { background: var(--yellow); color: var(--ink); }
+        :focus-visible { outline: 2.5px solid var(--primary); outline-offset: 2px; }
+        h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.2px; }
+        h2 { font-size: 1.4rem; }
+
+        .container { max-width: 1480px; margin: 0 auto; padding: 24px 16px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--ink);
+            padding: 14px 24px;
+            margin-bottom: 24px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .header::after {
+            content: "";
+            position: absolute;
+            left: 24px; right: 24px; bottom: -3px; height: 3px;
+            background: repeating-linear-gradient(90deg, var(--primary) 0 8px, var(--magenta) 8px 16px, var(--yellow) 16px 24px, var(--ink) 24px 32px);
+            border-radius: 0 0 4px 4px;
+        }
+
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+        .regmark { flex-shrink: 0; }
+
+        .btn {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 0 0 rgba(18,20,28,0.15); }
+        .btn:active { transform: translateY(0); box-shadow: none; }
+        .btn-secondary { background: var(--ink); }
+        .btn-danger { background: var(--magenta); color: white; }
+        .btn-danger:hover { background: #c01568; }
+        .btn-warning { background: var(--yellow); color: var(--ink); }
+        .btn-warning:hover { background: #dcae0c; }
+        .btn-success { background: #05966e; color: white; }
+        .btn-success:hover { background: #047d5b; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: #f1efe6; }
+
+        .search-box { margin-bottom: 24px; }
+        .search-box input {
+            width: 100%;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 144, 212, 0.14); }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 28px 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-image: linear-gradient(90deg, var(--border) 0 6px, transparent 6px 10px);
+            background-size: 10px 1px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .product-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        .product-card::before, .product-card::after {
+            content: "";
+            position: absolute;
+            width: 9px; height: 9px;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+        }
+        .product-card::before {
+            top: 5px; left: 5px;
+            border-top: 1.5px solid var(--magenta);
+            border-left: 1.5px solid var(--magenta);
+        }
+        .product-card::after {
+            bottom: 5px; right: 5px;
+            border-bottom: 1.5px solid var(--magenta);
+            border-right: 1.5px solid var(--magenta);
+        }
+        .product-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow); }
+        .product-card:hover::before, .product-card:hover::after { opacity: 1; }
+        .product-card .icon { font-size: 1.4rem; flex-shrink: 0; }
+        .product-card h3 { font-size: 0.92rem; font-weight: 600; color: var(--text-main); }
+
+        .screen { display: none; background: var(--surface); border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow); animation: screenIn 0.25s ease; }
+        @keyframes screenIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .back-btn { margin-bottom: 20px; }
+
+        .calc-grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; }
+        @media (max-width: 950px) { .calc-grid { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .form-group input, .form-group select {
+            width: 100%;
+            height: 42px;
+            padding: 8px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.92rem;
+            outline: none;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 144, 212, 0.12); }
+
+        .step-title {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--surface);
+            background: var(--ink);
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 4px;
+            margin: 14px 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        
+        .pen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .pen-card {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+        }
+        .pen-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .pen-card.active { border-color: var(--primary); background: #eaf6fc; box-shadow: 0 0 0 3px rgba(0,144,212,0.12); }
+        .pen-card img { width: 100%; height: 75px; object-fit: contain; margin-bottom: 6px; border-radius: 4px; }
+        .pen-id { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; font-family: var(--font-mono); }
+        .pen-name { font-size: 0.8rem; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .options-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+        .opt-btn {
+            padding: 8px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: 0.2s;
+        }
+        .opt-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .opt-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .right-panel-col { display: flex; flex-direction: column; gap: 16px; }
+
+        .margin-card {
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .result-box {
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 16px;
+        }
+        .card-preview-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            padding: 2px;
+        }
+        .card-preview-img img { width: 100%; height: 100%; object-fit: contain; }
+        .card-preview-text { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+        .card-preview-text span { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .card-preview-text strong { font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .result-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.88rem; }
+        .result-item strong, .result-item > span:last-child { font-family: var(--font-mono); font-weight: 600; }
+        .result-total { border-top: 2px dashed var(--border); padding-top: 14px; margin-top: 10px; font-size: 1.3rem; font-weight: 700; color: var(--primary); font-family: var(--font-mono); display: flex; justify-content: space-between; align-items: center; }
+
+        .add-pen-card {
+            background: #fff;
+            padding: 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+        }
+        .add-pen-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            height: 42px;
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 0 16px;
+        }
+        .checkbox-group label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+        .checkbox-group input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--primary); }
+
+        .price-size-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+        .price-size-title { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 16px;
+        }
+
+        .table-card { 
+            background: var(--surface); 
+            border-radius: var(--radius); 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow); 
+            overflow: hidden; 
+            margin-bottom: 20px;
+        }
+        .table-scroll { overflow-x: auto; }
+        .admin-table { 
+            width: 100%; 
+            min-width: 620px;
+            border-collapse: collapse; 
+            text-align: left; 
+            table-layout: fixed;
+        }
+        .admin-table th { 
+            background: var(--ink); 
+            padding: 10px 10px; 
+            font-size: 0.68rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.3px; 
+            color: #fff; 
+            font-weight: 700; 
+            font-family: var(--font-mono);
+            border-bottom: 1.5px solid var(--border); 
+            white-space: nowrap;
+        }
+        .admin-table td { 
+            padding: 8px 12px; 
+            border-bottom: 1px solid #f1f5f9; 
+            font-size: 0.88rem; 
+            vertical-align: middle; 
+        }
+        .admin-table td input[type="text"], .admin-table td input[type="number"] {
+            width: 100%;
+            min-width: 68px;
+            height: 32px;
+            padding: 4px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-family: var(--font-mono);
+            outline: none;
+        }
+        .admin-table td input:focus { border-color: var(--primary); }
+        .admin-table .action-btns .btn { height: 30px; width: 30px; padding: 0; font-size: 0.85rem; flex-shrink: 0; }
+        .admin-table tbody tr:hover { background: #faf9f4; }
+
+        .thumb-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 2px;
+        }
+        .thumb-box img { width: 100%; height: 100%; object-fit: contain; }
+
+        .badge-container { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+        .badge-uv { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-dtf { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+        .badge-laser { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .badge-tisneniya { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+
+        .action-btns { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: var(--ink); color: #fff;
+            text-align: center; border-radius: 8px; padding: 12px 20px 12px 16px; position: fixed;
+            z-index: 1000; right: 20px; bottom: 30px; font-size: 0.9rem; box-shadow: var(--shadow);
+            border-left: 4px solid var(--yellow);
+        }
+        #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><svg class="regmark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="10.5" stroke="var(--ink)" stroke-width="2"/><line x1="13" y1="0" x2="13" y2="26" stroke="var(--ink)" stroke-width="1.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--ink)" stroke-width="1.4"/><circle cx="13" cy="13" r="3.4" fill="var(--magenta)"/></svg> Poligrafiya & Suvenir ERP <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0; text-transform: none;">v3.8</span></h1>
+        <button class="btn btn-secondary" onclick="openAdminModal()">⚙️ Admin Panel</button>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="selectionScreen">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Mahsulot nomini kiriting..." oninput="filterProducts()">
+        </div>
+
+        <div class="section-title">1. POLIGRAFIYA MAHSULOTLARI</div>
+        <div class="product-grid">
+            <div class="product-card" onclick="openCalc('flayer', 'Flayer')"><div class="icon">📄</div><h3>Flayer</h3></div>
+            <div class="product-card" onclick="openCalc('listovka', 'Listovka')"><div class="icon">📑</div><h3>Listovka</h3></div>
+            <div class="product-card" onclick="openCalc('doorhanger', 'Doorhanger')"><div class="icon">🏷️</div><h3>Doorhanger</h3></div>
+            <div class="product-card" onclick="openCalc('buklet', 'Buklet')"><div class="icon">📖</div><h3>Buklet</h3></div>
+            <div class="product-card" onclick="openCalc('bloknot', 'Bloknot')"><div class="icon">📓</div><h3>Bloknot</h3></div>
+            <div class="product-card" onclick="openCalc('paket', 'Paket')"><div class="icon">🛍️</div><h3>Paket</h3></div>
+            <div class="product-card" onclick="openCalc('kalendar', 'Kalendar')"><div class="icon">📅</div><h3>Kalendar</h3></div>
+            <div class="product-card" onclick="openCalc('papka', 'Papka')"><div class="icon">📁</div><h3>Papka</h3></div>
+            <div class="product-card" onclick="openCalc('kubarik', 'Kubarik')"><div class="icon">🧊</div><h3>Kubarik</h3></div>
+        </div>
+
+        <div class="section-title">2. TEXTILE MAHSULOTLARI</div>
+        <div class="product-grid">
+            <div class="product-card" onclick="openCalc('futbolka', 'Futbolka')"><div class="icon">👕</div><h3>Futbolka</h3></div>
+            <div class="product-card" onclick="openCalc('kepka', 'Kepka')"><div class="icon">🧢</div><h3>Kepka</h3></div>
+            <div class="product-card" onclick="openCalc('svitshot', 'Svitshot')"><div class="icon">👔</div><h3>Svitshot</h3></div>
+            <div class="product-card" onclick="openCalc('xudi', 'Xudi')"><div class="icon">🧥</div><h3>Xudi</h3></div>
+            <div class="product-card" onclick="openCalc('jiletka', 'Jiletka')"><div class="icon">🥼</div><h3>Jiletka</h3></div>
+            <div class="product-card" onclick="openCalc('shoper', 'Shoper')"><div class="icon">👜</div><h3>Shoper</h3></div>
+        </div>
+
+        <div class="section-title">3. SUVENIR MAHSULOTLARI</div>
+        <div class="product-grid">
+            <div class="product-card" onclick="openCalc('ruchka', 'Ruchka')"><div class="icon">🖊️</div><h3>Ruchka</h3></div>
+            <div class="product-card" onclick="openCalc('yejidnevnik', 'Yejidnevnik')"><div class="icon">📘</div><h3>Yejidnevnik</h3></div>
+            <div class="product-card" onclick="openCalc('termos', 'Termos')"><div class="icon">🥤</div><h3>Termos</h3></div>
+            <div class="product-card" onclick="openCalc('brelok', 'Brelok')"><div class="icon">🔑</div><h3>Brelok</h3></div>
+            <div class="product-card" onclick="openCalc('bakal', 'Bakal')"><div class="icon">☕</div><h3>Bakal</h3></div>
+            <div class="product-card" onclick="openCalc('suv_idishlar', 'Suv idishlar')"><div class="icon">🍾</div><h3>Suv idishlar</h3></div>
+            <div class="product-card" onclick="openCalc('naborlar', 'Naborlar')"><div class="icon">🎁</div><h3>Naborlar</h3></div>
+            <div class="product-card" onclick="openCalc('beyjik', 'Beyjik')"><div class="icon">🪪</div><h3>Beyjik</h3></div>
+            <div class="product-card" onclick="openCalc('plagetkalar', 'Plagetkalar')"><div class="icon">🏆</div><h3>Plagetkalar</h3></div>
+            <div class="product-card" onclick="openCalc('powerbanklar', 'Powerbanklar')"><div class="icon">🔋</div><h3>Powerbanklar</h3></div>
+        </div>
+
+        <div class="section-title">4. REKLAMA MAHSULOTLARI</div>
+        <div class="product-grid">
+            <div class="product-card" onclick="openCalc('baner', 'Baner')"><div class="icon">🖼️</div><h3>Baner</h3></div>
+            <div class="product-card" onclick="openCalc('orakal', 'Orakal')"><div class="icon">🌆</div><h3>Orakal</h3></div>
+            <div class="product-card" onclick="openCalc('setka_orakal', 'Setka Orakal')"><div class="icon">🏁</div><h3>Setka Orakal</h3></div>
+            <div class="product-card" onclick="openCalc('tumanka', 'Tumanka')"><div class="icon">🌫️</div><h3>Tumanka</h3></div>
+            <div class="product-card" onclick="openCalc('xolst', 'Xolst')"><div class="icon">🎨</div><h3>Xolst</h3></div>
+        </div>
+
+        <div class="section-title">5. OFSET PECHAT</div>
+        <div class="product-grid">
+            <div class="product-card" onclick="openCalc('ofset_pechat', 'Ofset Pechat Kalkulyatori')"><div class="icon">🖨️</div><h3>Ofset pechat kalkulyatori</h3></div>
+        </div>
+
+        <div class="section-title">6. SIFRAVOY PECHAT</div>
+        <div class="product-grid">
+            <div class="product-card" onclick="openCalc('sifravoy_pechat', 'Raqamli Pechat Kalkulyatori')"><div class="icon">🖨️</div><h3>Raqamli Pechat Kalkulyatori</h3></div>
+        </div>
+    </div>
+
+    <!-- KALKULYATOR EKRANI -->
+    <div id="calcScreen" class="screen">
+        <button class="btn btn-outline back-btn" onclick="showScreen('selectionScreen')">⬅️ Ortga qaytish</button>
+        <h2 id="currentProductName" style="margin-bottom: 20px; color: var(--primary);"></h2>
+        
+        <div class="calc-grid">
+            <div id="dynamicForm"></div>
+
+            <div class="right-panel-col" id="rightPanelColumn">
+                <!-- Dinamik o'ng panel yoki natija -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL EKRANI -->
+    <div id="adminScreen" class="screen">
+        <button class="btn btn-outline back-btn" onclick="showScreen('selectionScreen')">⬅️ Asosiy ekranga qaytish</button>
+        <h2 style="margin-bottom: 20px; color: var(--text-main);">⚙️ Admin Panel — Baza va Narxlarni Boshqarish</h2>
+
+        <div id="adminCategorySelection">
+            <p style="margin-bottom: 20px; color: var(--text-muted); font-size: 0.95rem;">
+                Bazasini tahrirlash yoki model/narx qo'shmoqchi bo'lgan <strong>Mahsulotni</strong> tanlang:
+            </p>
+            <div id="adminCategoryGridContainer"></div>
+        </div>
+
+        <div id="adminSpecificProductManager" style="display: none;">
+            <button class="btn btn-outline" style="margin-bottom: 20px;" onclick="closeProductManager()">⬅️ Mahsulotlar ro'yxatiga qaytish</button>
+            <h2 id="currentManagingTitle" style="margin-bottom: 20px; color: var(--primary);"></h2>
+
+            <!-- OFSET PECHAT ADMIN PANEL BLOKI -->
+            <div id="ofsetAdminPanelBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📄 Xom Ashyo (Qog'oz) Narxlar Matrixi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Qog'oz turi, grammaji va uchta standart bosma bichim (620x880 / 620x940 / 700x1000) bo'yicha narxlar. "Ofset" qatori standart va o'chirilmaydi.</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">Qog'oz turi</th>
+                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOfsetPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow()">+ Yangi qog'oz turi qo'shish</button>
+                        <button class="btn btn-success" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🖨️ Ofset Forma (Klishe) Narxi</div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A3 Ofset — forma tannarxi:</label>
+                            <input type="number" id="setPlateA3" value="22000">
+                        </div>
+                        <div class="form-group">
+                            <label>A2 Ofset — forma tannarxi:</label>
+                            <input type="number" id="setPlateA2" value="44000">
+                        </div>
+                        <div class="form-group">
+                            <label>A1 Ofset — forma tannarxi:</label>
+                            <input type="number" id="setPlateA1" value="88000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">💰 Bosma (Pechat) Narxi — Baza va Qadam</div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A3 — Baza (1-1000 ottisk):</label>
+                            <input type="number" id="setPrintA3Base" value="170000">
+                        </div>
+                        <div class="form-group">
+                            <label>A3 — Qadam (har +1000):</label>
+                            <input type="number" id="setPrintA3Step" value="70000">
+                        </div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A2 — Baza (1-1000 ottisk):</label>
+                            <input type="number" id="setPrintA2Base" value="350000">
+                        </div>
+                        <div class="form-group">
+                            <label>A2 — Qadam (har +1000):</label>
+                            <input type="number" id="setPrintA2Step" value="80000">
+                        </div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A1 — Baza (1-1000 ottisk):</label>
+                            <input type="number" id="setPrintA1Base" value="1000000">
+                        </div>
+                        <div class="form-group">
+                            <label>A1 — Qadam (har +1000):</label>
+                            <input type="number" id="setPrintA1Step" value="150000">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
+                </div>
+            </div>
+
+            <!-- RAQAMLI PECHAT ADMIN PANEL BLOKI -->
+            <div id="digitalAdminPanelBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📦 Raqamli Pechat Qog'ozlari va Narxlarini Boshqarish</div>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nomi / Grammi</th>
+                                    <th style="width: 120px;">Qog'oz Eni</th>
+                                    <th style="width: 120px;">Qog'oz Bo'yi</th>
+                                    <th style="width: 120px;">Pechat Eni</th>
+                                    <th style="width: 120px;">Pechat Bo'yi</th>
+                                    <th style="width: 135px;">1 tomon. narxi</th>
+                                    <th style="width: 135px;">2 tomon. narxi</th>
+                                    <th style="width: 90px; text-align: right;">Amallar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminDigitalPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" style="background: #4f46e5;" onclick="addDigitalPaperRow()">+ Yangi qog'oz qo'shish</button>
+                        <button class="btn btn-success" onclick="saveAllDigitalPapers()">💾 Barcha o'zgarishlarni saqlash</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-pen-card" id="adminModelAddForm">
+                <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
+                <input type="hidden" id="editPenIndex" value="-1">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Model ID / Kodu:</label>
+                        <input type="text" id="newPenId" placeholder="TR-01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Model Nomi:</label>
+                        <input type="text" id="newPenName" placeholder="Model Nomi">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Model Baza Narxi (so'm):</label>
+                        <input type="number" id="newPenPrice" placeholder="50000">
+                    </div>
+                </div>
+
+                <div class="form-row" id="souvenirFieldsRow">
+                    <div class="form-group">
+                        <label>Rasm Yuklash (Lokal):</label>
+                        <input type="file" id="newPenFile" accept="image/*">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ruxsat berilgan Chop Turlari:</label>
+                        <div class="checkbox-group" id="checkboxGroupContainer">
+                            <label><input type="checkbox" id="chkUv" checked> UF Pechat</label>
+                            <label><input type="checkbox" id="chkDtf" checked> UF DTF</label>
+                            <label id="chkTisneniyaLabel"><input type="checkbox" id="chkTisneniya" checked> Tisneniya</label>
+                            <label><input type="checkbox" id="chkLaser" checked> Gravirovka</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-size-box">
+                    <div class="price-size-title">🏷️ Har bir chop turi uchun alohida narxlar (so'mda):</div>
+                    <div class="form-row" id="printPricesRowContainer">
+                        <div class="form-group">
+                            <label>UF Pechat narxi:</label>
+                            <input type="number" id="pricePrintUv" value="5000" placeholder="5000">
+                        </div>
+                        <div class="form-group">
+                            <label>UF DTF narxi:</label>
+                            <input type="number" id="pricePrintDtf" value="6000" placeholder="6000">
+                        </div>
+                        <div class="form-group" id="priceTisneniyaGroup">
+                            <label>Tisneniya narxi:</label>
+                            <input type="number" id="pricePrintTisneniya" value="8000" placeholder="8000">
+                        </div>
+                        <div class="form-group">
+                            <label>Gravirovka narxi:</label>
+                            <input type="number" id="pricePrintLaser" value="7000" placeholder="7000">
+                        </div>
+                    </div>
+                    <div class="form-group" id="klishePriceGroup" style="margin-top: 12px;">
+                        <label>Tisneniya uchun Qolip (Klishe) narxi:</label>
+                        <input type="number" id="priceKlishe" value="50000" placeholder="50000">
+                    </div>
+                </div>
+
+                <div id="sizePricesBox" class="price-size-box" style="display: none;">
+                    <div class="price-size-title" id="sizeBoxTitleText">📏 Razmerlar bo'yicha qo'shimcha koeffitsient/ustamalar:</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Kichik razmer (Standart):</label>
+                            <input type="number" id="priceSizeSmall" value="0" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>O'rta razmer ustamasi:</label>
+                            <input type="number" id="priceSizeMedium" value="5000" placeholder="5000">
+                        </div>
+                        <div class="form-group">
+                            <label>Katta razmer ustamasi:</label>
+                            <input type="number" id="priceSizeLarge" value="12000" placeholder="12000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" id="btnCancelEdit" style="display:none;" onclick="cancelPenEdit()">Bekor qilish</button>
+                    <button class="btn" id="btnSavePen" onclick="savePen()">💾 Saqlash</button>
+                </div>
+            </div>
+
+            <div class="table-card" id="adminModelTableCard">
+                <div style="padding: 16px 20px; background:#fff; border-bottom:1px solid var(--border);">
+                    <h3 style="font-size: 1.05rem;" id="tableListTitle">📋 Baza Modellari Ro'yxati</h3>
+                </div>
+                <div class="table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr id="adminTableHeader">
+                            <th style="width: 70px;">Rasm</th>
+                            <th style="width: 90px;">ID</th>
+                            <th>Nomi</th>
+                            <th style="width: 120px;">Baza Narxi</th>
+                            <th style="width: 320px;">Chop Turlari va Narxlari</th>
+                            <th style="width: 90px; text-align: right;">Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminPensTable"></tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast">Habar</div>
+
+<script>
+    let defaultPrices = {
+        flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000,
+        futbolka: 45000, kepka: 25000, svitshot: 75000, xudi: 95000, jiletka: 85000, shoper: 20000,
+        ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000,
+        baner: 35000, orakal: 45000, setka_orakal: 50000, tumanka: 40000, xolst: 85000,
+        ofset_pechat: 150, sifravoy_pechat: 800
+    };
+
+    let digitalPapersDatabase = [
+        { name: "Melovka 130g", q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 800, price2: 1200 },
+        { name: "Melovka 150g", q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 1000, price2: 1500 },
+        { name: "Melovka 250g", q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 1500, price2: 2200 },
+        { name: "Melovka 300g", q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 2000, price2: 3000 }
+    ];
+
+    const ofsetAvailablePaperTypes = ["Karton", "Melovka", "Dizayn qog'ozi"];
+
+    let ofsetRawPapers = [
+        { name: "Ofset", gsm: 80, prices: { "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true },
+        { name: "Melovka", gsm: 80, prices: { "620x880": 90000, "620x940": 95000, "700x1000": 110000 } },
+        { name: "Melovka", gsm: 115, prices: { "620x880": 115000, "620x940": 120000, "700x1000": 140000 } },
+        { name: "Karton", gsm: 250, prices: { "620x880": 240000, "620x940": 255000, "700x1000": 280000 } },
+        { name: "Dizayn qog'ozi", gsm: 200, prices: { "620x880": 300000, "620x940": 320000, "700x1000": 350000 } }
+    ];
+
+    let ofsetMachineSettings = {
+        plateA3: 22000, plateA2: 44000, plateA1: 88000,
+        printA3Base: 170000, printA3Step: 70000,
+        printA2Base: 350000, printA2Step: 80000,
+        printA1Base: 1000000, printA1Step: 150000
+    };
+
+    const allCategories = {
+        poligrafiya: [
+            { key: 'flayer', name: 'Flayer', icon: '📄' },
+            { key: 'listovka', name: 'Listovka', icon: '📑' },
+            { key: 'doorhanger', name: 'Doorhanger', icon: '🏷️' },
+            { key: 'buklet', name: 'Buklet', icon: '📖' },
+            { key: 'bloknot', name: 'Bloknot', icon: '📓' },
+            { key: 'paket', name: 'Paket', icon: '🛍️' },
+            { key: 'kalendar', name: 'Kalendar', icon: '📅' },
+            { key: 'papka', name: 'Papka', icon: '📁' },
+            { key: 'kubarik', name: 'Kubarik', icon: '🧊' }
+        ],
+        textile: [
+            { key: 'futbolka', name: 'Futbolka', icon: '👕' },
+            { key: 'kepka', name: 'Kepka', icon: '🧢' },
+            { key: 'svitshot', name: 'Svitshot', icon: '👔' },
+            { key: 'xudi', name: 'Xudi', icon: '🧥' },
+            { key: 'jiletka', name: 'Jiletka', icon: '🥼' },
+            { key: 'shoper', name: 'Shoper', icon: '👜' }
+        ],
+        souvenir: [
+            { key: 'ruchka', name: 'Ruchka', icon: '🖊️' },
+            { key: 'yejidnevnik', name: 'Yejidnevnik', icon: '📘' },
+            { key: 'termos', name: 'Termos', icon: '🥤' },
+            { key: 'brelok', name: 'Brelok', icon: '🔑' },
+            { key: 'bakal', name: 'Bakal', icon: '☕' },
+            { key: 'suv_idishlar', name: 'Suv idishlar', icon: '🍾' },
+            { key: 'naborlar', name: 'Naborlar', icon: '🎁' },
+            { key: 'beyjik', name: 'Beyjik', icon: '🪪' },
+            { key: 'plagetkalar', name: 'Plagetkalar', icon: '🏆' },
+            { key: 'powerbanklar', name: 'Powerbanklar', icon: '🔋' }
+        ],
+        reklama: [
+            { key: 'baner', name: 'Baner', icon: '🖼️' },
+            { key: 'orakal', name: 'Orakal', icon: '🌆' },
+            { key: 'setka_orakal', name: 'Setka Orakal', icon: '🏁' },
+            { key: 'tumanka', name: 'Tumanka', icon: '🌫️' },
+            { key: 'xolst', name: 'Xolst', icon: '🎨' }
+        ],
+        ofset: [
+            { key: 'ofset_pechat', name: 'Ofset pechat kalkulyatori', icon: '🖨️' }
+        ],
+        sifravoy: [
+            { key: 'sifravoy_pechat', name: 'Raqamli Pechat Kalkulyatori', icon: '🖨️' }
+        ]
+    };
+
+    const souvenirKeys = allCategories.souvenir.map(item => item.key);
+    const noTisneniyaSouvenirs = ['brelok', 'bakal', 'suv_idishlar', 'beyjik', 'powerbanklar'];
+
+    let pensDatabase = {};
+    let activeProductType = '';
+    let currentManagingProduct = null;
+    let currentCalcResult = {};
+
+    let selectedPen = null;
+    let selectedPrintType = 'uv';
+    let selectedPrintSize = 'small';
+    let selectedSide = 1;
+    let includeKlishe = false;
+
+    let currentPaper = { name: 'Melovka 130g', q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 800, price2: 1200 };
+    let printSidesDigital = 1;
+
+    let selectedOfsetPaperType = 'Ofset';
+    let selectedOfsetGsm = 80;
+    let selectedOfsetMachine = 'AUTO';
+    let printSidesOfset = 1;
+    let lastOfsetCalc = null;
+
+    function init() {
+        let savedPens = localStorage.getItem('erp_pens_db_v3');
+        pensDatabase = savedPens ? JSON.parse(savedPens) : {};
+
+        let savedPrices = localStorage.getItem('erp_default_prices');
+        if (savedPrices) {
+            defaultPrices = { ...defaultPrices, ...JSON.parse(savedPrices) };
+        }
+
+        let savedDigitalPapers = localStorage.getItem('erp_digital_papers_db');
+        if (savedDigitalPapers) {
+            digitalPapersDatabase = JSON.parse(savedDigitalPapers);
+        }
+        if (digitalPapersDatabase.length > 0) {
+            currentPaper = digitalPapersDatabase[0];
+        }
+
+        let savedOfsetRawPapers = localStorage.getItem('erp_ofset_raw_papers');
+        if (savedOfsetRawPapers) {
+            ofsetRawPapers = JSON.parse(savedOfsetRawPapers);
+        }
+
+        let savedOfsetMachineSettings = localStorage.getItem('erp_ofset_machine_settings');
+        if (savedOfsetMachineSettings) {
+            ofsetMachineSettings = { ...ofsetMachineSettings, ...JSON.parse(savedOfsetMachineSettings) };
+        }
+
+        renderAdminCategoryGrid();
+    }
+
+    function showToast(text) {
+        let t = document.getElementById("toast");
+        t.innerText = text;
+        t.className = "show";
+        setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen, #selectionScreen').forEach(el => el.style.display = 'none');
+        document.getElementById(screenId).style.display = 'block';
+    }
+
+    function openAdminModal() {
+        let password = prompt("Admin kirish parolini kiriting:", "");
+        if (password === "1234") {
+            closeProductManager();
+            showScreen('adminScreen');
+        } else if (password !== null) {
+            showToast("⚠️ Xato parol!");
+        }
+    }
+
+    function renderAdminCategoryGrid() {
+        let container = document.getElementById('adminCategoryGridContainer');
+        
+        const renderSection = (title, items) => `
+            <div class="section-title">${title}</div>
+            <div class="product-grid">
+                ${items.map(item => `
+                    <div class="product-card" onclick="openProductManager('${item.key}', '${item.name}')">
+                        <div class="icon">${item.icon}</div>
+                        <h3>${item.name}</h3>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        container.innerHTML = `
+            ${renderSection('1. POLIGRAFIYA MAHSULOTLARI BAZASI', allCategories.poligrafiya)}
+            ${renderSection('2. TEXTILE MAHSULOTLARI BAZASI', allCategories.textile)}
+            ${renderSection('3. SUVENIR MAHSULOTLARI BAZASI', allCategories.souvenir)}
+            ${renderSection('4. REKLAMA MAHSULOTLARI BAZASI', allCategories.reklama)}
+            ${renderSection('5. OFSET PECHAT BAZASI', allCategories.ofset)}
+            ${renderSection('6. SIFRAVOY PECHAT BAZASI', allCategories.sifravoy)}
+        `;
+    }
+
+    function openProductManager(key, name) {
+        currentManagingProduct = key;
+        document.getElementById('adminCategorySelection').style.display = 'none';
+        document.getElementById('adminSpecificProductManager').style.display = 'block';
+        document.getElementById('currentManagingTitle').innerText = `${name} — Bazasini Boshqarish`;
+
+        let isDigital = (key === 'sifravoy_pechat');
+        let isOfset = (key === 'ofset_pechat');
+
+        document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
+        document.getElementById('digitalAdminPanelBox').style.display = isDigital ? 'block' : 'none';
+        document.getElementById('adminModelAddForm').style.display = (isDigital || isOfset) ? 'none' : 'block';
+        document.getElementById('adminModelTableCard').style.display = (isDigital || isOfset) ? 'none' : 'block';
+
+        if (isOfset) {
+            renderAdminOfsetPapersMatrix();
+            loadOfsetMachineSettingsToUI();
+            return;
+        }
+        if (isDigital) {
+            renderAdminDigitalPaperTable();
+            return;
+        }
+
+        document.getElementById('tableListTitle').innerText = `📋 ${name} Bazasidagi Modellar Ro'yxati`;
+
+        let isSouvenir = souvenirKeys.includes(key);
+        document.getElementById('souvenirFieldsRow').style.display = isSouvenir ? 'grid' : 'none';
+
+        let isNoTisneniya = noTisneniyaSouvenirs.includes(key);
+        document.getElementById('chkTisneniyaLabel').style.display = isNoTisneniya ? 'none' : 'inline-flex';
+        document.getElementById('priceTisneniyaGroup').style.display = isNoTisneniya ? 'none' : 'block';
+        document.getElementById('klishePriceGroup').style.display = isNoTisneniya ? 'none' : 'block';
+
+        let hasSizes = (key === 'yejidnevnik' || key === 'termos');
+        document.getElementById('sizePricesBox').style.display = hasSizes ? 'block' : 'none';
+
+        cancelPenEdit();
+        renderAdminPensTable();
+    }
+
+    function closeProductManager() {
+        document.getElementById('adminCategorySelection').style.display = 'block';
+        document.getElementById('adminSpecificProductManager').style.display = 'none';
+    }
+
+    function loadOfsetMachineSettingsToUI() {
+        document.getElementById('setPlateA3').value = ofsetMachineSettings.plateA3;
+        document.getElementById('setPlateA2').value = ofsetMachineSettings.plateA2;
+        document.getElementById('setPlateA1').value = ofsetMachineSettings.plateA1;
+        document.getElementById('setPrintA3Base').value = ofsetMachineSettings.printA3Base;
+        document.getElementById('setPrintA3Step').value = ofsetMachineSettings.printA3Step;
+        document.getElementById('setPrintA2Base').value = ofsetMachineSettings.printA2Base;
+        document.getElementById('setPrintA2Step').value = ofsetMachineSettings.printA2Step;
+        document.getElementById('setPrintA1Base').value = ofsetMachineSettings.printA1Base;
+        document.getElementById('setPrintA1Step').value = ofsetMachineSettings.printA1Step;
+    }
+
+    function renderAdminOfsetPapersMatrix() {
+        let tbody = document.getElementById('adminOfsetPaperTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = ofsetRawPapers.map((item, index) => {
+            let isOffset = (item.name === "Ofset");
+            let nameFieldHtml = isOffset
+                ? `<input type="text" value="Ofset" readonly style="background:#f1f5f9; font-weight:600;" id="ofset_mtx_name_${index}">`
+                : `<select id="ofset_mtx_name_${index}">${ofsetAvailablePaperTypes.map(t => `<option value="${t}" ${item.name === t ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+            return `
+            <tr>
+                <td>${nameFieldHtml}</td>
+                <td><input type="number" id="ofset_mtx_gsm_${index}" value="${item.gsm}" ${isOffset ? 'readonly style="background:#f1f5f9;"' : ''}></td>
+                <td><input type="number" id="ofset_mtx_p880_${index}" value="${item.prices['620x880'] || 0}"></td>
+                <td><input type="number" id="ofset_mtx_p940_${index}" value="${item.prices['620x940'] || 0}" ${isOffset ? 'disabled style="background:#f1f5f9;"' : ''}></td>
+                <td><input type="number" id="ofset_mtx_p1000_${index}" value="${item.prices['700x1000'] || 0}" ${isOffset ? 'disabled style="background:#f1f5f9;"' : ''}></td>
+                <td style="text-align: right;">
+                    <div class="action-btns" style="justify-content: flex-end;">
+                        <button class="btn btn-danger" title="O'chirish" ${isOffset ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} onclick="deleteOfsetPaperRow(${index})">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+        }).join('');
+    }
+
+    function addOfsetPaperRow() {
+        ofsetRawPapers.push({ name: "Melovka", gsm: 200, prices: { "620x880": 200000, "620x940": 210000, "700x1000": 230000 } });
+        renderAdminOfsetPapersMatrix();
+    }
+
+    function deleteOfsetPaperRow(index) {
+        if (ofsetRawPapers[index] && ofsetRawPapers[index].name === "Ofset") {
+            showToast("⚠️ 'Ofset' qatorini o'chirib bo'lmaydi!");
+            return;
+        }
+        if (ofsetRawPapers.length <= 1) {
+            showToast("⚠️ Kamida bitta xom ashyo qolishi kerak!");
+            return;
+        }
+        if (confirm("Ushbu qog'oz turini o'chirmoqchimisiz?")) {
+            ofsetRawPapers.splice(index, 1);
+            renderAdminOfsetPapersMatrix();
+        }
+    }
+
+    function saveAllOfsetPapers() {
+        let updated = [];
+        let offsetItem = ofsetRawPapers.find(p => p.name === "Ofset");
+        let offsetIndex = ofsetRawPapers.findIndex(p => p.name === "Ofset");
+        if (offsetItem) {
+            let p880Input = document.getElementById(`ofset_mtx_p880_${offsetIndex}`);
+            if (p880Input) offsetItem.prices["620x880"] = parseFloat(p880Input.value) || 0;
+            updated.push(offsetItem);
+        } else {
+            updated.push({ name: "Ofset", gsm: 80, prices: { "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true });
+        }
+
+        for (let index = 0; index < ofsetRawPapers.length; index++) {
+            let nameField = document.getElementById(`ofset_mtx_name_${index}`);
+            if (!nameField || nameField.value === "Ofset") continue;
+
+            let gsmInput = document.getElementById(`ofset_mtx_gsm_${index}`);
+            let p880Input = document.getElementById(`ofset_mtx_p880_${index}`);
+            let p940Input = document.getElementById(`ofset_mtx_p940_${index}`);
+            let p1000Input = document.getElementById(`ofset_mtx_p1000_${index}`);
+
+            updated.push({
+                name: nameField.value || "Melovka",
+                gsm: parseInt(gsmInput.value) || 80,
+                prices: {
+                    "620x880": parseFloat(p880Input.value) || 0,
+                    "620x940": parseFloat(p940Input.value) || 0,
+                    "700x1000": parseFloat(p1000Input.value) || 0
+                }
+            });
+        }
+
+        ofsetRawPapers = updated;
+        localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
+
+        ofsetMachineSettings = {
+            plateA3: parseFloat(document.getElementById('setPlateA3').value) || 0,
+            plateA2: parseFloat(document.getElementById('setPlateA2').value) || 0,
+            plateA1: parseFloat(document.getElementById('setPlateA1').value) || 0,
+            printA3Base: parseFloat(document.getElementById('setPrintA3Base').value) || 0,
+            printA3Step: parseFloat(document.getElementById('setPrintA3Step').value) || 0,
+            printA2Base: parseFloat(document.getElementById('setPrintA2Base').value) || 0,
+            printA2Step: parseFloat(document.getElementById('setPrintA2Step').value) || 0,
+            printA1Base: parseFloat(document.getElementById('setPrintA1Base').value) || 0,
+            printA1Step: parseFloat(document.getElementById('setPrintA1Step').value) || 0
+        };
+        localStorage.setItem('erp_ofset_machine_settings', JSON.stringify(ofsetMachineSettings));
+
+        renderAdminOfsetPapersMatrix();
+        loadOfsetMachineSettingsToUI();
+        showToast("💾 Barcha ofset o'zgarishlar saqlandi!");
+    }
+
+    function renderAdminDigitalPaperTable() {
+        let tbody = document.getElementById('adminDigitalPaperTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = digitalPapersDatabase.map((item, index) => `
+            <tr>
+                <td><input type="text" id="dig_name_${index}" value="${item.name}" style="max-width: 100%; min-width: 130px;"></td>
+                <td><input type="number" id="dig_qeni_${index}" value="${item.q_eni}"></td>
+                <td><input type="number" id="dig_qboyi_${index}" value="${item.q_boyi}"></td>
+                <td><input type="number" id="dig_peni_${index}" value="${item.p_eni}"></td>
+                <td><input type="number" id="dig_pboyi_${index}" value="${item.p_boyi}"></td>
+                <td><input type="number" id="dig_price1_${index}" value="${item.price1}"></td>
+                <td><input type="number" id="dig_price2_${index}" value="${item.price2}"></td>
+                <td style="text-align: right;">
+                    <div class="action-btns" style="justify-content: flex-end;">
+                        <button class="btn btn-warning" title="O'zgartirish" onclick="updateSingleDigitalPaper(${index})">✏️</button>
+                        <button class="btn btn-danger" title="O'chirish" onclick="deleteDigitalPaperRow(${index})">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function updateSingleDigitalPaper(index) {
+        digitalPapersDatabase[index] = {
+            name: document.getElementById(`dig_name_${index}`).value,
+            q_eni: Number(document.getElementById(`dig_qeni_${index}`).value),
+            q_boyi: Number(document.getElementById(`dig_qboyi_${index}`).value),
+            p_eni: Number(document.getElementById(`dig_peni_${index}`).value),
+            p_boyi: Number(document.getElementById(`dig_pboyi_${index}`).value),
+            price1: Number(document.getElementById(`dig_price1_${index}`).value),
+            price2: Number(document.getElementById(`dig_price2_${index}`).value)
+        };
+        localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
+        showToast("✅ Qog'oz ma'lumotlari o'zgartirildi!");
+    }
+
+    function saveAllDigitalPapers() {
+        for (let index = 0; index < digitalPapersDatabase.length; index++) {
+            let nameInput = document.getElementById(`dig_name_${index}`);
+            if (nameInput) {
+                digitalPapersDatabase[index] = {
+                    name: nameInput.value,
+                    q_eni: Number(document.getElementById(`dig_qeni_${index}`).value),
+                    q_boyi: Number(document.getElementById(`dig_qboyi_${index}`).value),
+                    p_eni: Number(document.getElementById(`dig_peni_${index}`).value),
+                    p_boyi: Number(document.getElementById(`dig_pboyi_${index}`).value),
+                    price1: Number(document.getElementById(`dig_price1_${index}`).value),
+                    price2: Number(document.getElementById(`dig_price2_${index}`).value)
+                };
+            }
+        }
+        localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
+        showToast("💾 Barcha o'zgarishlar muvaffaqiyatli saqlandi!");
+        renderAdminDigitalPaperTable();
+    }
+
+    function addDigitalPaperRow() {
+        digitalPapersDatabase.push({ name: "Yangi qog'oz", q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 1000, price2: 1500 });
+        localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
+        renderAdminDigitalPaperTable();
+        showToast("✅ Yangi qog'oz qo'shildi!");
+    }
+
+    function deleteDigitalPaperRow(index) {
+        if (confirm("Rostdan ham ushbu qog'ozni o'chirmoqchimisiz?")) {
+            digitalPapersDatabase.splice(index, 1);
+            localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
+            renderAdminDigitalPaperTable();
+            showToast("🗑️ O'chirildi.");
+        }
+    }
+
+    function renderAdminPensTable() {
+        let tbody = document.getElementById('adminPensTable');
+        let isSouvenir = souvenirKeys.includes(currentManagingProduct);
+        let currentList = pensDatabase[currentManagingProduct] || [];
+
+        if (!isSouvenir) {
+            let basePrice = defaultPrices[currentManagingProduct] || 0;
+            tbody.innerHTML = `
+                <tr>
+                    <td>-</td>
+                    <td><strong>STANDART</strong></td>
+                    <td style="font-weight:600;">Asosiy Mahsulot Tan Narxi</td>
+                    <td style="font-weight:700; color:var(--primary);">${basePrice.toLocaleString()} so'm</td>
+                    <td><span class="badge badge-uv">Standart Kalkulyatsiya</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn btn-warning" style="height:32px; padding:0 12px; font-size:0.78rem;" onclick="editBasePrice()">✏️ Narxni O'zgartirish</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        if (currentList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding:20px;">Hozircha ushbu mahsulot bazasiga hech qanday model qo'shilmagan.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = currentList.map((p, idx) => `
+            <tr>
+                <td>
+                    <div class="thumb-box">
+                        <img src="${p.image}" onerror="this.src='https://via.placeholder.com/50?text=No+Img'">
+                    </div>
+                </td>
+                <td><strong style="color:var(--text-muted); font-size:0.82rem;">${p.id}</strong></td>
+                <td style="font-weight:600; color:var(--text-main);">${p.name}</td>
+                <td style="font-weight:700; color:var(--primary);">${p.basePrice.toLocaleString()} so'm</td>
+                <td>
+                    <div class="badge-container">
+                        ${p.allowUv ? `<span class="badge badge-uv">UF: ${(p.printPrices?.uv || 0).toLocaleString()}</span>` : ''}
+                        ${p.allowDtf ? `<span class="badge badge-dtf">DTF: ${(p.printPrices?.dtf || 0).toLocaleString()}</span>` : ''}
+                        ${p.allowTisneniya ? `<span class="badge badge-tisneniya">Tisneniya: ${(p.printPrices?.tisneniya || 0).toLocaleString()}</span>` : ''}
+                        ${p.allowLaser ? `<span class="badge badge-laser">Gravirovka: ${(p.printPrices?.laser || 0).toLocaleString()}</span>` : ''}
+                    </div>
+                </td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn btn-warning" title="Tahrirlash" onclick="editPen(${idx})">✏️</button>
+                        <button class="btn btn-danger" title="O'chirish" onclick="deletePen(${idx})">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function editBasePrice() {
+        let oldPrice = defaultPrices[currentManagingProduct] || 0;
+        let newPrice = prompt("Yangi tan narxini (baza narxini) kiriting (so'mda):", oldPrice);
+        if (newPrice !== null && !isNaN(parseFloat(newPrice))) {
+            defaultPrices[currentManagingProduct] = parseFloat(newPrice);
+            localStorage.setItem('erp_default_prices', JSON.stringify(defaultPrices));
+            renderAdminPensTable();
+            showToast("✅ Baza narxi yangilandi!");
+        }
+    }
+
+    function convertBase64(file) {
+        return new Promise((resolve, reject) => {
+            const fileReader = new FileReader();
+            fileReader.readAsDataURL(file);
+            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onerror = (error) => reject(error);
+        });
+    }
+
+    async function savePen() {
+        if (!currentManagingProduct) return;
+        if (!pensDatabase[currentManagingProduct]) pensDatabase[currentManagingProduct] = [];
+
+        let editIdx = parseInt(document.getElementById('editPenIndex').value);
+        let id = document.getElementById('newPenId').value.trim();
+        let name = document.getElementById('newPenName').value.trim();
+        let price = parseFloat(document.getElementById('newPenPrice').value) || 0;
+
+        let allowUv = document.getElementById('chkUv').checked;
+        let allowDtf = document.getElementById('chkDtf').checked;
+        let isNoTisneniya = noTisneniyaSouvenirs.includes(currentManagingProduct);
+        let allowTisneniya = isNoTisneniya ? false : document.getElementById('chkTisneniya').checked;
+        let allowLaser = document.getElementById('chkLaser').checked;
+
+        let pUv = parseFloat(document.getElementById('pricePrintUv').value) || 0;
+        let pDtf = parseFloat(document.getElementById('pricePrintDtf').value) || 0;
+        let pTisneniya = parseFloat(document.getElementById('pricePrintTisneniya').value) || 0;
+        let pLaser = parseFloat(document.getElementById('pricePrintLaser').value) || 0;
+        let pKlishe = parseFloat(document.getElementById('priceKlishe').value) || 0;
+
+        let pSmall = parseFloat(document.getElementById('priceSizeSmall').value) || 0;
+        let pMedium = parseFloat(document.getElementById('priceSizeMedium').value) || 0;
+        let pLarge = parseFloat(document.getElementById('priceSizeLarge').value) || 0;
+
+        if (!id || !name) { showToast("⚠️ ID va nomini kiriting!"); return; }
+
+        let image = '';
+        let fileInput = document.getElementById('newPenFile');
+
+        if (fileInput.files && fileInput.files[0]) {
+            image = await convertBase64(fileInput.files[0]);
+        } else if (editIdx >= 0 && pensDatabase[currentManagingProduct][editIdx]) {
+            image = pensDatabase[currentManagingProduct][editIdx].image;
+        } else {
+            image = 'https://via.placeholder.com/150?text=Model';
+        }
+
+        let penData = { 
+            id, name, basePrice: price, image, 
+            allowUv, allowDtf, allowTisneniya, allowLaser,
+            printPrices: { uv: pUv, dtf: pDtf, tisneniya: pTisneniya, laser: pLaser },
+            klishePrice: pKlishe,
+            sizes: { small: pSmall, medium: pMedium, large: pLarge }
+        };
+
+        if (editIdx >= 0) {
+            pensDatabase[currentManagingProduct][editIdx] = penData;
+            showToast("✏️ Model yangilandi!");
+        } else {
+            pensDatabase[currentManagingProduct].push(penData);
+            showToast("✅ Model qo'shildi!");
+        }
+
+        localStorage.setItem('erp_pens_db_v3', JSON.stringify(pensDatabase));
+        renderAdminPensTable();
+        cancelPenEdit();
+    }
+
+    function editPen(index) {
+        let pen = pensDatabase[currentManagingProduct][index];
+        if (!pen) return;
+
+        document.getElementById('editPenIndex').value = index;
+        document.getElementById('newPenId').value = pen.id;
+        document.getElementById('newPenName').value = pen.name;
+        document.getElementById('newPenPrice').value = pen.basePrice;
+
+        document.getElementById('chkUv').checked = pen.allowUv;
+        document.getElementById('chkDtf').checked = pen.allowDtf;
+        if (!noTisneniyaSouvenirs.includes(currentManagingProduct)) {
+            document.getElementById('chkTisneniya').checked = pen.allowTisneniya;
+        }
+        document.getElementById('chkLaser').checked = pen.allowLaser;
+
+        if (pen.printPrices) {
+            document.getElementById('pricePrintUv').value = pen.printPrices.uv || 0;
+            document.getElementById('pricePrintDtf').value = pen.printPrices.dtf || 0;
+            document.getElementById('pricePrintTisneniya').value = pen.printPrices.tisneniya || 0;
+            document.getElementById('pricePrintLaser').value = pen.printPrices.laser || 0;
+        }
+        if (pen.klishePrice !== undefined) {
+            document.getElementById('priceKlishe').value = pen.klishePrice;
+        }
+
+        if (pen.sizes) {
+            document.getElementById('priceSizeSmall').value = pen.sizes.small || 0;
+            document.getElementById('priceSizeMedium').value = pen.sizes.medium || 0;
+            document.getElementById('priceSizeLarge').value = pen.sizes.large || 0;
+        }
+
+        document.getElementById('penFormTitle').innerText = `✏️ Modelni Tahrirlash (${pen.id})`;
+        document.getElementById('btnSavePen').innerText = "💾 Saqlash";
+        document.getElementById('btnCancelEdit').style.display = "inline-flex";
+    }
+
+    function cancelPenEdit() {
+        document.getElementById('editPenIndex').value = "-1";
+        document.getElementById('newPenId').value = '';
+        document.getElementById('newPenName').value = '';
+        document.getElementById('newPenPrice').value = '';
+        document.getElementById('newPenFile').value = '';
+        document.getElementById('chkUv').checked = true;
+        document.getElementById('chkDtf').checked = true;
+        document.getElementById('chkTisneniya').checked = true;
+        document.getElementById('chkLaser').checked = true;
+
+        document.getElementById('pricePrintUv').value = 5000;
+        document.getElementById('pricePrintDtf').value = 6000;
+        document.getElementById('pricePrintTisneniya').value = 8000;
+        document.getElementById('pricePrintLaser').value = 7000;
+        document.getElementById('priceKlishe').value = 50000;
+
+        document.getElementById('priceSizeSmall').value = 0;
+        document.getElementById('priceSizeMedium').value = 5000;
+        document.getElementById('priceSizeLarge').value = 12000;
+
+        document.getElementById('penFormTitle').innerText = "➕ Yangi Model Qo'shish";
+        document.getElementById('btnSavePen').innerText = "💾 Saqlash";
+        document.getElementById('btnCancelEdit').style.display = "none";
+    }
+
+    function deletePen(index) {
+        if (confirm("Rostdan ham o'chirmoqchimisiz?")) {
+            pensDatabase[currentManagingProduct].splice(index, 1);
+            localStorage.setItem('erp_pens_db_v3', JSON.stringify(pensDatabase));
+            renderAdminPensTable();
+            showToast("🗑️ Model o'chirildi.");
+        }
+    }
+
+    function filterProducts() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let cards = document.getElementsByClassName('product-card');
+        for (let card of cards) {
+            let title = card.innerText.toLowerCase();
+            card.style.display = title.includes(input) ? "flex" : "none";
+        }
+    }
+
+    function openCalc(type, name) {
+        activeProductType = type;
+        document.getElementById('currentProductName').innerText = type === 'sifravoy_pechat' ? 'Raqamli Pechat Kalkulyatori' : (type === 'ofset_pechat' ? 'Ofset Pechat Kalkulyatori' : (name + " — Hisoblash Moduli"));
+        generateForm(type);
+        showScreen('calcScreen');
+        calculate();
+    }
+
+    function generateForm(type) {
+        const form = document.getElementById('dynamicForm');
+        const rightCol = document.getElementById('rightPanelColumn');
+        let html = '';
+
+        if (souvenirKeys.includes(type)) {
+            rightCol.className = "right-panel-col";
+            rightCol.style.display = "flex";
+            rightCol.innerHTML = `
+                <div class="margin-card">
+                    <div class="form-group">
+                        <label>Ishxona Marjasi (%):</label>
+                        <input type="number" id="inpMargin" value="65" min="0" step="1" oninput="calculate()">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div>
+                        <h3 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;">Hisob-kitob Natijasi</h3>
+                        <div class="card-preview-header" id="previewCardBox" style="display: none;">
+                            <div class="card-preview-img">
+                                <img id="previewProductImg" src="" alt="Mahsulot rasmi" onerror="this.src='https://via.placeholder.com/50?text=Foto'">
+                            </div>
+                            <div class="card-preview-text">
+                                <span>Tanlangan model:</span>
+                                <strong id="previewProductName">-</strong>
+                            </div>
+                        </div>
+                        <div class="result-item"><span>Tafsilot:</span> <strong id="resDetails" style="text-align: right; max-width: 60%;">-</strong></div>
+                        <div class="result-item"><span>Miqdor / Hajm:</span> <strong id="resQuantity">0 dona</strong></div>
+                        <div class="result-item"><span>Birlik narxi:</span> <strong id="resUnitPrice">0 so'm</strong></div>
+                        <div class="result-item result-total"><span>Jami summa:</span> <span id="resTotalPrice">0 so'm</span></div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn" style="width: 100%;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                    </div>
+                </div>
+            `;
+
+            let activeDb = pensDatabase[type] || [];
+            if (activeDb.length > 0) {
+                selectedPen = activeDb[0];
+                selectedPrintType = selectedPen.allowUv ? 'uv' : (selectedPen.allowDtf ? 'dtf' : (selectedPen.allowTisneniya ? 'tisneniya' : 'laser'));
+                selectedPrintSize = 'small';
+                selectedSide = 1;
+                includeKlishe = false;
+
+                let hasSizes = (type === 'yejidnevnik' || type === 'termos');
+                let isNoTisneniya = noTisneniyaSouvenirs.includes(type);
+
+                html = `
+                    <div class="step-title">1. Modelni tanlang (${activeDb.length} ta mavjud):</div>
+                    <div class="pen-grid" id="penGrid"></div>
+
+                    <div class="step-title">2. Chop etish turi:</div>
+                    <div class="options-group" id="printTypeGroup"></div>
+
+                    ${!isNoTisneniya ? `
+                        <div id="klisheBoxContainer" style="margin-bottom: 12px; display: none;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
+                                <input type="checkbox" id="chkIncludeKlishe" onchange="toggleKlishe()" style="width: 16px; height: 16px; accent-color: var(--primary);"> Qolip (Klishe) tayyorlash qo'shilsinmi?
+                            </label>
+                        </div>
+                    ` : ''}
+
+                    ${hasSizes ? `
+                        <div class="step-title">3. Chop etish razmeri (o'lchami):</div>
+                        <div class="options-group" id="printSizeGroup">
+                            <button class="opt-btn active" id="sizeSmallBtn" onclick="selectPenSize('small')">Kichik (Standart)</button>
+                            <button class="opt-btn" id="sizeMediumBtn" onclick="selectPenSize('medium')">O'rta</button>
+                            <button class="opt-btn" id="sizeLargeBtn" onclick="selectPenSize('large')">Katta</button>
+                        </div>
+                    ` : ''}
+
+                    <div class="step-title">${hasSizes ? '4' : '3'}. Bosma tomoni:</div>
+                    <div class="options-group">
+                        <button class="opt-btn active" id="side1Btn" onclick="selectPenSide(1)">1 tomonlama</button>
+                        <button class="opt-btn" id="side2Btn" onclick="selectPenSide(2)">2 tomonlama</button>
+                    </div>
+
+                    <div class="form-group" style="margin-top:10px;">
+                        <label>${hasSizes ? '5' : '4'}. Adad (dona):</label>
+                        <input type="number" id="inpQuantity" value="50" min="1" oninput="calculate()">
+                    </div>
+                `;
+                form.innerHTML = html;
+                renderPensList(activeDb);
+                renderPrintOptions();
+                return;
+            } else {
+                html = `
+                    <div style="background:#fff3cd; color:#856404; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.88rem;">
+                        ⚠️ Ushbu mahsulot uchun hali alohida modellar kiritilmagan. Standart hisob ishlatiladi.
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>Bosma Turi:</label>
+                        <select id="inpSides" onchange="calculate()">
+                            <option value="1">Bir tomonlama</option>
+                            <option value="1.5">Ikki tomonlama</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Adad (dona):</label>
+                        <input type="number" id="inpQuantity" value="50" min="1" oninput="calculate()">
+                    </div>
+                `;
+                form.innerHTML = html;
+                return;
+            }
+        }
+
+        if (type === 'ofset_pechat') {
+            form.className = "";
+            let parentGrid = document.querySelector('.calc-grid');
+            parentGrid.style.gridTemplateColumns = "1.2fr 1fr";
+
+            printSidesOfset = 1;
+            selectedOfsetMachine = 'AUTO';
+
+            if (!ofsetRawPapers.some(p => p.name === selectedOfsetPaperType)) {
+                selectedOfsetPaperType = ofsetRawPapers.length > 0 ? ofsetRawPapers[0].name : 'Ofset';
+            }
+            let gsmOptionsInit = ofsetRawPapers.filter(p => p.name === selectedOfsetPaperType);
+            if (gsmOptionsInit.length > 0 && !gsmOptionsInit.some(p => p.gsm === selectedOfsetGsm)) {
+                selectedOfsetGsm = gsmOptionsInit[0].gsm;
+            }
+
+            form.innerHTML = `
+                <div class="step-title">Ofset qog'oz turi:</div>
+                <div class="options-group" id="ofsetPaperTypeGroup"></div>
+
+                <div class="step-title">Qog'oz zichligi (g/m²):</div>
+                <div class="options-group" id="ofsetGsmGroup"></div>
+
+                <div class="step-title">Standart formatlar (tezkor tanlash):</div>
+                <div class="options-group" id="standardOfsetSizeGroup">
+                    <button class="opt-btn" id="btnOfsetA1" onclick="setOfsetSize(594, 841, 'btnOfsetA1')">A1</button>
+                    <button class="opt-btn" id="btnOfsetA2" onclick="setOfsetSize(420, 594, 'btnOfsetA2')">A2</button>
+                    <button class="opt-btn active" id="btnOfsetA3" onclick="setOfsetSize(297, 420, 'btnOfsetA3')">A3</button>
+                    <button class="opt-btn" id="btnOfsetA4" onclick="setOfsetSize(210, 297, 'btnOfsetA4')">A4</button>
+                    <button class="opt-btn" id="btnOfsetA5" onclick="setOfsetSize(148, 210, 'btnOfsetA5')">A5</button>
+                    <button class="opt-btn" id="btnOfsetA6" onclick="setOfsetSize(105, 148, 'btnOfsetA6')">A6</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Mahsulot eni X (mm):</label>
+                        <input type="number" id="ofsetWidthX" value="297" oninput="onOfsetCustomSize()">
+                    </div>
+                    <div class="form-group">
+                        <label>Mahsulot bo'yi Y (mm):</label>
+                        <input type="number" id="ofsetHeightY" value="420" oninput="onOfsetCustomSize()">
+                    </div>
+                </div>
+
+                <div class="step-title">Bosma turi (tomonlari):</div>
+                <div class="options-group" id="printTypeGroupOfset" style="display:flex;">
+                    <button class="opt-btn active" onclick="setPrintTypeOfset(1)" style="flex:1;">Bir tomonlama</button>
+                    <button class="opt-btn" onclick="setPrintTypeOfset(2)" style="flex:1;">Ikki tomonlama</button>
+                </div>
+
+                <div class="step-title">Mashina tanlash rejimi:</div>
+                <div class="options-group" id="ofsetMachineGroup">
+                    <button class="opt-btn active" onclick="setOfsetMachineMode('AUTO', this)">🤖 Avtomatik (Eng arzoni)</button>
+                    <button class="opt-btn" onclick="setOfsetMachineMode('A3', this)">A3 Ofset</button>
+                    <button class="opt-btn" onclick="setOfsetMachineMode('A2', this)">A2 Ofset</button>
+                    <button class="opt-btn" onclick="setOfsetMachineMode('A1', this)">A1 Ofset</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tiraj (Miqdori - dona):</label>
+                        <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Kompaniya ustama foizi (Marja %):</label>
+                        <input type="number" id="ofsetMargin" value="30" min="0" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div id="ofsetRecommendationBanner" style="display:none; background:#eef2ff; border:1.5px solid #c7d2fe; color:#3730a3; padding:12px 14px; border-radius:10px; margin-bottom:16px; font-size:0.82rem; font-weight:600;">
+                    <div id="ofsetRecommendationText"></div>
+                    <div id="ofsetOborotAlert" style="margin-top:6px;"></div>
+                </div>
+
+                <div class="result-box" style="margin-top: 16px;">
+                    <div>
+                        <h3 style="margin-bottom: 8px; color: var(--text-main); font-size: 0.95rem;">Ofset hisob-kitob natijasi:</h3>
+                        <div style="font-size: 0.88rem; color: var(--text-main); display: flex; flex-direction: column; gap: 4px;">
+                            <div id="resOfsetMachine">Tanlangan ofset: -</div>
+                            <div id="resOfsetRawFormat">Qog'oz formati: -</div>
+                            <div id="resOfsetSheetInfo">1 ta bosma qog'ozga sig'adigan mahsulot: 0 dona</div>
+                            <div id="resOfsetTotalSheets">Jami kerakli qog'oz: 0 ta</div>
+                            <div id="resOfsetFormsCount">Forma (Klishe/Plastina) soni: 0 ta</div>
+                            <div id="resOfsetBaseCost">Asosiy tannarx: 0 so'm</div>
+                            <div id="resOfsetTotal" style="font-weight: 700; color: var(--primary); margin-top: 4px;">Umumiy narx: 0 so'm</div>
+                        </div>
+                        <div class="table-card" style="margin-top: 12px; padding: 10px; background: var(--bg-main);">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Mashinalar bo'yicha 1 dona narxi:</div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>A3 Ofset:</span><strong id="compOfsetA3">-</strong></div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>A2 Ofset:</span><strong id="compOfsetA2">-</strong></div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>A1 Ofset:</span><strong id="compOfsetA1">-</strong></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 14px;">
+                        <button class="btn" style="width: 100%; height: 36px; font-size: 0.82rem;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                    </div>
+                </div>
+            `;
+
+            rightCol.className = "";
+            rightCol.style.display = "block";
+            rightCol.innerHTML = `
+                <div class="step-title" style="margin-top:0;">Qog'ozdagi joylashuvi (5mm otstup, 2mm oraliq):</div>
+                <div id="previewOfsetBox" style="width: 100%; height: 350px; border: 2px dashed #05966e; background: #ecfdf5; border-radius: 8px; display: grid; gap: 4px; padding: 6px; box-sizing: border-box; overflow: hidden;"></div>
+            `;
+
+            let tableContainerId = document.getElementById('ofsetTableContainer');
+            if (!tableContainerId) {
+                let tableDiv = document.createElement('div');
+                tableDiv.id = 'ofsetTableContainer';
+                tableDiv.style.marginTop = "30px";
+                tableDiv.innerHTML = `
+                    <div class="section-title">Ofset xom ashyo (qog'oz) narxlar matrixi</div>
+                    <div class="table-card">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Qog'oz turi / Grammi</th>
+                                    <th style="width: 150px;">620x880</th>
+                                    <th style="width: 150px;">620x940</th>
+                                    <th style="width: 150px;">700x1000</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ofsetPublicTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('calcScreen').appendChild(tableDiv);
+            } else {
+                tableContainerId.style.display = 'block';
+            }
+            renderOfsetPublicTable();
+            renderOfsetPaperTypeChips();
+            renderOfsetGsmChips();
+
+            calculate();
+            return;
+        }
+
+        if (type === 'sifravoy_pechat') {
+            form.className = "";
+            let parentGrid = document.querySelector('.calc-grid');
+            parentGrid.style.gridTemplateColumns = "1.2fr 1fr";
+
+            printSidesDigital = 1;
+
+            if (digitalPapersDatabase.length > 0 && !digitalPapersDatabase.some(p => p.name === currentPaper.name)) {
+                currentPaper = digitalPapersDatabase[0];
+            }
+
+            let paperButtonsHtml = digitalPapersDatabase.map((p, idx) => `
+                <button class="opt-btn ${idx === 0 ? 'active' : ''}" onclick="setPaperByIndex(${idx})">${p.name}</button>
+            `).join('');
+
+            form.innerHTML = `
+                <div class="step-title">Qog'oz turi va grammi:</div>
+                <div class="options-group" id="paperTypeGroup">
+                    ${paperButtonsHtml}
+                </div>
+
+                <div class="step-title">Standart o'lchamlar:</div>
+                <div class="options-group" id="standardSizeGroup">
+                    <button class="opt-btn active" id="btnSizeA3" onclick="setSize(297, 420, 'btnSizeA3')">A3</button>
+                    <button class="opt-btn" id="btnSizeA4" onclick="setSize(210, 297, 'btnSizeA4')">A4</button>
+                    <button class="opt-btn" id="btnSizeA5" onclick="setSize(148, 210, 'btnSizeA5')">A5</button>
+                    <button class="opt-btn" id="btnSizeA6" onclick="setSize(105, 148, 'btnSizeA6')">A6</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Mahsulot eni X (mm):</label>
+                        <input type="number" id="widthX" value="297" oninput="calculate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Mahsulot bo'yi Y (mm):</label>
+                        <input type="number" id="heightY" value="420" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Kerakli mahsulot soni (dona):</label>
+                        <input type="number" id="inpQuantity" value="100" min="1" oninput="calculate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Pechat turi:</label>
+                        <div class="options-group" id="printTypeGroupDigital" style="margin-bottom:0; display:flex;">
+                            <button class="opt-btn active" onclick="setPrintTypeDigital(1)" style="flex:1;">Bir tomonlama</button>
+                            <button class="opt-btn" onclick="setPrintTypeDigital(2)" style="flex:1;">Ikki tomonlama</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-box" style="margin-top: 16px;">
+                    <div>
+                        <h3 style="margin-bottom: 8px; color: var(--text-main); font-size: 0.95rem;">Hisob-kitob natijasi:</h3>
+                        <div style="font-size: 0.88rem; color: var(--text-main); display: flex; flex-direction: column; gap: 4px;">
+                            <div id="resDigitalSheetInfo">1 ta listga sig'adigan mahsulot: 0 dona</div>
+                            <div id="resDigitalListCount">Kerakli listlar soni: 0 dona</div>
+                            <div id="resDigitalTotal" style="font-weight: 700; color: var(--primary); margin-top: 4px;">Umumiy narx: 0 so'm</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 14px;">
+                        <button class="btn" style="width: 100%; height: 36px; font-size: 0.82rem;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                    </div>
+                </div>
+            `;
+
+            rightCol.className = "";
+            rightCol.style.display = "block";
+            rightCol.innerHTML = `
+                <div class="step-title" style="margin-top:0;">Pechat maydoni joylashuvi:</div>
+                <div id="previewBox" style="width: 100%; height: 350px; border: 2px dashed #38bdf8; background: #f0fdf4; border-radius: 8px; display: grid; gap: 4px; padding: 6px; box-sizing: border-box; overflow: hidden;"></div>
+            `;
+
+            let tableContainerId = document.getElementById('digitalTableContainer');
+            if (!tableContainerId) {
+                let tableDiv = document.createElement('div');
+                tableDiv.id = 'digitalTableContainer';
+                tableDiv.style.marginTop = "30px";
+                tableDiv.innerHTML = `
+                    <div class="section-title">Qog'oz turlari, O'lchamlari va Narxlari</div>
+                    <div class="table-card">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Qog'oz turi / Grammi</th>
+                                    <th style="width: 200px;">Qog'oz o'lchami</th>
+                                    <th style="width: 160px;">1 tomon. narxi</th>
+                                    <th style="width: 160px;">2 tomon. narxi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="digitalPublicTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('calcScreen').appendChild(tableDiv);
+            } else {
+                tableContainerId.style.display = 'block';
+            }
+            renderDigitalPublicTable();
+
+            calculate();
+            return;
+        } else {
+            let tableContainerId = document.getElementById('digitalTableContainer');
+            if (tableContainerId) tableContainerId.style.display = 'none';
+            let ofsetContainerId = document.getElementById('ofsetTableContainer');
+            if (ofsetContainerId) ofsetContainerId.style.display = 'none';
+            document.querySelector('.calc-grid').style.gridTemplateColumns = "1.3fr 0.7fr";
+        }
+
+        rightCol.className = "right-panel-col";
+        rightCol.style.display = "flex";
+        rightCol.innerHTML = `
+            <div class="margin-card">
+                <div class="form-group">
+                    <label>Ishxona Marjasi (%):</label>
+                    <input type="number" id="inpMargin" value="65" min="0" step="1" oninput="calculate()">
+                </div>
+            </div>
+            <div class="result-box">
+                <div>
+                    <h3 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;">Hisob-kitob Natijasi</h3>
+                    <div class="result-item"><span>Tafsilot:</span> <strong id="resDetails" style="text-align: right; max-width: 60%;">-</strong></div>
+                    <div class="result-item"><span>Miqdor / Hajm:</span> <strong id="resQuantity">0 dona</strong></div>
+                    <div class="result-item"><span>Birlik narxi:</span> <strong id="resUnitPrice">0 so'm</strong></div>
+                    <div class="result-item result-total"><span>Jami summa:</span> <span id="resTotalPrice">0 so'm</span></div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="btn" style="width: 100%;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                </div>
+            </div>
+        `;
+
+        if (['futbolka', 'kepka', 'svitshot', 'xudi', 'jiletka', 'shoper'].includes(type)) {
+            html = `
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Pechat Formati:</label>
+                    <select id="inpPrintSize" onchange="calculate()">
+                        <option value="0">Pechatsiz (Faqat kiyim)</option>
+                        <option value="15000">A5 Formati (Kichik)</option>
+                        <option value="25000" selected>A4 Formati (Standart)</option>
+                        <option value="40000">A3 Formati (Katta)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Pechat Tomoni:</label>
+                    <select id="inpSides" onchange="calculate()">
+                        <option value="1">1 tomonlama</option>
+                        <option value="1.8">2 tomonlama (Oldi-orqa)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Adad (dona):</label>
+                    <input type="number" id="inpQuantity" value="10" min="1" oninput="calculate()">
+                </div>
+            `;
+        }
+        else if (['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'].includes(type)) {
+            html = `
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Eni (metr):</label>
+                    <input type="number" id="inpWidth" value="2" min="0.1" step="0.1" oninput="calculate()">
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Bo'yi (metr):</label>
+                    <input type="number" id="inpHeight" value="1" min="0.1" step="0.1" oninput="calculate()">
+                </div>
+                <div class="form-group">
+                    <label>Adad (dona):</label>
+                    <input type="number" id="inpQuantity" value="1" min="1" oninput="calculate()">
+                </div>
+            `;
+        } 
+        else {
+            html = `
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Bosma Turi:</label>
+                    <select id="inpSides" onchange="calculate()">
+                        <option value="1">Bir tomonlama (4+0)</option>
+                        <option value="1.6">Ikki tomonlama (4+4)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Adad (dona):</label>
+                    <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
+                </div>
+            `;
+        }
+
+        form.innerHTML = html;
+    }
+
+    function renderDigitalPublicTable() {
+        let tbody = document.getElementById('digitalPublicTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = digitalPapersDatabase.map(item => `
+            <tr>
+                <td style="font-weight:600;">${item.name}</td>
+                <td>${item.q_eni} x ${item.q_boyi} mm</td>
+                <td>${item.price1.toLocaleString()} so'm</td>
+                <td>${item.price2.toLocaleString()} so'm</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderOfsetPublicTable() {
+        let tbody = document.getElementById('ofsetPublicTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = ofsetRawPapers.map(item => `
+            <tr>
+                <td style="font-weight:600;">${item.name} ${item.gsm}g</td>
+                <td>${(item.prices['620x880'] || 0).toLocaleString()} so'm</td>
+                <td>${(item.prices['620x940'] || 0).toLocaleString()} so'm</td>
+                <td>${(item.prices['700x1000'] || 0).toLocaleString()} so'm</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderOfsetPaperTypeChips() {
+        let group = document.getElementById('ofsetPaperTypeGroup');
+        if (!group) return;
+        let uniqueTypes = ["Ofset", ...new Set(ofsetRawPapers.filter(p => p.name !== "Ofset").map(p => p.name))];
+        group.innerHTML = uniqueTypes.map(typeName => `
+            <button class="opt-btn ${typeName === selectedOfsetPaperType ? 'active' : ''}" onclick="setOfsetPaperType('${typeName}')">${typeName}</button>
+        `).join('');
+    }
+
+    function renderOfsetGsmChips() {
+        let group = document.getElementById('ofsetGsmGroup');
+        if (!group) return;
+        let filtered = ofsetRawPapers.filter(p => p.name === selectedOfsetPaperType);
+        let uniqueGsms = [...new Set(filtered.map(p => p.gsm))].sort((a, b) => a - b);
+        group.innerHTML = uniqueGsms.map(gsm => `
+            <button class="opt-btn ${gsm === selectedOfsetGsm ? 'active' : ''}" onclick="setOfsetGsm(${gsm})">${gsm}g</button>
+        `).join('');
+    }
+
+    function setOfsetPaperType(typeName) {
+        selectedOfsetPaperType = typeName;
+        let filtered = ofsetRawPapers.filter(p => p.name === selectedOfsetPaperType);
+        if (filtered.length > 0) selectedOfsetGsm = filtered[0].gsm;
+        renderOfsetPaperTypeChips();
+        renderOfsetGsmChips();
+        calculate();
+    }
+
+    function setOfsetGsm(gsm) {
+        selectedOfsetGsm = gsm;
+        renderOfsetGsmChips();
+        calculate();
+    }
+
+    function setOfsetMachineMode(mode, btnEl) {
+        selectedOfsetMachine = mode;
+        document.querySelectorAll('#ofsetMachineGroup button').forEach(btn => btn.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+        calculate();
+    }
+
+    function onOfsetCustomSize() {
+        document.querySelectorAll('#standardOfsetSizeGroup button').forEach(btn => btn.classList.remove('active'));
+        calculate();
+    }
+
+    function setOfsetSize(w, h, btnId) {
+        document.getElementById('ofsetWidthX').value = w;
+        document.getElementById('ofsetHeightY').value = h;
+        
+        let sizeBtns = document.querySelectorAll('#standardOfsetSizeGroup button');
+        sizeBtns.forEach(btn => {
+            if (btn.id === btnId) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        calculate();
+    }
+
+    function setPrintTypeOfset(sides) {
+        printSidesOfset = sides;
+        let btns = document.querySelectorAll('#printTypeGroupOfset button');
+        btns.forEach((btn, idx) => {
+            if ((idx + 1) === sides) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        calculate();
+    }
+
+    function updatePreviewOfset(cols, rows) {
+        const previewBox = document.getElementById('previewOfsetBox');
+        if (!previewBox) return;
+        previewBox.innerHTML = '';
+        
+        previewBox.style.display = 'grid';
+        previewBox.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        previewBox.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        previewBox.style.gap = '3px';
+        previewBox.style.padding = '6px';
+        previewBox.style.boxSizing = 'border-box';
+        
+        previewBox.style.width = '100%';
+        previewBox.style.maxWidth = '310px';
+        previewBox.style.height = '440px';
+        previewBox.style.margin = '0 auto';
+        previewBox.style.border = '2px dashed #05966e';
+        previewBox.style.backgroundColor = '#ecfdf5';
+        previewBox.style.borderRadius = '6px';
+
+        let totalItems = cols * rows;
+        for (let i = 0; i < totalItems; i++) {
+            let div = document.createElement('div');
+            div.className = 'preview-item';
+            div.textContent = i + 1;
+            div.style.background = '#10b981';
+            div.style.border = '1px solid #05966e';
+            div.style.borderRadius = '3px';
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.justifyContent = 'center';
+            div.style.fontSize = '12px';
+            div.style.fontWeight = '900';
+            div.style.color = '#fff';
+            previewBox.appendChild(div);
+        }
+    }
+
+    function renderPensList(activeDb) {
+        const grid = document.getElementById('penGrid');
+        if (!grid) return;
+        grid.innerHTML = activeDb.map(pen => `
+            <div class="pen-card ${selectedPen && selectedPen.id === pen.id ? 'active' : ''}" id="pen-card-${pen.id}" onclick="selectPenModel('${pen.id}')">
+                <img src="${pen.image}" alt="${pen.name}" onerror="this.src='https://via.placeholder.com/100x75?text=No+Img'">
+                <span class="pen-id">${pen.id}</span>
+                <span class="pen-name" title="${pen.name}">${pen.name}</span>
+            </div>
+        `).join('');
+    }
+
+    function selectPenModel(penId) {
+        let activeDb = pensDatabase[activeProductType] || [];
+        selectedPen = activeDb.find(p => p.id === penId);
+        if (!selectedPen) return;
+
+        if (selectedPrintType === 'uv' && !selectedPen.allowUv) {
+            selectedPrintType = selectedPen.allowDtf ? 'dtf' : (selectedPen.allowTisneniya ? 'tisneniya' : (selectedPen.allowLaser ? 'laser' : 'uv'));
+        }
+
+        document.querySelectorAll('.pen-card').forEach(c => c.classList.remove('active'));
+        document.getElementById(`pen-card-${penId}`)?.classList.add('active');
+        renderPrintOptions();
+        calculate();
+    }
+
+    function renderPrintOptions() {
+        const group = document.getElementById('printTypeGroup');
+        if (!group || !selectedPen) return;
+        let isNoTisneniya = noTisneniyaSouvenirs.includes(activeProductType);
+        let html = '';
+        if (selectedPen.allowUv) {
+            html += `<button class="opt-btn ${selectedPrintType === 'uv' ? 'active' : ''}" onclick="selectPenPrint('uv')">UF Pechat</button>`;
+        }
+        if (selectedPen.allowDtf) {
+            html += `<button class="opt-btn ${selectedPrintType === 'dtf' ? 'active' : ''}" onclick="selectPenPrint('dtf')">UF DTF</button>`;
+        }
+        if (selectedPen.allowTisneniya && !isNoTisneniya) {
+            html += `<button class="opt-btn ${selectedPrintType === 'tisneniya' ? 'active' : ''}" onclick="selectPenPrint('tisneniya')">Tisneniya</button>`;
+        }
+        if (selectedPen.allowLaser) {
+            html += `<button class="opt-btn ${selectedPrintType === 'laser' ? 'active' : ''}" onclick="selectPenPrint('laser')">Gravirovka</button>`;
+        }
+        group.innerHTML = html;
+
+        let klisheBox = document.getElementById('klisheBoxContainer');
+        if (klisheBox) {
+            klisheBox.style.display = (selectedPrintType === 'tisneniya' && !isNoTisneniya) ? 'block' : 'none';
+        }
+    }
+
+    function selectPenPrint(type) {
+        selectedPrintType = type;
+        renderPrintOptions();
+        calculate();
+    }
+
+    function toggleKlishe() {
+        let chk = document.getElementById('chkIncludeKlishe');
+        includeKlishe = chk ? chk.checked : false;
+        calculate();
+    }
+
+    function selectPenSize(size) {
+        selectedPrintSize = size;
+        document.getElementById('sizeSmallBtn')?.classList.toggle('active', size === 'small');
+        document.getElementById('sizeMediumBtn')?.classList.toggle('active', size === 'medium');
+        document.getElementById('sizeLargeBtn')?.classList.toggle('active', size === 'large');
+        calculate();
+    }
+
+    function selectPenSide(sides) {
+        selectedSide = sides;
+        document.getElementById('side1Btn')?.classList.toggle('active', sides === 1);
+        document.getElementById('side2Btn')?.classList.toggle('active', sides === 2);
+        calculate();
+    }
+
+    function setPaperByIndex(index) {
+        if (digitalPapersDatabase[index]) {
+            currentPaper = digitalPapersDatabase[index];
+            let btns = document.querySelectorAll('#paperTypeGroup button');
+            btns.forEach((btn, idx) => {
+                if (idx === index) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            calculate();
+        }
+    }
+
+   function setSize(w, h, btnId) {
+        document.getElementById('widthX').value = w;
+        document.getElementById('heightY').value = h;
+        
+        let sizeBtns = document.querySelectorAll('#standardSizeGroup button');
+        sizeBtns.forEach(btn => {
+            if (btn.id === btnId) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        calculate();
+    }
+
+    function setPrintTypeDigital(sides) {
+        printSidesDigital = sides;
+        let btns = document.querySelectorAll('#printTypeGroupDigital button');
+        btns.forEach((btn, idx) => {
+            if ((idx + 1) === sides) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        calculate();
+    }
+
+    function updatePreviewDigital(cols, rows) {
+        const previewBox = document.getElementById('previewBox');
+        if (!previewBox) return;
+        previewBox.innerHTML = '';
+        
+        previewBox.style.display = 'grid';
+        previewBox.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        previewBox.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        previewBox.style.gap = '3px';
+        previewBox.style.padding = '6px';
+        previewBox.style.boxSizing = 'border-box';
+        
+        previewBox.style.width = '100%';
+        previewBox.style.maxWidth = '310px';
+        previewBox.style.height = '440px';
+        previewBox.style.margin = '0 auto';
+        previewBox.style.border = '2px dashed #0284c7';
+        previewBox.style.backgroundColor = '#f0f9ff';
+        previewBox.style.borderRadius = '6px';
+
+        let totalItems = cols * rows;
+        for (let i = 0; i < totalItems; i++) {
+            let div = document.createElement('div');
+            div.className = 'preview-item';
+            div.textContent = i + 1;
+            div.style.background = '#38bdf8';
+            div.style.border = '1px solid #0284c7';
+            div.style.borderRadius = '3px';
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.justifyContent = 'center';
+            div.style.fontSize = '12px';
+            div.style.fontWeight = '900';
+            div.style.color = '#fff';
+            previewBox.appendChild(div);
+        }
+    }
+
+    function getOfsetWorkingSheets(machName) {
+        if (machName === 'A3') {
+            return [
+                { w: 297, h: 420, rawKey: "620x880", divisor: 4 },
+                { w: 310, h: 440, rawKey: "620x880", divisor: 4 },
+                { w: 310, h: 470, rawKey: "620x940", divisor: 4 },
+                { w: 350, h: 500, rawKey: "700x1000", divisor: 4 }
+            ];
+        } else if (machName === 'A2') {
+            return [
+                { w: 620, h: 440, rawKey: "620x880", divisor: 2 },
+                { w: 620, h: 470, rawKey: "620x940", divisor: 2 },
+                { w: 500, h: 700, rawKey: "700x1000", divisor: 2 }
+            ];
+        } else if (machName === 'A1') {
+            return [
+                { w: 620, h: 880, rawKey: "620x880", divisor: 1 },
+                { w: 620, h: 940, rawKey: "620x940", divisor: 1 },
+                { w: 700, h: 1000, rawKey: "700x1000", divisor: 1 }
+            ];
+        }
+        return [];
+    }
+
+    function calculateOfsetGridFitting(usableW, usableH, reqW, reqH) {
+        const EPS = 1e-6;
+        let effectiveW = reqW + 2;
+        let effectiveH = reqH + 2;
+
+        let cols1 = Math.floor((usableW + 2) / effectiveW + EPS);
+        let rows1 = Math.floor((usableH + 2) / effectiveH + EPS);
+        let count1 = (cols1 > 0 && rows1 > 0) ? (cols1 * rows1) : 0;
+
+        let cols2 = Math.floor((usableW + 2) / (reqH + 2) + EPS);
+        let rows2 = Math.floor((usableH + 2) / (reqW + 2) + EPS);
+        let count2 = (cols2 > 0 && rows2 > 0) ? (cols2 * rows2) : 0;
+
+        if (count2 > count1) {
+            return { cols: cols2, rows: rows2, count: count2, itemW: reqH, itemH: reqW, isRotated: true };
+        } else {
+            return { cols: cols1, rows: rows1, count: count1, itemW: reqW, itemH: reqH, isRotated: false };
+        }
+    }
+
+    function calculateOfsetForMachine(machName, w, h, tiraj, side, paperType, gsm) {
+        let bestVariant = null;
+        let minPerPieceCost = Infinity;
+
+        let availablePapersForSelection = ofsetRawPapers.filter(p => p.name === paperType && p.gsm === gsm);
+        let isOffsetType = (paperType === "Ofset");
+        let workingSheets = getOfsetWorkingSheets(machName);
+
+        let platePrices = { 'A3': ofsetMachineSettings.plateA3, 'A2': ofsetMachineSettings.plateA2, 'A1': ofsetMachineSettings.plateA1 };
+
+        for (let paperObj of availablePapersForSelection) {
+            for (let ws of workingSheets) {
+                let price = paperObj.prices[ws.rawKey];
+                if (!price || price <= 0) continue;
+
+                let usableW = ws.w - 10;
+                let usableH = ws.h - 10;
+
+                let fit = calculateOfsetGridFitting(usableW, usableH, w, h);
+                if (fit.count <= 0) continue;
+
+                let itemsPerSheet = fit.count;
+                let totalItemsPerFullBase = itemsPerSheet * ws.divisor;
+
+                let baseSheets = Math.ceil(tiraj / totalItemsPerFullBase);
+                let reserve = (side === 2) ? 200 : 100;
+                let totalBaseSheets = baseSheets + reserve;
+                let totalPaperCost = totalBaseSheets * price;
+
+                let basePrintCost = 0, stepPrintCost = 0;
+                if (machName === 'A3') { basePrintCost = ofsetMachineSettings.printA3Base; stepPrintCost = ofsetMachineSettings.printA3Step; }
+                else if (machName === 'A2') { basePrintCost = ofsetMachineSettings.printA2Base; stepPrintCost = ofsetMachineSettings.printA2Step; }
+                else if (machName === 'A1') { basePrintCost = ofsetMachineSettings.printA1Base; stepPrintCost = ofsetMachineSettings.printA1Step; }
+
+                let oborotType = "STANDART";
+                let totalPlates = 4;
+                let totalPrintCost = 0;
+                let totalWorkingSheets = baseSheets;
+
+                if (side === 1) {
+                    oborotType = "1_SIDE";
+                    totalPlates = 4;
+                    let thousandsUnits = Math.ceil(totalWorkingSheets / 1000);
+                    let multiplier = Math.max(0, thousandsUnits - 1);
+                    totalPrintCost = basePrintCost + (multiplier * stepPrintCost);
+                } else {
+                    if (fit.count >= 2 && fit.count % 2 === 0) {
+                        oborotType = "SVOY";
+                        totalPlates = 4;
+                        let totalImpressions = totalWorkingSheets * 2;
+                        let thousandsUnits = Math.ceil(totalImpressions / 1000);
+                        let multiplier = Math.max(0, thousandsUnits - 1);
+                        totalPrintCost = basePrintCost + (multiplier * stepPrintCost);
+                    } else {
+                        oborotType = "CHUJOY";
+                        totalPlates = 8;
+                        let thousandsUnits = Math.ceil(totalWorkingSheets / 1000);
+                        let multiplier = Math.max(0, thousandsUnits - 1);
+                        let singlePassCost = basePrintCost + (multiplier * stepPrintCost);
+                        totalPrintCost = singlePassCost * 2;
+                    }
+                }
+
+                let totalPlateCost = totalPlates * platePrices[machName];
+                let baseTotalCost = totalPaperCost + totalPlateCost + totalPrintCost;
+                let perPieceCostRaw = tiraj > 0 ? (baseTotalCost / tiraj) : 0;
+
+                if (perPieceCostRaw < minPerPieceCost) {
+                    minPerPieceCost = perPieceCostRaw;
+                    bestVariant = {
+                        machine: machName,
+                        rawName: isOffsetType ? `${w}x${h} mm (Ofset)` : `${ws.rawKey} mm (${paperObj.name} ${gsm}g) - ${ws.w}x${ws.h}`,
+                        workW: ws.w, workH: ws.h,
+                        itemsPerSheet, totalSheets: totalBaseSheets,
+                        baseTotalCost, perPieceCostRaw,
+                        fitData: fit, oborotType, totalPlates
+                    };
+                }
+            }
+        }
+
+        return bestVariant;
+    }
+
+    function calculate() {
+        let qty = parseInt(document.getElementById('inpQuantity')?.value) || 1;
+        let baseCost = defaultPrices[activeProductType] || 1000;
+        let baseUnitPrice = 0;
+        let details = activeProductType.toUpperCase();
+        let previewImgUrl = '';
+        let previewNameText = activeProductType.toUpperCase();
+
+        if (activeProductType === 'ofset_pechat') {
+            let w = parseFloat(document.getElementById('ofsetWidthX')?.value) || 0;
+            let h = parseFloat(document.getElementById('ofsetHeightY')?.value) || 0;
+            let tiraj = qty;
+            let marginPercent = parseFloat(document.getElementById('ofsetMargin')?.value) || 0;
+
+            if (w <= 0 || h <= 0) return;
+
+            let resA3 = calculateOfsetForMachine('A3', w, h, tiraj, printSidesOfset, selectedOfsetPaperType, selectedOfsetGsm);
+            let resA2 = calculateOfsetForMachine('A2', w, h, tiraj, printSidesOfset, selectedOfsetPaperType, selectedOfsetGsm);
+            let resA1 = calculateOfsetForMachine('A1', w, h, tiraj, printSidesOfset, selectedOfsetPaperType, selectedOfsetGsm);
+
+            let compA3El = document.getElementById('compOfsetA3');
+            let compA2El = document.getElementById('compOfsetA2');
+            let compA1El = document.getElementById('compOfsetA1');
+            if (compA3El) compA3El.innerHTML = resA3 ? (Math.round(resA3.perPieceCostRaw * (1 + marginPercent / 100)).toLocaleString() + " so'm") : '<span style="color:#e31c79;">Sig\'maydi</span>';
+            if (compA2El) compA2El.innerHTML = resA2 ? (Math.round(resA2.perPieceCostRaw * (1 + marginPercent / 100)).toLocaleString() + " so'm") : '<span style="color:#e31c79;">Sig\'maydi</span>';
+            if (compA1El) compA1El.innerHTML = resA1 ? (Math.round(resA1.perPieceCostRaw * (1 + marginPercent / 100)).toLocaleString() + " so'm") : '<span style="color:#e31c79;">Sig\'maydi</span>';
+
+            let validResults = [resA3, resA2, resA1].filter(Boolean);
+            let activeRes = null;
+            let banner = document.getElementById('ofsetRecommendationBanner');
+            let recText = document.getElementById('ofsetRecommendationText');
+            let oborotAlert = document.getElementById('ofsetOborotAlert');
+
+            if (selectedOfsetMachine === 'AUTO') {
+                if (validResults.length > 0) {
+                    validResults.sort((a, b) => a.perPieceCostRaw - b.perPieceCostRaw);
+                    activeRes = validResults[0];
+                    if (recText) recText.innerText = `💡 Eng tejamkor: [${activeRes.machine} Ofset (${activeRes.workW}x${activeRes.workH})] formatidagi qog'ozga chop etish tavsiya etiladi.`;
+                }
+            } else {
+                if (selectedOfsetMachine === 'A3') activeRes = resA3;
+                if (selectedOfsetMachine === 'A2') activeRes = resA2;
+                if (selectedOfsetMachine === 'A1') activeRes = resA1;
+                if (recText) recText.innerText = `Tanlangan rejim: [${selectedOfsetMachine} Ofset]`;
+            }
+
+            if (!activeRes) {
+                if (banner) banner.style.display = 'block';
+                if (recText) recText.innerText = "⚠️ Bu mahsulot o'lchami tanlangan mashinaga sig'maydi yoki bu gramajda mos xom ashyo topilmadi!";
+                if (oborotAlert) oborotAlert.innerHTML = '';
+                document.getElementById('resOfsetMachine').innerText = `Tanlangan ofset: -`;
+                document.getElementById('resOfsetRawFormat').innerText = `Qog'oz formati: -`;
+                document.getElementById('resOfsetSheetInfo').innerText = `1 ta bosma qog'ozga sig'adigan mahsulot: 0 dona`;
+                document.getElementById('resOfsetTotalSheets').innerText = `Jami kerakli qog'oz: 0 ta`;
+                document.getElementById('resOfsetFormsCount').innerText = `Forma (Klishe/Plastina) soni: 0 ta`;
+                document.getElementById('resOfsetBaseCost').innerText = `Asosiy tannarx: 0 so'm`;
+                document.getElementById('resOfsetTotal').innerText = `Umumiy narx: 0 so'm`;
+                let previewBox = document.getElementById('previewOfsetBox');
+                if (previewBox) previewBox.innerHTML = '<span style="color:#e31c79; font-weight:700; font-size:0.8rem; text-align:center; padding: 20px;">Bu o\'lcham tanlangan mashinaga sig\'maydi!</span>';
+                currentCalcResult = { details: "Sig'maydi", qty, unitPrice: 0, totalPrice: 0, name: "Ofset Pechat", imageUrl: '' };
+                return;
+            }
+
+            if (banner) banner.style.display = 'block';
+
+            if (printSidesOfset === 2) {
+                if (activeRes.oborotType === "SVOY") {
+                    oborotAlert.innerHTML = `<div style="background:#dcfce7; color:#14532d; border:1px solid #86efac; padding:6px 10px; border-radius:8px; font-size:0.78rem; font-weight:700;">⚠️ Ikki tomonlama <strong>SVOY OBOROT</strong> holatida chop etiladi (1 komplekt forma).</div>`;
+                } else {
+                    oborotAlert.innerHTML = `<div style="background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; padding:6px 10px; border-radius:8px; font-size:0.78rem; font-weight:700;">⚠️ Ikki tomonlama <strong>CHUJOY OBOROT</strong> holatida chop etiladi (2 komplekt forma).</div>`;
+                }
+            } else {
+                oborotAlert.innerHTML = `<div style="font-size:0.76rem; color:var(--text-muted);">ℹ️ Bir tomonlama standart chop etish rejimi.</div>`;
+            }
+
+            let grandTotal = Math.round(activeRes.baseTotalCost * (1 + marginPercent / 100));
+            let unitPrice = tiraj > 0 ? Math.round(grandTotal / tiraj) : 0;
+
+            details = `${activeRes.rawName} | (${w}x${h}mm) | ${printSidesOfset === 1 ? 'Bir tomonlama' : 'Ikki tomonlama'} [${activeRes.machine}]`;
+            previewNameText = "Ofset Pechat";
+
+            updatePreviewOfset(activeRes.fitData.cols, activeRes.fitData.rows);
+
+            document.getElementById('resOfsetMachine').innerText = `Tanlangan ofset: ${activeRes.machine} (${activeRes.workW}x${activeRes.workH})`;
+            document.getElementById('resOfsetRawFormat').innerText = `Qog'oz formati: ${activeRes.rawName}`;
+            document.getElementById('resOfsetSheetInfo').innerText = `1 ta bosma qog'ozga sig'adigan mahsulot: ${activeRes.itemsPerSheet} dona`;
+            document.getElementById('resOfsetTotalSheets').innerText = `Jami kerakli qog'oz: ${activeRes.totalSheets} ta`;
+            document.getElementById('resOfsetFormsCount').innerText = `Forma (Klishe/Plastina) soni: ${activeRes.totalPlates} ta (${activeRes.totalPlates / 4} kamplekt)`;
+            document.getElementById('resOfsetBaseCost').innerText = `Asosiy tannarx: ${Math.round(activeRes.baseTotalCost).toLocaleString()} so'm`;
+            document.getElementById('resOfsetTotal').innerText = `Umumiy narx: ${grandTotal.toLocaleString()} so'm`;
+
+            currentCalcResult = { details, qty, unitPrice, totalPrice: grandTotal, name: previewNameText, imageUrl: '' };
+            return;
+        }
+
+        if (activeProductType === 'sifravoy_pechat') {
+            let x = parseFloat(document.getElementById('widthX')?.value) || 1;
+            let y = parseFloat(document.getElementById('heightY')?.value) || 1;
+
+            let pW = currentPaper.p_eni || 310;
+            let pH = currentPaper.p_boyi || 440;
+            const gap = 2;
+
+            let effectiveW = x + gap;
+            let effectiveH = y + gap;
+
+            let cols1 = Math.floor((pW + gap) / effectiveW);
+            let rows1 = Math.floor((pH + gap) / effectiveH);
+            let count1 = cols1 * rows1;
+
+            let cols2 = Math.floor((pW + gap) / (y + gap));
+            let rows2 = Math.floor((pH + gap) / (x + gap));
+            let count2 = cols2 * rows2;
+
+            let bestCols = cols1, bestRows = rows1, perSheet = count1;
+            let isRotated = false;
+
+            if (count2 > count1) {
+                bestCols = cols2;
+                bestRows = rows2;
+                perSheet = count2;
+                isRotated = true;
+            }
+            if (perSheet < 1) perSheet = 1;
+
+            let sheetsNeeded = Math.ceil(qty / perSheet);
+            let unitPaperPrice = (printSidesDigital === 1) ? currentPaper.price1 : currentPaper.price2;
+            let totalPaperCost = sheetsNeeded * unitPaperPrice;
+
+            let totalSum = totalPaperCost * (1 + 65 / 100);
+            let unitPrice = Math.round(totalSum / qty);
+
+            details = `${currentPaper.name} | (${x}x${y}mm) | ${printSidesDigital} tomon ${isRotated ? '[Aylantirilgan]' : ''}`;
+            previewNameText = "Raqamli Pechat";
+            
+            updatePreviewDigital(bestCols, bestRows);
+
+            document.getElementById('resDigitalSheetInfo').innerText = `1 ta listga sig'adigan mahsulot: ${perSheet} dona`;
+            document.getElementById('resDigitalListCount').innerText = `Kerakli listlar soni: ${sheetsNeeded} dona`;
+            document.getElementById('resDigitalTotal').innerText = `Umumiy narx: ${Math.round(totalSum).toLocaleString()} so'm`;
+
+            currentCalcResult = { details, qty, unitPrice, totalPrice: Math.round(totalSum), name: previewNameText, imageUrl: '' };
+            return;
+        }
+
+        let previewBox = document.getElementById('previewCardBox');
+        let marginPercent = parseFloat(document.getElementById('inpMargin')?.value) || 65;
+
+        if (souvenirKeys.includes(activeProductType)) {
+            let activeDb = pensDatabase[activeProductType] || [];
+
+            if (activeDb.length > 0 && selectedPen) {
+                if(previewBox) previewBox.style.display = 'flex';
+                previewImgUrl = selectedPen.image;
+                previewNameText = `${selectedPen.id} - ${selectedPen.name}`;
+
+                let itemPrice = selectedPen.basePrice > 0 ? selectedPen.basePrice : baseCost;
+                let printPrices = selectedPen.printPrices || { uv: 5000, dtf: 6000, tisneniya: 8000, laser: 7000 };
+                let basePrintCost = printPrices[selectedPrintType] || 5000;
+
+                let printName = 'UF Pechat';
+                if (selectedPrintType === 'dtf') printName = 'UF DTF';
+                else if (selectedPrintType === 'tisneniya') printName = 'Tisneniya';
+                else if (selectedPrintType === 'laser') printName = 'Gravirovka';
+
+                let sizeExtra = 0;
+                let sizeLabel = 'Standart';
+                if ((activeProductType === 'yejidnevnik' || activeProductType === 'termos') && selectedPen.sizes) {
+                    sizeExtra = selectedPen.sizes[selectedPrintSize] || 0;
+                    sizeLabel = selectedPrintSize === 'small' ? 'Kichik' : (selectedPrintSize === 'medium' ? "O'rta" : 'Katta');
+                }
+
+                let printCost = (basePrintCost + sizeExtra) * (selectedSide === 2 ? 1.5 : 1);
+                details = `${selectedPen.id} (${selectedPen.name}) | ${printName} [${sizeLabel}] (${selectedSide} tomon)`;
+
+                let totalItemSum = itemPrice + printCost;
+                let isNoTisneniya = noTisneniyaSouvenirs.includes(activeProductType);
+                if (includeKlishe && selectedPrintType === 'tisneniya' && !isNoTisneniya) {
+                    let klishePrice = selectedPen.klishePrice !== undefined ? selectedPen.klishePrice : 50000;
+                    totalItemSum += (klishePrice / qty);
+                    details += ` + Qolip`;
+                }
+
+                baseUnitPrice = totalItemSum;
+            } else {
+                if(previewBox) previewBox.style.display = 'none';
+                let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
+                baseUnitPrice = baseCost * sideFactor;
+                details = "Standart Hisob";
+            }
+        } 
+        else {
+            if(previewBox) previewBox.style.display = 'none';
+            if (['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'].includes(activeProductType)) {
+                let w = parseFloat(document.getElementById('inpWidth')?.value) || 0;
+                let h = parseFloat(document.getElementById('inpHeight')?.value) || 0;
+                let sqMetr = w * h;
+                baseUnitPrice = sqMetr * baseCost;
+                details = `${w}m x ${h}m (${sqMetr.toFixed(2)} kv.m)`;
+            } 
+            else if (['futbolka', 'kepka', 'svitshot', 'xudi', 'jiletka', 'shoper'].includes(activeProductType)) {
+                let printPrice = parseFloat(document.getElementById('inpPrintSize')?.value || 0);
+                let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
+                baseUnitPrice = baseCost + (printPrice * sideFactor);
+                details = "Textile tayyorlash + Pechat";
+            }
+            else {
+                let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
+                let rate = baseCost * sideFactor;
+                if (qty >= 5000) rate *= 0.75;
+                else if (qty >= 1000) rate *= 0.85;
+                baseUnitPrice = rate;
+                details = "Poligrafiya chop etish";
+            }
+        }
+
+        if (document.getElementById('previewProductImg')) {
+            document.getElementById('previewProductImg').src = previewImgUrl;
+            document.getElementById('previewProductName').innerText = previewNameText;
+        }
+
+        let unitPrice = Math.round(baseUnitPrice * (1 + marginPercent / 100));
+        let totalPrice = unitPrice * qty;
+
+        document.getElementById('resDetails').innerText = details;
+        document.getElementById('resQuantity').innerText = qty.toLocaleString() + " dona";
+        document.getElementById('resUnitPrice').innerText = unitPrice.toLocaleString() + " so'm";
+        document.getElementById('resTotalPrice').innerText = totalPrice.toLocaleString() + " so'm";
+
+        currentCalcResult = { details, qty, unitPrice, totalPrice, name: previewNameText, imageUrl: previewImgUrl };
+    }
+
+    async function copyResult() {
+        let text = `${currentCalcResult.name}\n\n`;
+        text += `ℹ️ Tafsilot: ${currentCalcResult.details}\n`;
+        text += `🔹 Miqdori: ${currentCalcResult.qty} dona\n`;
+        text += `🔹 Birlik narxi: ${currentCalcResult.unitPrice.toLocaleString()} so'm\n`;
+        text += `💰 Jami Summa: ${currentCalcResult.totalPrice.toLocaleString()} so'm`;
+
+        if (currentCalcResult.imageUrl && currentCalcResult.imageUrl.startsWith('data:image')) {
+            try {
+                let response = await fetch(currentCalcResult.imageUrl);
+                let blob = await response.blob();
+                
+                if (navigator.clipboard && window.ClipboardItem) {
+                    let data = [new ClipboardItem({ 
+                        [blob.type]: blob,
+                        "text/plain": new Blob([text], { type: "text/plain" })
+                    })];
+                    await navigator.clipboard.write(data);
+                    showToast("📋 Rasm va matn nusxalandi! Telegramga paste (Ctrl+V) qiling.");
+                    return;
+                }
+            } catch (e) {
+                console.log("Clipboard rasm xatosi:", e);
+            }
+        }
+
+        navigator.clipboard.writeText(text);
+        showToast("📋 Matn nusxalandi!");
+    }
+
+    init();
+</script>
+
+</body>
+</html>
