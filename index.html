@@ -686,20 +686,25 @@
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">📐 Bloknot O'lchamlari va Narxlari</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Har bir o'lcham uchun baza narx va ichki varoqlar sonini kiriting.
-                        "Standart" ustunida mijoz ekranida avtomatik tanlanadigan o'lchamni belgilang.
+                        Bloknot narxi ikki qismdan iborat: <b>usti</b> (karton muqova) va <b>ichki varoqlar</b>.
+                        Har biriga aniq narx kiriting — koeffitsient ishlatilmaydi.<br>
+                        <b>A3 ulushi</b> — bitta bloknot ustiga necha A3 list ketishi (lak hisobi uchun):
+                        A4 = 1, A5 = 0.5, A6 = 0.25.
                     </p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
                         <table class="admin-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 90px;">Nomi</th>
-                                    <th style="width: 130px;">O'lchami (mm)</th>
-                                    <th style="width: 110px;">Varoq soni</th>
-                                    <th style="width: 150px;">Baza narx (so'm)</th>
-                                    <th style="width: 90px; text-align:center;">Standart</th>
-                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                    <th style="width: 80px;">Nomi</th>
+                                    <th style="width: 120px;">O'lchami (mm)</th>
+                                    <th style="width: 90px;">Varoq soni</th>
+                                    <th style="width: 90px;">A3 ulushi</th>
+                                    <th style="width: 130px;">Usti narxi (so'm)</th>
+                                    <th style="width: 140px;">Ichki 1 tom. (so'm)</th>
+                                    <th style="width: 140px;">Ichki 2 tom. (so'm)</th>
+                                    <th style="width: 80px; text-align:center;">Standart</th>
+                                    <th style="width: 60px; text-align: right;">Amal</th>
                                 </tr>
                             </thead>
                             <tbody id="adminBloknotSizeTableBody"></tbody>
@@ -707,6 +712,32 @@
                         </div>
                     </div>
                     <button class="btn" style="background: #4f46e5;" onclick="addBloknotSizeRow()">+ Yangi o'lcham qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📊 Adad Pog'onalari (chegirma)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Adad oshgan sari narx qanday kamayishini shu yerda belgilaysiz.
+                        Koeffitsient <b>faqat usti va ichki varoqlarga</b> qo'llanadi —
+                        lak va tisneniyaning o'z hisobi bor.<br>
+                        Masalan: 1 dan → 1.0 (chegirmasiz), 1000 dan → 0.85 (15% arzon), 5000 dan → 0.75 (25% arzon).
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Adad (shu sondan boshlab)</th>
+                                    <th style="width: 180px;">Koeffitsient</th>
+                                    <th style="width: 140px;">Chegirma</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBloknotTierTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addBloknotTierRow()">+ Yangi pog'ona qo'shish</button>
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
@@ -733,38 +764,41 @@
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">🖨️ Ichki Varoqlar Pechat Koeffitsienti</div>
+                    <div class="add-pen-card-title">✨ Usti Lak Narxi (A3 list bo'yicha)</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Baza narx shu koeffitsientga ko'paytiriladi. Bir tomonlama odatda 1.0, ikki tomonlama 1.6.
+                        Lak A3 listlar soni bo'yicha hisoblanadi.
+                        <b>A3 listlar soni = adad × o'lchamning A3 ulushi.</b><br>
+                        Birinchi paket — minimal to'lov: listlar soni undan kam bo'lsa ham to'liq olinadi.
+                        Undan oshgan har bir list alohida narxlanadi.
                     </p>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Bir tomonlama (standart):</label>
-                            <input type="number" step="0.1" min="0" id="bloknotOneSideFactor" value="1">
+                            <label>Birinchi paket (necha A3 list):</label>
+                            <input type="number" min="1" id="bloknotLakFirstSheets" value="1000">
                         </div>
                         <div class="form-group">
-                            <label>Ikki tomonlama:</label>
-                            <input type="number" step="0.1" min="0" id="bloknotTwoSideFactor" value="1.6">
+                            <label>Birinchi paket narxi (so'm):</label>
+                            <input type="number" min="0" id="bloknotLakFirstPrice" value="350000">
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top: 12px;">
+                        <div class="form-group">
+                            <label>Keyingi har bir A3 list (so'm):</label>
+                            <input type="number" min="0" id="bloknotLakNextPrice" value="500">
+                        </div>
+                        <div class="form-group">
+                            <label style="color: var(--text-muted);">Namuna hisob:</label>
+                            <div id="bloknotLakPreview" style="font-family: var(--font-mono); font-size: 0.82rem; padding: 10px 0; color: var(--text-main);"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">✨ Usti Lak va Tisneniya Narxlari</div>
+                    <div class="add-pen-card-title">🔨 Tisneniya Narxi</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Dona narxi har bir bloknotga qo'shiladi. Klishe/tayyorlov esa bir marta olinib, adadga bo'linadi.
+                        Dona narxi har bir bloknotga qo'shiladi. Klishe bir marta olinib, adadga bo'linadi.
                     </p>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>Usti lak (so'm/dona):</label>
-                            <input type="number" min="0" id="bloknotLakPrice" value="500">
-                        </div>
-                        <div class="form-group">
-                            <label>Lak tayyorlov (bir martalik):</label>
-                            <input type="number" min="0" id="bloknotLakSetup" value="0">
-                        </div>
-                    </div>
-                    <div class="form-row" style="margin-top: 12px;">
                         <div class="form-group">
                             <label>Tisneniya (so'm/dona):</label>
                             <input type="number" min="0" id="bloknotTisneniyaPrice" value="800">
@@ -2252,7 +2286,7 @@
 
             <div class="form-group" style="margin-top:16px;">
                 <label>Adad (dona):</label>
-                <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
+                <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate(); updateBloknotInfo();">
             </div>
 
             <div id="bloknotInfoBox" style="margin-top:18px; padding:14px 16px; background:#f0f7ff; border-left:4px solid var(--primary); border-radius:8px;">
@@ -2304,13 +2338,28 @@
         if (bloknotConfig.infoText) qatorlar.push(bloknotConfig.infoText);
         qatorlar.push(`<b>${s.name}</b> o'lchami: ${s.label}`);
         qatorlar.push(`Ichki varoqlar soni: <b>${s.sheets} ta</b>`);
+        qatorlar.push(`Bitta ${s.name} bloknot ustiga <b>${s.a3Share} ta A3 list</b> ketadi`);
         qatorlar.push(`<span style="color:var(--text-muted)">Usti lak va tisneniya birgalikda qo'llanilmaydi — bittasini tanlang.</span>`);
+
+        let qty = parseInt(document.getElementById('inpQuantity')?.value) || 0;
+
+        if (bloknotSelected.extra === 'lak' && qty > 0) {
+            let a3 = qty * (s.a3Share || 0);
+            let jami = bloknotLakTotal(qty, s.a3Share);
+            let L = bloknotConfig.lak;
+            let izoh = a3 <= (L.firstPackSheets ?? 1000)
+                ? `birinchi paket (${L.firstPackSheets} listgacha)`
+                : `${L.firstPackSheets} list + ${(a3 - L.firstPackSheets).toLocaleString('ru-RU')} ta qo'shimcha`;
+            qatorlar.push(
+                `Lak: <b>${a3.toLocaleString('ru-RU')} ta A3 list</b> → ` +
+                `<b>${jami.toLocaleString('ru-RU')} so'm</b> <span style="color:var(--text-muted)">(${izoh})</span>`
+            );
+        }
+
         if (bloknotSelected.extra === 'tisneniya' && bloknotConfig.tisneniya.klishePrice > 0) {
-            qatorlar.push(`Tisneniya uchun klishe: <b>${bloknotConfig.tisneniya.klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
+            qatorlar.push(`Tisneniya klishesi: <b>${bloknotConfig.tisneniya.klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
         }
-        if (bloknotSelected.extra === 'lak' && bloknotConfig.lak.setupPrice > 0) {
-            qatorlar.push(`Lak tayyorlovi: <b>${bloknotConfig.lak.setupPrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
-        }
+
         box.innerHTML = qatorlar.join('<br>');
     }
 
@@ -2437,14 +2486,17 @@
         let tb = document.getElementById('adminBloknotSizeTableBody');
         if (tb) {
             if (bloknotConfig.sizes.length === 0) {
-                tb.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding:20px;">O'lcham kiritilmagan.</td></tr>`;
+                tb.innerHTML = `<tr><td colspan="9" style="text-align:center; color: var(--text-muted); padding:20px;">O'lcham kiritilmagan.</td></tr>`;
             } else {
                 tb.innerHTML = bloknotConfig.sizes.map((s, idx) => `
                     <tr>
                         <td><input type="text" class="bl-size-name" value="${s.name}" style="width:100%;"></td>
                         <td><input type="text" class="bl-size-label" value="${s.label}" style="width:100%;"></td>
                         <td><input type="number" min="1" class="bl-size-sheets" value="${s.sheets}" style="width:100%;"></td>
-                        <td><input type="number" min="0" class="bl-size-price" value="${s.basePrice}" style="width:100%;"></td>
+                        <td><input type="number" min="0" step="0.05" class="bl-size-a3" value="${s.a3Share}" style="width:100%;" oninput="updateBloknotLakPreview()"></td>
+                        <td><input type="number" min="0" class="bl-size-cover" value="${s.coverPrice}" style="width:100%;"></td>
+                        <td><input type="number" min="0" class="bl-size-inner1" value="${s.innerOnePrice}" style="width:100%;"></td>
+                        <td><input type="number" min="0" class="bl-size-inner2" value="${s.innerTwoPrice}" style="width:100%;"></td>
                         <td style="text-align:center;">
                             <input type="radio" name="blSizeDefault" class="bl-size-default" ${s.isDefault ? 'checked' : ''}>
                         </td>
@@ -2453,6 +2505,30 @@
                         </td>
                     </tr>
                 `).join('');
+            }
+        }
+
+        // --- adad pog'onalari jadvali ---
+        let tt = document.getElementById('adminBloknotTierTableBody');
+        if (tt) {
+            let tiers = bloknotConfig.qtyTiers || [];
+            if (tiers.length === 0) {
+                tt.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding:20px;">Pog'ona kiritilmagan — narx chegirmasiz hisoblanadi.</td></tr>`;
+            } else {
+                tt.innerHTML = tiers.map((t, idx) => {
+                    let chegirma = Math.round((1 - (t.factor ?? 1)) * 100);
+                    return `
+                    <tr>
+                        <td><input type="number" min="1" class="bl-tier-from" value="${t.from}" style="width:100%;" oninput="updateBloknotTierHints()"></td>
+                        <td><input type="number" min="0" step="0.01" class="bl-tier-factor" value="${t.factor}" style="width:100%;" oninput="updateBloknotTierHints()"></td>
+                        <td class="bl-tier-hint" style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.82rem;">
+                            ${chegirma > 0 ? '-' + chegirma + '%' : (chegirma < 0 ? '+' + (-chegirma) + '%' : 'chegirmasiz')}
+                        </td>
+                        <td style="text-align:right;">
+                            <button class="btn btn-sm btn-danger" onclick="deleteBloknotTier(${idx})">🗑</button>
+                        </td>
+                    </tr>`;
+                }).join('');
             }
         }
 
