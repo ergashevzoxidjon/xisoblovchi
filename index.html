@@ -2555,21 +2555,81 @@
 
         // --- boshqa maydonlar ---
         let q = (id) => document.getElementById(id);
-        if (q('bloknotOneSideFactor'))   q('bloknotOneSideFactor').value   = bloknotConfig.innerPrint.oneSideFactor;
-        if (q('bloknotTwoSideFactor'))   q('bloknotTwoSideFactor').value   = bloknotConfig.innerPrint.twoSideFactor;
-        if (q('bloknotLakPrice'))        q('bloknotLakPrice').value        = bloknotConfig.lak.pricePerUnit;
-        if (q('bloknotLakSetup'))        q('bloknotLakSetup').value        = bloknotConfig.lak.setupPrice;
+        if (q('bloknotLakFirstSheets'))  q('bloknotLakFirstSheets').value  = bloknotConfig.lak.firstPackSheets;
+        if (q('bloknotLakFirstPrice'))   q('bloknotLakFirstPrice').value   = bloknotConfig.lak.firstPackPrice;
+        if (q('bloknotLakNextPrice'))    q('bloknotLakNextPrice').value    = bloknotConfig.lak.nextSheetPrice;
         if (q('bloknotTisneniyaPrice'))  q('bloknotTisneniyaPrice').value  = bloknotConfig.tisneniya.pricePerUnit;
         if (q('bloknotKlishePrice'))     q('bloknotKlishePrice').value     = bloknotConfig.tisneniya.klishePrice;
         if (q('bloknotInfoTextInput'))   q('bloknotInfoTextInput').value   = bloknotConfig.infoText || '';
+
+        ['bloknotLakFirstSheets','bloknotLakFirstPrice','bloknotLakNextPrice'].forEach(id => {
+            let el = q(id);
+            if (el) el.oninput = updateBloknotLakPreview;
+        });
+        updateBloknotLakPreview();
+    }
+
+    // Adad pog'onalari jadvalidagi "chegirma" ustunini jonli yangilaydi
+    function updateBloknotTierHints() {
+        let factors = document.querySelectorAll('.bl-tier-factor');
+        let hints = document.querySelectorAll('.bl-tier-hint');
+        factors.forEach((el, i) => {
+            let f = parseFloat(el.value);
+            if (isNaN(f)) { if (hints[i]) hints[i].innerText = '—'; return; }
+            let ch = Math.round((1 - f) * 100);
+            if (hints[i]) hints[i].innerText = ch > 0 ? `-${ch}%` : (ch < 0 ? `+${-ch}%` : 'chegirmasiz');
+        });
+    }
+
+    // Admin panelda lak formulasini namuna bilan ko'rsatadi
+    function updateBloknotLakPreview() {
+        let box = document.getElementById('bloknotLakPreview');
+        if (!box) return;
+
+        let son = (id, d) => { let v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? d : v; };
+        let birinchiList = son('bloknotLakFirstSheets', 1000);
+        let birinchiNarx = son('bloknotLakFirstPrice', 350000);
+        let keyingiNarx  = son('bloknotLakNextPrice', 500);
+
+        // birinchi o'lchamning A3 ulushi bilan namuna
+        let a3El = document.querySelector('.bl-size-a3');
+        let a3Ulush = a3El ? (parseFloat(a3El.value) || 1) : 1;
+
+        let namuna = [1000, 3000];
+        let qatorlar = namuna.map(qty => {
+            let a3 = qty * a3Ulush;
+            let jami = a3 <= birinchiList ? birinchiNarx : birinchiNarx + (a3 - birinchiList) * keyingiNarx;
+            return `${qty} dona → ${a3.toLocaleString('ru-RU')} A3 → ${jami.toLocaleString('ru-RU')} so'm`;
+        });
+        box.innerHTML = qatorlar.join('<br>') +
+            `<div style="color:var(--text-muted); margin-top:4px;">(1-o'lcham, A3 ulushi ${a3Ulush})</div>`;
     }
 
     function addBloknotSizeRow() {
         collectBloknotTablesFromUI();
         bloknotConfig.sizes.push({
             key: 'yangi' + Date.now(), name: 'A5', label: '148x210mm',
-            sheets: 40, basePrice: 0, isDefault: false
+            sheets: 40, a3Share: 0.5, coverPrice: 0, innerOnePrice: 0, innerTwoPrice: 0,
+            isDefault: false
         });
+        renderAdminBloknotTables();
+    }
+
+    function addBloknotTierRow() {
+        collectBloknotTablesFromUI();
+        if (!Array.isArray(bloknotConfig.qtyTiers)) bloknotConfig.qtyTiers = [];
+        let oxirgi = bloknotConfig.qtyTiers[bloknotConfig.qtyTiers.length - 1];
+        bloknotConfig.qtyTiers.push({
+            from: oxirgi ? (oxirgi.from * 2 || 1000) : 1,
+            factor: oxirgi ? Math.max(0.5, +(oxirgi.factor - 0.1).toFixed(2)) : 1
+        });
+        renderAdminBloknotTables();
+    }
+
+    function deleteBloknotTier(idx) {
+        if (!confirm("Ushbu pog'onani o'chirmoqchimisiz?")) return;
+        collectBloknotTablesFromUI();
+        bloknotConfig.qtyTiers.splice(idx, 1);
         renderAdminBloknotTables();
     }
 
@@ -2609,11 +2669,14 @@
 
     // jadvaldagi kiritilgan qiymatlarni obyektga yig'adi
     function collectBloknotTablesFromUI() {
-        let nomlar   = document.querySelectorAll('.bl-size-name');
+        let nomlar = document.querySelectorAll('.bl-size-name');
         if (nomlar.length > 0) {
             let labels   = document.querySelectorAll('.bl-size-label');
             let sheets   = document.querySelectorAll('.bl-size-sheets');
-            let prices   = document.querySelectorAll('.bl-size-price');
+            let a3s      = document.querySelectorAll('.bl-size-a3');
+            let covers   = document.querySelectorAll('.bl-size-cover');
+            let inner1   = document.querySelectorAll('.bl-size-inner1');
+            let inner2   = document.querySelectorAll('.bl-size-inner2');
             let defaults = document.querySelectorAll('.bl-size-default');
             let yangi = [];
             nomlar.forEach((el, i) => {
@@ -2622,12 +2685,31 @@
                     name: (el.value || '').trim() || `O'lcham ${i + 1}`,
                     label: (labels[i]?.value || '').trim(),
                     sheets: parseInt(sheets[i]?.value) || 0,
-                    basePrice: parseFloat(prices[i]?.value) || 0,
+                    a3Share: parseFloat(a3s[i]?.value) || 0,
+                    coverPrice: parseFloat(covers[i]?.value) || 0,
+                    innerOnePrice: parseFloat(inner1[i]?.value) || 0,
+                    innerTwoPrice: parseFloat(inner2[i]?.value) || 0,
                     isDefault: defaults[i]?.checked || false
                 });
             });
             if (yangi.length > 0 && !yangi.some(s => s.isDefault)) yangi[0].isDefault = true;
             bloknotConfig.sizes = yangi;
+        }
+
+        // --- adad pog'onalari ---
+        let tierFrom = document.querySelectorAll('.bl-tier-from');
+        if (tierFrom.length > 0) {
+            let tierFactor = document.querySelectorAll('.bl-tier-factor');
+            let yangi = [];
+            tierFrom.forEach((el, i) => {
+                let from = parseInt(el.value);
+                let factor = parseFloat(tierFactor[i]?.value);
+                if (isNaN(from) || from < 1) from = 1;
+                if (isNaN(factor) || factor < 0) factor = 1;
+                yangi.push({ from, factor });
+            });
+            yangi.sort((a, b) => a.from - b.from);
+            bloknotConfig.qtyTiers = yangi;
         }
 
         let sNomlar = document.querySelectorAll('.bl-spring-name');
@@ -2656,10 +2738,9 @@
             return isNaN(v) || v < 0 ? standart : v;
         };
 
-        bloknotConfig.innerPrint.oneSideFactor  = son('bloknotOneSideFactor', 1);
-        bloknotConfig.innerPrint.twoSideFactor  = son('bloknotTwoSideFactor', 1.6);
-        bloknotConfig.lak.pricePerUnit          = son('bloknotLakPrice', 0);
-        bloknotConfig.lak.setupPrice            = son('bloknotLakSetup', 0);
+        bloknotConfig.lak.firstPackSheets       = Math.max(1, son('bloknotLakFirstSheets', 1000));
+        bloknotConfig.lak.firstPackPrice        = son('bloknotLakFirstPrice', 0);
+        bloknotConfig.lak.nextSheetPrice        = son('bloknotLakNextPrice', 0);
         bloknotConfig.tisneniya.pricePerUnit    = son('bloknotTisneniyaPrice', 0);
         bloknotConfig.tisneniya.klishePrice     = son('bloknotKlishePrice', 0);
         bloknotConfig.infoText = (document.getElementById('bloknotInfoTextInput')?.value || '').trim();
