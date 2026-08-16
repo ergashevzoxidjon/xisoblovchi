@@ -1,0 +1,15 @@
+# Tizim fayllari
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Muharrir
+.vscode/
+.idea/
+*.swp
+*~
+
+# Vaqtinchalik
+*.log
+*.tmp
+*.bak
