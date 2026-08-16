@@ -16,3 +16,9 @@ desktop.ini
 
 # Yuklash skripti (mahalliy)
 push.bat
+
+# O'rnatuvchi fayllar va yirik binarlar
+*.exe
+*.msi
+*.zip
+*.rar
