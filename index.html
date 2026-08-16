@@ -680,6 +680,118 @@
                 </div>
             </div>
 
+            <!-- BLOKNOT ADMIN PANEL BLOKI -->
+            <div id="bloknotAdminBox" style="display: none; margin-bottom: 28px;">
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📐 Bloknot O'lchamlari va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Har bir o'lcham uchun baza narx va ichki varoqlar sonini kiriting.
+                        "Standart" ustunida mijoz ekranida avtomatik tanlanadigan o'lchamni belgilang.
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Nomi</th>
+                                    <th style="width: 130px;">O'lchami (mm)</th>
+                                    <th style="width: 110px;">Varoq soni</th>
+                                    <th style="width: 150px;">Baza narx (so'm)</th>
+                                    <th style="width: 90px; text-align:center;">Standart</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBloknotSizeTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addBloknotSizeRow()">+ Yangi o'lcham qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🌀 Prujina Joyi va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Prujina joylashuvi bo'yicha qo'shimcha narx (so'm/dona). Farq bo'lmasa 0 qoldiring.
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Nomi</th>
+                                    <th style="width: 160px;">Qo'shimcha narx (so'm/dona)</th>
+                                    <th style="width: 90px; text-align:center;">Standart</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBloknotSpringTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addBloknotSpringRow()">+ Yangi variant qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🖨️ Ichki Varoqlar Pechat Koeffitsienti</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Baza narx shu koeffitsientga ko'paytiriladi. Bir tomonlama odatda 1.0, ikki tomonlama 1.6.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Bir tomonlama (standart):</label>
+                            <input type="number" step="0.1" min="0" id="bloknotOneSideFactor" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Ikki tomonlama:</label>
+                            <input type="number" step="0.1" min="0" id="bloknotTwoSideFactor" value="1.6">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">✨ Usti Lak va Tisneniya Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Dona narxi har bir bloknotga qo'shiladi. Klishe/tayyorlov esa bir marta olinib, adadga bo'linadi.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Usti lak (so'm/dona):</label>
+                            <input type="number" min="0" id="bloknotLakPrice" value="500">
+                        </div>
+                        <div class="form-group">
+                            <label>Lak tayyorlov (bir martalik):</label>
+                            <input type="number" min="0" id="bloknotLakSetup" value="0">
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top: 12px;">
+                        <div class="form-group">
+                            <label>Tisneniya (so'm/dona):</label>
+                            <input type="number" min="0" id="bloknotTisneniyaPrice" value="800">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="bloknotKlishePrice" value="50000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">ℹ️ Mijozga Ko'rsatiladigan Ma'lumot</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Hisoblash sahifasida ma'lumot blokida chiqadi. O'lcham va varoq soni avtomatik qo'shiladi.
+                    </p>
+                    <div class="form-group">
+                        <label>Matn:</label>
+                        <input type="text" id="bloknotInfoTextInput" value="Bloknot usti 250-300gr kartondan tayyorlanadi.">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-success" onclick="saveBloknotConfig()">💾 Bloknot sozlamalarini saqlash</button>
+                </div>
+            </div>
+
             <div class="add-pen-card" id="adminModelAddForm">
                 <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
                 <input type="hidden" id="editPenIndex" value="-1">
@@ -2090,6 +2202,11 @@
 
         form.innerHTML = html;
 
+        if (type === 'bloknot') {
+            renderBloknotOptions();
+            return;
+        }
+
         let gsmListForRender = poligrafiyaGsmDatabase[type] || [];
         if (gsmListForRender.length > 0 && document.getElementById('poligrafiyaGsmGroup')) {
             renderPoligrafiyaGsmOptions(gsmListForRender);
@@ -2216,6 +2333,55 @@
         bloknotSelected.tisneniya = !bloknotSelected.tisneniya;
         renderBloknotOptions();
         calculate();
+    }
+
+    // ====================== BLOKNOT: HISOB-KITOB ======================
+
+    function calculateBloknot(qty) {
+        let size = bloknotConfig.sizes[bloknotSelected.sizeIndex] || bloknotConfig.sizes[0];
+        let spring = bloknotConfig.spring[bloknotSelected.springIndex] || bloknotConfig.spring[0];
+
+        // 1) Baza narx (o'lchamga qarab) x ichki pechat koeffitsienti
+        let sideFactor = bloknotSelected.twoSide
+            ? (bloknotConfig.innerPrint.twoSideFactor ?? 1.6)
+            : (bloknotConfig.innerPrint.oneSideFactor ?? 1);
+
+        let unit = (size.basePrice || 0) * sideFactor;
+
+        // 2) Adad chegirmasi (boshqa mahsulotlardagi kabi)
+        if (qty >= 5000) unit *= 0.75;
+        else if (qty >= 1000) unit *= 0.85;
+
+        // 3) Prujina joyi narxi
+        unit += (spring.price || 0);
+
+        // 4) Usti lak
+        if (bloknotSelected.lak) {
+            unit += (bloknotConfig.lak.pricePerUnit || 0);
+            if (bloknotConfig.lak.setupPrice > 0) {
+                unit += (bloknotConfig.lak.setupPrice / qty);
+            }
+        }
+
+        // 5) Tisneniya + bir martalik klishe
+        if (bloknotSelected.tisneniya) {
+            unit += (bloknotConfig.tisneniya.pricePerUnit || 0);
+            if (bloknotConfig.tisneniya.klishePrice > 0) {
+                unit += (bloknotConfig.tisneniya.klishePrice / qty);
+            }
+        }
+
+        // Tafsilot matni
+        let qismlar = [
+            `Bloknot ${size.name} (${size.label})`,
+            `${size.sheets} varoq`,
+            bloknotSelected.twoSide ? 'ichki 2 tomonlama' : 'ichki 1 tomonlama',
+            `prujina ${spring.name.toLowerCase()}`
+        ];
+        if (bloknotSelected.lak) qismlar.push('usti lak');
+        if (bloknotSelected.tisneniya) qismlar.push('tisneniya + klishe');
+
+        return { unitPrice: unit, details: qismlar.join(' | ') };
     }
 
     function selectPoligrafiyaGsm(index) {
@@ -2853,6 +3019,11 @@
                 let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
                 baseUnitPrice = baseCost + (printPrice * sideFactor);
                 details = "Textile tayyorlash + Pechat";
+            }
+            else if (activeProductType === 'bloknot') {
+                let res = calculateBloknot(qty);
+                baseUnitPrice = res.unitPrice;
+                details = res.details;
             }
             else {
                 let sideFactor = poligrafiyaSideTypes[activeProductType] ?? 1.6;
