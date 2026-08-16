@@ -1215,13 +1215,17 @@
 
         let isDigital = (key === 'sifravoy_pechat');
         let isOfset = (key === 'ofset_pechat');
-        let isPoligrafiya = poligrafiyaKeys.includes(key);
+        let isBloknot = (key === 'bloknot');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot;
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
         document.getElementById('digitalAdminPanelBox').style.display = isDigital ? 'block' : 'none';
         document.getElementById('poligrafiyaSizeAdminBox').style.display = isPoligrafiya ? 'block' : 'none';
-        document.getElementById('adminModelAddForm').style.display = (isDigital || isOfset || isPoligrafiya) ? 'none' : 'block';
-        document.getElementById('adminModelTableCard').style.display = (isDigital || isOfset || isPoligrafiya) ? 'none' : 'block';
+        document.getElementById('bloknotAdminBox').style.display = isBloknot ? 'block' : 'none';
+
+        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot;
+        document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
+        document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
         if (isOfset) {
             renderAdminOfsetPapersMatrix();
@@ -1230,6 +1234,10 @@
         }
         if (isDigital) {
             renderAdminDigitalPaperTable();
+            return;
+        }
+        if (isBloknot) {
+            renderAdminBloknotTables();
             return;
         }
         if (isPoligrafiya) {
@@ -2333,6 +2341,173 @@
         bloknotSelected.tisneniya = !bloknotSelected.tisneniya;
         renderBloknotOptions();
         calculate();
+    }
+
+    // ====================== BLOKNOT: ADMIN PANEL ======================
+
+    function renderAdminBloknotTables() {
+        // --- o'lchamlar jadvali ---
+        let tb = document.getElementById('adminBloknotSizeTableBody');
+        if (tb) {
+            if (bloknotConfig.sizes.length === 0) {
+                tb.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding:20px;">O'lcham kiritilmagan.</td></tr>`;
+            } else {
+                tb.innerHTML = bloknotConfig.sizes.map((s, idx) => `
+                    <tr>
+                        <td><input type="text" class="bl-size-name" value="${s.name}" style="width:100%;"></td>
+                        <td><input type="text" class="bl-size-label" value="${s.label}" style="width:100%;"></td>
+                        <td><input type="number" min="1" class="bl-size-sheets" value="${s.sheets}" style="width:100%;"></td>
+                        <td><input type="number" min="0" class="bl-size-price" value="${s.basePrice}" style="width:100%;"></td>
+                        <td style="text-align:center;">
+                            <input type="radio" name="blSizeDefault" class="bl-size-default" ${s.isDefault ? 'checked' : ''}>
+                        </td>
+                        <td style="text-align:right;">
+                            <button class="btn btn-sm btn-danger" onclick="deleteBloknotSize(${idx})">🗑</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // --- prujina jadvali ---
+        let tp = document.getElementById('adminBloknotSpringTableBody');
+        if (tp) {
+            if (bloknotConfig.spring.length === 0) {
+                tp.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding:20px;">Variant kiritilmagan.</td></tr>`;
+            } else {
+                tp.innerHTML = bloknotConfig.spring.map((s, idx) => `
+                    <tr>
+                        <td><input type="text" class="bl-spring-name" value="${s.name}" style="width:100%;"></td>
+                        <td><input type="number" min="0" class="bl-spring-price" value="${s.price}" style="width:100%;"></td>
+                        <td style="text-align:center;">
+                            <input type="radio" name="blSpringDefault" class="bl-spring-default" ${s.isDefault ? 'checked' : ''}>
+                        </td>
+                        <td style="text-align:right;">
+                            <button class="btn btn-sm btn-danger" onclick="deleteBloknotSpring(${idx})">🗑</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // --- boshqa maydonlar ---
+        let q = (id) => document.getElementById(id);
+        if (q('bloknotOneSideFactor'))   q('bloknotOneSideFactor').value   = bloknotConfig.innerPrint.oneSideFactor;
+        if (q('bloknotTwoSideFactor'))   q('bloknotTwoSideFactor').value   = bloknotConfig.innerPrint.twoSideFactor;
+        if (q('bloknotLakPrice'))        q('bloknotLakPrice').value        = bloknotConfig.lak.pricePerUnit;
+        if (q('bloknotLakSetup'))        q('bloknotLakSetup').value        = bloknotConfig.lak.setupPrice;
+        if (q('bloknotTisneniyaPrice'))  q('bloknotTisneniyaPrice').value  = bloknotConfig.tisneniya.pricePerUnit;
+        if (q('bloknotKlishePrice'))     q('bloknotKlishePrice').value     = bloknotConfig.tisneniya.klishePrice;
+        if (q('bloknotInfoTextInput'))   q('bloknotInfoTextInput').value   = bloknotConfig.infoText || '';
+    }
+
+    function addBloknotSizeRow() {
+        collectBloknotTablesFromUI();
+        bloknotConfig.sizes.push({
+            key: 'yangi' + Date.now(), name: 'A5', label: '148x210mm',
+            sheets: 40, basePrice: 0, isDefault: false
+        });
+        renderAdminBloknotTables();
+    }
+
+    function deleteBloknotSize(idx) {
+        if (bloknotConfig.sizes.length <= 1) {
+            showToast("⚠️ Kamida bitta o'lcham qolishi kerak!");
+            return;
+        }
+        if (!confirm("Ushbu o'lchamni o'chirmoqchimisiz?")) return;
+        collectBloknotTablesFromUI();
+        let ediStandart = bloknotConfig.sizes[idx].isDefault;
+        bloknotConfig.sizes.splice(idx, 1);
+        if (ediStandart && bloknotConfig.sizes.length > 0) bloknotConfig.sizes[0].isDefault = true;
+        renderAdminBloknotTables();
+    }
+
+    function addBloknotSpringRow() {
+        collectBloknotTablesFromUI();
+        bloknotConfig.spring.push({
+            key: 'yangi' + Date.now(), name: 'Yangi variant', price: 0, isDefault: false
+        });
+        renderAdminBloknotTables();
+    }
+
+    function deleteBloknotSpring(idx) {
+        if (bloknotConfig.spring.length <= 1) {
+            showToast("⚠️ Kamida bitta variant qolishi kerak!");
+            return;
+        }
+        if (!confirm("Ushbu variantni o'chirmoqchimisiz?")) return;
+        collectBloknotTablesFromUI();
+        let ediStandart = bloknotConfig.spring[idx].isDefault;
+        bloknotConfig.spring.splice(idx, 1);
+        if (ediStandart && bloknotConfig.spring.length > 0) bloknotConfig.spring[0].isDefault = true;
+        renderAdminBloknotTables();
+    }
+
+    // jadvaldagi kiritilgan qiymatlarni obyektga yig'adi
+    function collectBloknotTablesFromUI() {
+        let nomlar   = document.querySelectorAll('.bl-size-name');
+        if (nomlar.length > 0) {
+            let labels   = document.querySelectorAll('.bl-size-label');
+            let sheets   = document.querySelectorAll('.bl-size-sheets');
+            let prices   = document.querySelectorAll('.bl-size-price');
+            let defaults = document.querySelectorAll('.bl-size-default');
+            let yangi = [];
+            nomlar.forEach((el, i) => {
+                yangi.push({
+                    key: bloknotConfig.sizes[i]?.key || ('s' + i),
+                    name: (el.value || '').trim() || `O'lcham ${i + 1}`,
+                    label: (labels[i]?.value || '').trim(),
+                    sheets: parseInt(sheets[i]?.value) || 0,
+                    basePrice: parseFloat(prices[i]?.value) || 0,
+                    isDefault: defaults[i]?.checked || false
+                });
+            });
+            if (yangi.length > 0 && !yangi.some(s => s.isDefault)) yangi[0].isDefault = true;
+            bloknotConfig.sizes = yangi;
+        }
+
+        let sNomlar = document.querySelectorAll('.bl-spring-name');
+        if (sNomlar.length > 0) {
+            let sPrices   = document.querySelectorAll('.bl-spring-price');
+            let sDefaults = document.querySelectorAll('.bl-spring-default');
+            let yangi = [];
+            sNomlar.forEach((el, i) => {
+                yangi.push({
+                    key: bloknotConfig.spring[i]?.key || ('p' + i),
+                    name: (el.value || '').trim() || `Variant ${i + 1}`,
+                    price: parseFloat(sPrices[i]?.value) || 0,
+                    isDefault: sDefaults[i]?.checked || false
+                });
+            });
+            if (yangi.length > 0 && !yangi.some(s => s.isDefault)) yangi[0].isDefault = true;
+            bloknotConfig.spring = yangi;
+        }
+    }
+
+    function saveBloknotConfig() {
+        collectBloknotTablesFromUI();
+
+        let son = (id, standart) => {
+            let v = parseFloat(document.getElementById(id)?.value);
+            return isNaN(v) || v < 0 ? standart : v;
+        };
+
+        bloknotConfig.innerPrint.oneSideFactor  = son('bloknotOneSideFactor', 1);
+        bloknotConfig.innerPrint.twoSideFactor  = son('bloknotTwoSideFactor', 1.6);
+        bloknotConfig.lak.pricePerUnit          = son('bloknotLakPrice', 0);
+        bloknotConfig.lak.setupPrice            = son('bloknotLakSetup', 0);
+        bloknotConfig.tisneniya.pricePerUnit    = son('bloknotTisneniyaPrice', 0);
+        bloknotConfig.tisneniya.klishePrice     = son('bloknotKlishePrice', 0);
+        bloknotConfig.infoText = (document.getElementById('bloknotInfoTextInput')?.value || '').trim();
+
+        // asosiy o'lcham yorlig'ini ham yangilaymiz
+        let std = bloknotConfig.sizes.find(s => s.isDefault) || bloknotConfig.sizes[0];
+        if (std && std.label) poligrafiyaSizeLabels.bloknot = std.label;
+
+        localStorage.setItem('erp_bloknot_config', JSON.stringify(bloknotConfig));
+        renderAdminBloknotTables();
+        showToast("💾 Bloknot sozlamalari saqlandi!");
     }
 
     // ====================== BLOKNOT: HISOB-KITOB ======================
