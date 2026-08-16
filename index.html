@@ -1010,19 +1010,29 @@
     // ====================== BLOKNOT SOZLAMALARI ======================
     // Barcha qiymatlar Admin Panel > Bloknot bo'limidan o'zgartiriladi.
     let bloknotConfig = {
-        // O'lchamlar: har biriga baza narx va ichki varoqlar soni
+        // O'lchamlar: usti va ichki varoqlar narxi alohida kiritiladi.
+        // a3Share — bitta bloknot ustiga necha A3 list ketishi (lak hisobi uchun).
         sizes: [
-            { key: 'a6', name: 'A6', label: '105x148mm', sheets: 35, basePrice: 6000,  isDefault: true  },
-            { key: 'a5', name: 'A5', label: '148x210mm', sheets: 40, basePrice: 9000,  isDefault: false },
-            { key: 'a4', name: 'A4', label: '210x297mm', sheets: 50, basePrice: 14000, isDefault: false }
+            { key: 'a6', name: 'A6', label: '105x148mm', sheets: 35, a3Share: 0.25,
+              coverPrice: 2000, innerOnePrice: 4000, innerTwoPrice: 6400, isDefault: true  },
+            { key: 'a5', name: 'A5', label: '148x210mm', sheets: 40, a3Share: 0.5,
+              coverPrice: 3000, innerOnePrice: 6000, innerTwoPrice: 9600, isDefault: false },
+            { key: 'a4', name: 'A4', label: '210x297mm', sheets: 50, a3Share: 1.0,
+              coverPrice: 4500, innerOnePrice: 9500, innerTwoPrice: 15200, isDefault: false }
         ],
-        // Ichki varoqlar pechat turi (koeffitsient admin paneldan)
-        innerPrint: {
-            oneSideFactor: 1.0,   // bir tomonlama - standart
-            twoSideFactor: 1.6    // ikki tomonlama
+        // Adad pog'onalari: qaysi adaddan boshlab qanday koeffitsient
+        // (faqat usti + ichki varoqlarga qo'llanadi)
+        qtyTiers: [
+            { from: 1,    factor: 1.0  },
+            { from: 1000, factor: 0.85 },
+            { from: 5000, factor: 0.75 }
+        ],
+        // Usti lak: A3 list bo'yicha pog'onali hisob
+        lak: {
+            firstPackSheets: 1000,     // birinchi paket - necha A3 list
+            firstPackPrice: 350000,    // birinchi paket narxi (minimal to'lov)
+            nextSheetPrice: 500        // undan keyingi har bir A3 list
         },
-        // Usti lak: dona narxi + bir martalik tayyorlov
-        lak: { pricePerUnit: 500, setupPrice: 0 },
         // Tisneniya: dona narxi + bir martalik klishe
         tisneniya: { pricePerUnit: 800, klishePrice: 50000 },
         // Prujina joyi: har biriga alohida narx
@@ -1136,22 +1146,7 @@
         let savedBloknot = localStorage.getItem('erp_bloknot_config');
         if (savedBloknot) {
             try {
-                let parsed = JSON.parse(savedBloknot);
-                bloknotConfig = {
-                    ...bloknotConfig,
-                    ...parsed,
-                    innerPrint: { ...bloknotConfig.innerPrint, ...(parsed.innerPrint || {}) },
-                    lak: { ...bloknotConfig.lak, ...(parsed.lak || {}) },
-                    tisneniya: { ...bloknotConfig.tisneniya, ...(parsed.tisneniya || {}) }
-                };
-                if (!Array.isArray(bloknotConfig.sizes) || bloknotConfig.sizes.length === 0) {
-                    bloknotConfig.sizes = [
-                        { key: 'a6', name: 'A6', label: '105x148mm', sheets: 35, basePrice: 6000, isDefault: true }
-                    ];
-                }
-                if (!Array.isArray(bloknotConfig.spring) || bloknotConfig.spring.length === 0) {
-                    bloknotConfig.spring = [{ key: 'top', name: 'Yuqoridan', price: 0, isDefault: true }];
-                }
+                bloknotConfig = migrateBloknotConfig(JSON.parse(savedBloknot), bloknotConfig);
             } catch (e) {
                 console.warn('Bloknot sozlamalarini o\'qishda xato:', e);
             }
@@ -2344,6 +2339,97 @@
         calculate();
     }
 
+    // ====================== BLOKNOT: SOZLAMA MIGRATSIYASI ======================
+    // Eski tuzilmadagi saqlangan sozlamalarni yangisiga o'tkazadi,
+    // shunda foydalanuvchi kiritgan narxlar yo'qolmaydi.
+
+    function migrateBloknotConfig(saqlangan, standart) {
+        let cfg = { ...standart };
+
+        // --- o'lchamlar ---
+        if (Array.isArray(saqlangan.sizes) && saqlangan.sizes.length > 0) {
+            // eski koeffitsientlar (bo'lsa) ichki narxni hisoblash uchun kerak
+            let eskiIkkiTom = saqlangan.innerPrint?.twoSideFactor ?? 1.6;
+
+            cfg.sizes = saqlangan.sizes.map((s, i) => {
+                let standartOlcham = standart.sizes.find(d => d.name === s.name) || standart.sizes[i] || standart.sizes[0];
+
+                // A3 ulushi: saqlangan bo'lsa o'sha, bo'lmasa nomiga qarab taxmin
+                let a3 = s.a3Share;
+                if (a3 === undefined) {
+                    let nom = (s.name || '').toUpperCase();
+                    a3 = nom === 'A4' ? 1.0 : nom === 'A5' ? 0.5 : nom === 'A6' ? 0.25
+                       : (standartOlcham.a3Share ?? 0.5);
+                }
+
+                // Eski `basePrice` butun bloknot narxi edi.
+                // Uni taxminan uchdan bir usti + qolgani ichki qilib bo'lamiz.
+                let usti  = s.coverPrice;
+                let ich1  = s.innerOnePrice;
+                let ich2  = s.innerTwoPrice;
+
+                if (usti === undefined || ich1 === undefined) {
+                    let baza = (s.basePrice !== undefined) ? s.basePrice
+                             : (standartOlcham.coverPrice + standartOlcham.innerOnePrice);
+                    usti = Math.round(baza / 3);
+                    ich1 = baza - usti;
+                }
+                if (ich2 === undefined) {
+                    ich2 = Math.round(ich1 * eskiIkkiTom);
+                }
+
+                return {
+                    key: s.key || ('s' + i),
+                    name: s.name || standartOlcham.name,
+                    label: s.label || standartOlcham.label,
+                    sheets: s.sheets ?? standartOlcham.sheets,
+                    a3Share: a3,
+                    coverPrice: usti,
+                    innerOnePrice: ich1,
+                    innerTwoPrice: ich2,
+                    isDefault: !!s.isDefault
+                };
+            });
+            if (!cfg.sizes.some(s => s.isDefault)) cfg.sizes[0].isDefault = true;
+        }
+
+        // --- prujina ---
+        if (Array.isArray(saqlangan.spring) && saqlangan.spring.length > 0) {
+            cfg.spring = saqlangan.spring.map((s, i) => ({
+                key: s.key || ('p' + i),
+                name: s.name || `Variant ${i + 1}`,
+                price: s.price ?? 0,
+                isDefault: !!s.isDefault
+            }));
+            if (!cfg.spring.some(s => s.isDefault)) cfg.spring[0].isDefault = true;
+        }
+
+        // --- adad pog'onalari ---
+        if (Array.isArray(saqlangan.qtyTiers) && saqlangan.qtyTiers.length > 0) {
+            cfg.qtyTiers = saqlangan.qtyTiers
+                .map(t => ({ from: t.from ?? 1, factor: t.factor ?? 1 }))
+                .sort((a, b) => a.from - b.from);
+        }
+
+        // --- lak: eski (dona narxi) -> yangi (A3 pog'onali) ---
+        cfg.lak = { ...standart.lak };
+        if (saqlangan.lak) {
+            if (saqlangan.lak.firstPackSheets !== undefined) {
+                cfg.lak = { ...cfg.lak, ...saqlangan.lak };
+            }
+            // eski `pricePerUnit`/`setupPrice` bo'lsa — tashlab yuboriladi,
+            // chunki yangi model butunlay boshqacha hisoblanadi.
+        }
+
+        // --- tisneniya ---
+        cfg.tisneniya = { ...standart.tisneniya, ...(saqlangan.tisneniya || {}) };
+
+        // --- ma'lumot matni ---
+        if (typeof saqlangan.infoText === 'string') cfg.infoText = saqlangan.infoText;
+
+        return cfg;
+    }
+
     // ====================== BLOKNOT: ADMIN PANEL ======================
 
     function renderAdminBloknotTables() {
@@ -2513,30 +2599,50 @@
 
     // ====================== BLOKNOT: HISOB-KITOB ======================
 
+    // Adad bo'yicha koeffitsientni topadi
+    function bloknotQtyFactor(qty) {
+        let tiers = (bloknotConfig.qtyTiers || []).slice().sort((a, b) => a.from - b.from);
+        let k = 1;
+        for (const t of tiers) {
+            if (qty >= t.from) k = t.factor;
+        }
+        return k;
+    }
+
+    // Lak umumiy summasi — A3 listlar soni bo'yicha pog'onali hisob
+    function bloknotLakTotal(qty, a3Share) {
+        let L = bloknotConfig.lak || {};
+        let birinchiList = L.firstPackSheets ?? 1000;
+        let birinchiNarx = L.firstPackPrice ?? 0;
+        let keyingiNarx  = L.nextSheetPrice ?? 0;
+
+        let a3Soni = qty * (a3Share || 0);
+        if (a3Soni <= birinchiList) return birinchiNarx;          // minimal to'lov
+        return birinchiNarx + (a3Soni - birinchiList) * keyingiNarx;
+    }
+
     function calculateBloknot(qty) {
         let size = bloknotConfig.sizes[bloknotSelected.sizeIndex] || bloknotConfig.sizes[0];
         let spring = bloknotConfig.spring[bloknotSelected.springIndex] || bloknotConfig.spring[0];
 
-        // 1) Baza narx (o'lchamga qarab) x ichki pechat koeffitsienti
-        let sideFactor = bloknotSelected.twoSide
-            ? (bloknotConfig.innerPrint.twoSideFactor ?? 1.6)
-            : (bloknotConfig.innerPrint.oneSideFactor ?? 1);
+        // 1) Usti + ichki varoqlar narxi (aniq narxlar, koeffitsientsiz)
+        let ichkiNarx = bloknotSelected.twoSide
+            ? (size.innerTwoPrice || 0)
+            : (size.innerOnePrice || 0);
 
-        let unit = (size.basePrice || 0) * sideFactor;
+        let unit = (size.coverPrice || 0) + ichkiNarx;
 
-        // 2) Adad chegirmasi (boshqa mahsulotlardagi kabi)
-        if (qty >= 5000) unit *= 0.75;
-        else if (qty >= 1000) unit *= 0.85;
+        // 2) Adad pog'onasi — faqat usti va ichki varoqlarga
+        unit *= bloknotQtyFactor(qty);
 
-        // 3) Prujina joyi narxi
+        // 3) Prujina joyi narxi (chegirmasiz)
         unit += (spring.price || 0);
 
         // 4) Qo'shimcha ishlov — lak YOKI tisneniya (ikkalasi birga emas)
+        let lakJami = 0;
         if (bloknotSelected.extra === 'lak') {
-            unit += (bloknotConfig.lak.pricePerUnit || 0);
-            if (bloknotConfig.lak.setupPrice > 0) {
-                unit += (bloknotConfig.lak.setupPrice / qty);
-            }
+            lakJami = bloknotLakTotal(qty, size.a3Share);
+            unit += lakJami / qty;
         } else if (bloknotSelected.extra === 'tisneniya') {
             unit += (bloknotConfig.tisneniya.pricePerUnit || 0);
             if (bloknotConfig.tisneniya.klishePrice > 0) {
@@ -2549,12 +2655,16 @@
             `Bloknot ${size.name} (${size.label})`,
             `${size.sheets} varoq`,
             bloknotSelected.twoSide ? 'ichki 2 tomonlama' : 'ichki 1 tomonlama',
-            `prujina ${spring.name.toLowerCase()}`
+            `prujina ${(spring.name || '').toLowerCase()}`
         ];
-        if (bloknotSelected.extra === 'lak') qismlar.push('usti lak');
-        else if (bloknotSelected.extra === 'tisneniya') qismlar.push('tisneniya + klishe');
+        if (bloknotSelected.extra === 'lak') {
+            let a3 = qty * (size.a3Share || 0);
+            qismlar.push(`usti lak (${a3} A3 list)`);
+        } else if (bloknotSelected.extra === 'tisneniya') {
+            qismlar.push('tisneniya + klishe');
+        }
 
-        return { unitPrice: unit, details: qismlar.join(' | ') };
+        return { unitPrice: unit, details: qismlar.join(' | '), lakTotal: lakJami };
     }
 
     function selectPoligrafiyaGsm(index) {
