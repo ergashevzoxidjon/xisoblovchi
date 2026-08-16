@@ -1035,11 +1035,11 @@
     };
 
     // Mijoz ekranida tanlangan qiymatlar
+    // extra: 'yoq' | 'lak' | 'tisneniya'  — faqat bittasi tanlanadi
     let bloknotSelected = {
         sizeIndex: 0,
         twoSide: false,
-        lak: false,
-        tisneniya: false,
+        extra: 'yoq',
         springIndex: 0
     };
 
@@ -2238,8 +2238,7 @@
         bloknotSelected = {
             sizeIndex: defSize >= 0 ? defSize : 0,
             twoSide: false,
-            lak: false,
-            tisneniya: false,
+            extra: 'yoq',
             springIndex: defSpring >= 0 ? defSpring : 0
         };
 
@@ -2289,11 +2288,14 @@
                     onclick="selectBloknotSpring(${idx})">${s.name}</button>
         `).join('');
 
+        // Lak va tisneniya birgalikda tanlanmaydi — faqat bittasi
         document.getElementById('bloknotExtraGroup').innerHTML = `
-            <button class="opt-btn ${bloknotSelected.lak ? 'active' : ''}"
-                    onclick="toggleBloknotLak()">${bloknotSelected.lak ? '✓ ' : ''}Usti lak</button>
-            <button class="opt-btn ${bloknotSelected.tisneniya ? 'active' : ''}"
-                    onclick="toggleBloknotTisneniya()">${bloknotSelected.tisneniya ? '✓ ' : ''}Tisneniya</button>
+            <button class="opt-btn ${bloknotSelected.extra === 'yoq' ? 'active' : ''}"
+                    onclick="selectBloknotExtra('yoq')">Yo'q</button>
+            <button class="opt-btn ${bloknotSelected.extra === 'lak' ? 'active' : ''}"
+                    onclick="selectBloknotExtra('lak')">Usti lak</button>
+            <button class="opt-btn ${bloknotSelected.extra === 'tisneniya' ? 'active' : ''}"
+                    onclick="selectBloknotExtra('tisneniya')">Tisneniya</button>
         `;
 
         updateBloknotInfo();
@@ -2307,8 +2309,12 @@
         if (bloknotConfig.infoText) qatorlar.push(bloknotConfig.infoText);
         qatorlar.push(`<b>${s.name}</b> o'lchami: ${s.label}`);
         qatorlar.push(`Ichki varoqlar soni: <b>${s.sheets} ta</b>`);
-        if (bloknotSelected.tisneniya && bloknotConfig.tisneniya.klishePrice > 0) {
+        qatorlar.push(`<span style="color:var(--text-muted)">Usti lak va tisneniya birgalikda qo'llanilmaydi — bittasini tanlang.</span>`);
+        if (bloknotSelected.extra === 'tisneniya' && bloknotConfig.tisneniya.klishePrice > 0) {
             qatorlar.push(`Tisneniya uchun klishe: <b>${bloknotConfig.tisneniya.klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
+        }
+        if (bloknotSelected.extra === 'lak' && bloknotConfig.lak.setupPrice > 0) {
+            qatorlar.push(`Lak tayyorlovi: <b>${bloknotConfig.lak.setupPrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
         }
         box.innerHTML = qatorlar.join('<br>');
     }
@@ -2331,14 +2337,9 @@
         calculate();
     }
 
-    function toggleBloknotLak() {
-        bloknotSelected.lak = !bloknotSelected.lak;
-        renderBloknotOptions();
-        calculate();
-    }
-
-    function toggleBloknotTisneniya() {
-        bloknotSelected.tisneniya = !bloknotSelected.tisneniya;
+    // Lak va tisneniya bir vaqtda bo'lmaydi — bittasini tanlash
+    function selectBloknotExtra(tur) {
+        bloknotSelected.extra = tur;
         renderBloknotOptions();
         calculate();
     }
@@ -2530,16 +2531,13 @@
         // 3) Prujina joyi narxi
         unit += (spring.price || 0);
 
-        // 4) Usti lak
-        if (bloknotSelected.lak) {
+        // 4) Qo'shimcha ishlov — lak YOKI tisneniya (ikkalasi birga emas)
+        if (bloknotSelected.extra === 'lak') {
             unit += (bloknotConfig.lak.pricePerUnit || 0);
             if (bloknotConfig.lak.setupPrice > 0) {
                 unit += (bloknotConfig.lak.setupPrice / qty);
             }
-        }
-
-        // 5) Tisneniya + bir martalik klishe
-        if (bloknotSelected.tisneniya) {
+        } else if (bloknotSelected.extra === 'tisneniya') {
             unit += (bloknotConfig.tisneniya.pricePerUnit || 0);
             if (bloknotConfig.tisneniya.klishePrice > 0) {
                 unit += (bloknotConfig.tisneniya.klishePrice / qty);
@@ -2553,8 +2551,8 @@
             bloknotSelected.twoSide ? 'ichki 2 tomonlama' : 'ichki 1 tomonlama',
             `prujina ${spring.name.toLowerCase()}`
         ];
-        if (bloknotSelected.lak) qismlar.push('usti lak');
-        if (bloknotSelected.tisneniya) qismlar.push('tisneniya + klishe');
+        if (bloknotSelected.extra === 'lak') qismlar.push('usti lak');
+        else if (bloknotSelected.extra === 'tisneniya') qismlar.push('tisneniya + klishe');
 
         return { unitPrice: unit, details: qismlar.join(' | ') };
     }
