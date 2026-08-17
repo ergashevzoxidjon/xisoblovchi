@@ -1,0 +1,31 @@
+# Tizim fayllari
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Muharrir
+.vscode/
+.idea/
+*.swp
+*~
+
+# Vaqtinchalik
+*.log
+*.tmp
+*.bak
+
+# O'rnatuvchi fayllar va yirik binarlar
+*.exe
+*.msi
+*.zip
+*.rar
+
+# Yuklash va avtomatlashtirish skriptlari (mahalliy ish qurollari)
+push.bat
+AVTO-SOZLASH.bat
+AVTO-TOXTATISH.bat
+HOLAT.bat
+avto-push.ps1
+avto-push-yashirin.vbs
+avto-push.log
+.avto-push.lock
