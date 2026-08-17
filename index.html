@@ -330,12 +330,13 @@
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: 15px;
-            height: 42px;
+            flex-wrap: wrap;
+            gap: 10px 15px;
+            min-height: 42px;
             background: #f8fafc;
             border: 1.5px solid var(--border);
             border-radius: 8px;
-            padding: 0 16px;
+            padding: 10px 16px;
         }
         .checkbox-group label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
         .checkbox-group input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--primary); }
@@ -350,6 +351,129 @@
         .reklama-extra-card:has(input:checked) { border-color: var(--primary); }
         .reklama-extra-card-disabled { opacity: 0.45; }
         .reklama-extra-card-disabled label { cursor: not-allowed !important; }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            appearance: none;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            padding: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+            background: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+        input[type="color"]::-webkit-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); border-radius: 50%; }
+        input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); border-radius: 50%; }
+
+        .color-chip-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 6px 10px 6px 6px;
+        }
+        .color-chip-row input[type="text"] {
+            border: none;
+            outline: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            width: 100px;
+            background: transparent;
+            height: auto;
+            padding: 0;
+        }
+        .color-chip-remove {
+            border: none;
+            background: none;
+            color: #e11d48;
+            cursor: pointer;
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: 0 2px;
+        }
+
+        .color-swatch-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px 6px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 999px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            transition: all 0.15s;
+        }
+        .color-swatch-btn.active { border-color: var(--primary); background: rgba(0, 144, 212, 0.08); color: var(--primary); }
+        .color-swatch-dot { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.15); flex-shrink: 0; }
+
+        .lenta-chip-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            width: 150px;
+        }
+        .lenta-chip-row img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #f1f5f9;
+        }
+        .lenta-chip-row input[type="text"], .lenta-chip-row input[type="number"] {
+            width: 100%;
+            height: 32px;
+            font-size: 0.8rem;
+            padding: 0 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        .lenta-chip-row input[type="file"] {
+            width: 100%;
+            font-size: 0.72rem;
+        }
+        .lenta-chip-remove {
+            border: none;
+            background: none;
+            color: #e11d48;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 2px;
+        }
+
+        .lenta-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .lenta-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            width: 110px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .lenta-card img { width: 100%; height: 55px; object-fit: cover; border-radius: 6px; background: #f1f5f9; }
+        .lenta-card span.lenta-name { font-size: 0.78rem; font-weight: 600; }
+        .lenta-card span.lenta-price { font-size: 0.72rem; color: var(--text-muted); }
+        .lenta-card.active { border-color: var(--primary); background: rgba(0, 144, 212, 0.08); }
 
         .price-size-box {
             background: #f8fafc;
@@ -434,9 +558,7 @@
         .badge-container { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
         .badge-uv { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-        .badge-dtf { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
-        .badge-laser { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
-        .badge-tisneniya { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+        .badge-sifravoy { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
 
         .action-btns { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 
@@ -868,9 +990,7 @@
                         <label>Ruxsat berilgan Chop Turlari:</label>
                         <div class="checkbox-group" id="checkboxGroupContainer">
                             <label><input type="checkbox" id="chkUv" checked> UF Pechat</label>
-                            <label><input type="checkbox" id="chkDtf" checked> UF DTF</label>
-                            <label id="chkTisneniyaLabel"><input type="checkbox" id="chkTisneniya" checked> Tisneniya</label>
-                            <label><input type="checkbox" id="chkLaser" checked> Gravirovka</label>
+                            <label><input type="checkbox" id="chkSifravoy" checked> Sifravoy Pechat</label>
                         </div>
                     </div>
                 </div>
@@ -883,21 +1003,9 @@
                             <input type="number" id="pricePrintUv" value="5000" placeholder="5000">
                         </div>
                         <div class="form-group">
-                            <label>UF DTF narxi:</label>
-                            <input type="number" id="pricePrintDtf" value="6000" placeholder="6000">
+                            <label>Sifravoy Pechat narxi:</label>
+                            <input type="number" id="pricePrintSifravoy" value="4000" placeholder="4000">
                         </div>
-                        <div class="form-group" id="priceTisneniyaGroup">
-                            <label>Tisneniya narxi:</label>
-                            <input type="number" id="pricePrintTisneniya" value="8000" placeholder="8000">
-                        </div>
-                        <div class="form-group">
-                            <label>Gravirovka narxi:</label>
-                            <input type="number" id="pricePrintLaser" value="7000" placeholder="7000">
-                        </div>
-                    </div>
-                    <div class="form-group" id="klishePriceGroup" style="margin-top: 12px;">
-                        <label>Tisneniya uchun Qolip (Klishe) narxi:</label>
-                        <input type="number" id="priceKlishe" value="50000" placeholder="50000">
                     </div>
                 </div>
 
@@ -921,10 +1029,14 @@
 
                 <div id="colorsBox" class="price-size-box" style="display: none;">
                     <div class="price-size-title">🎨 Mavjud ranglar (narxga ta'sir qilmaydi):</div>
-                    <div class="form-group">
-                        <label>Ranglar (vergul bilan ajrating):</label>
-                        <input type="text" id="newPenColors" placeholder="Qora, Oq, Qizil, Ko'k">
-                    </div>
+                    <div id="colorChipsEditor" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;"></div>
+                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem;" onclick="addColorChipRow()">+ Rang qo'shish</button>
+                </div>
+
+                <div id="lentaBox" class="price-size-box" style="display: none;">
+                    <div class="price-size-title">🎗️ Lenta modellari (har birining o'z narxi bor, umumiy summaga qo'shiladi):</div>
+                    <div id="lentaChipsEditor" style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px;"></div>
+                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem;" onclick="addLentaRow()">+ Lenta qo'shish</button>
                 </div>
 
                 <div class="form-actions">
@@ -1040,9 +1152,9 @@
     };
 
     const souvenirKeys = allCategories.souvenir.map(item => item.key);
-    const noTisneniyaSouvenirs = ['ruchka', 'brelok', 'bakal', 'suv_idishlar', 'beyjik', 'powerbanklar'];
     const reklamaBanTypes = ['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'];
-    const hasSizesTypes = ['termos']; // razmerlar (Kichik/O'rta/Katta) bo'yicha ustama qo'llaniladigan turlar
+    const hasSizesTypes = []; // razmerlar (Kichik/O'rta/Katta) bo'yicha ustama qo'llaniladigan turlar (hozircha hech biri ishlatmaydi)
+    const oneSidedOnlySouvenirs = ['plagetkalar']; // faqat bir tomonlama pechat qilinadigan turlar (ikki tomonlama variant ko'rsatilmaydi)
     // Har bir reklama turi uchun qaysi qo'shimcha xizmatlar tegishli ekanligi
     const reklamaExtraOptionsConfig = {
         baner:         { xalqacha: true,  reyka: true,  ustanovka: true, ploter: false },
@@ -1154,8 +1266,10 @@
     let selectedPrintType = 'uv';
     let selectedPrintSize = 'small';
     let selectedSide = 1;
-    let includeKlishe = false;
     let selectedColor = null;
+    let colorChipsState = []; // admin formasida tahrirlanayotgan { name, hex } ranglar ro'yxati
+    let selectedLenta = null; // kalkulyatorda tanlangan lenta id
+    let lentaChipsState = []; // admin formasida tahrirlanayotgan { id, name, price, image } lentalar ro'yxati (faqat Beyjik uchun)
 
     let currentPaper = { name: 'Melovka 130g', q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 800, price2: 1200 };
     let printSidesDigital = 1;
@@ -1169,11 +1283,18 @@
     function getDefaultPensDatabase() {
         // Test/namuna maqsadida har bir souvenir bo'limiga 5tadan namuna mahsulot.
         // Narxlar va nomlar shartli (test uchun) — real ishlatishdan oldin admin panelda tahrirlang.
-        const samplePalette = ["Qora", "Oq", "Qizil", "Ko'k", "Yashil", "Kumush", "Oltin"];
+        const samplePalette = [
+            { name: "Qora", hex: "#000000" },
+            { name: "Oq", hex: "#ffffff" },
+            { name: "Qizil", hex: "#e11d48" },
+            { name: "Ko'k", hex: "#2563eb" },
+            { name: "Yashil", hex: "#16a34a" },
+            { name: "Kumush", hex: "#c0c0c0" },
+            { name: "Oltin", hex: "#d4af37" }
+        ];
         const db = {};
         souvenirKeys.forEach((key, catIdx) => {
             const hasSizes = hasSizesTypes.includes(key);
-            const isNoTisneniya = noTisneniyaSouvenirs.includes(key);
             const catInfo = allCategories.souvenir.find(c => c.key === key);
             const catName = catInfo ? catInfo.name : key;
             db[key] = [];
@@ -1181,7 +1302,7 @@
                 let colorCount = 2 + (i % 3); // 2-4 ta rang, namuna uchun
                 let colors = [];
                 for (let c = 0; c < colorCount; c++) {
-                    colors.push(samplePalette[(i + c + catIdx) % samplePalette.length]);
+                    colors.push({ ...samplePalette[(i + c + catIdx) % samplePalette.length] });
                 }
                 db[key].push({
                     id: `${key.toUpperCase()}-00${i}`,
@@ -1189,11 +1310,8 @@
                     basePrice: 4000 + (i * 1500) + (catIdx * 300),
                     image: 'https://via.placeholder.com/150?text=' + encodeURIComponent(catName + ' ' + i),
                     allowUv: true,
-                    allowDtf: true,
-                    allowTisneniya: !isNoTisneniya,
-                    allowLaser: true,
-                    printPrices: { uv: 5000, dtf: 6000, tisneniya: isNoTisneniya ? 0 : 8000, laser: 7000 },
-                    klishePrice: 50000,
+                    allowSifravoy: true,
+                    printPrices: { uv: 5000, sifravoy: 4000 },
                     sizes: hasSizes
                         ? { small: 2000 + i * 200, medium: 3500 + i * 300, large: 5000 + i * 400 }
                         : { small: 0, medium: 0, large: 0 },
@@ -1353,11 +1471,7 @@
         let isSouvenir = souvenirKeys.includes(key);
         document.getElementById('souvenirFieldsRow').style.display = isSouvenir ? 'grid' : 'none';
         document.getElementById('colorsBox').style.display = isSouvenir ? 'block' : 'none';
-
-        let isNoTisneniya = noTisneniyaSouvenirs.includes(key);
-        document.getElementById('chkTisneniyaLabel').style.display = isNoTisneniya ? 'none' : 'inline-flex';
-        document.getElementById('priceTisneniyaGroup').style.display = isNoTisneniya ? 'none' : 'block';
-        document.getElementById('klishePriceGroup').style.display = isNoTisneniya ? 'none' : 'block';
+        document.getElementById('lentaBox').style.display = (key === 'beyjik') ? 'block' : 'none';
 
         let hasSizes = hasSizesTypes.includes(key);
         document.getElementById('sizePricesBox').style.display = hasSizes ? 'block' : 'none';
@@ -1688,9 +1802,7 @@
                 <td>
                     <div class="badge-container">
                         ${p.allowUv ? `<span class="badge badge-uv">UF: ${(p.printPrices?.uv || 0).toLocaleString()}</span>` : ''}
-                        ${p.allowDtf ? `<span class="badge badge-dtf">DTF: ${(p.printPrices?.dtf || 0).toLocaleString()}</span>` : ''}
-                        ${p.allowTisneniya ? `<span class="badge badge-tisneniya">Tisneniya: ${(p.printPrices?.tisneniya || 0).toLocaleString()}</span>` : ''}
-                        ${p.allowLaser ? `<span class="badge badge-laser">Gravirovka: ${(p.printPrices?.laser || 0).toLocaleString()}</span>` : ''}
+                        ${p.allowSifravoy ? `<span class="badge badge-sifravoy">Sifravoy: ${(p.printPrices?.sifravoy || 0).toLocaleString()}</span>` : ''}
                     </div>
                 </td>
                 <td>
@@ -1768,6 +1880,90 @@
         });
     }
 
+    function colorNameToHex(name) {
+        const map = {
+            "qora": "#000000", "oq": "#ffffff", "qizil": "#e11d48", "ko'k": "#2563eb", "kok": "#2563eb",
+            "yashil": "#16a34a", "sariq": "#f59e0b", "kumush": "#c0c0c0", "oltin": "#d4af37",
+            "pushti": "#ec4899", "binafsha": "#7c3aed", "kulrang": "#6b7280", "jigarrang": "#78350f"
+        };
+        return map[(name || '').toLowerCase().trim()] || '#94a3b8';
+    }
+
+    function normalizeColorEntry(c) {
+        if (typeof c === 'string') {
+            return { name: c, hex: colorNameToHex(c) };
+        }
+        return { name: c.name || '', hex: c.hex || '#94a3b8' };
+    }
+
+    function renderColorChipsEditor() {
+        const container = document.getElementById('colorChipsEditor');
+        if (!container) return;
+        container.innerHTML = colorChipsState.length > 0
+            ? colorChipsState.map((c, idx) => `
+                <div class="color-chip-row">
+                    <input type="color" value="${c.hex}" oninput="updateColorChip(${idx}, 'hex', this.value)">
+                    <input type="text" value="${(c.name || '').replace(/"/g, '&quot;')}" placeholder="Rang nomi" oninput="updateColorChip(${idx}, 'name', this.value)">
+                    <button type="button" class="color-chip-remove" onclick="removeColorChip(${idx})" title="O'chirish">×</button>
+                </div>
+            `).join('')
+            : `<span style="color:var(--text-muted); font-size:0.82rem;">Hali rang qo'shilmagan. "+ Rang qo'shish" tugmasini bosing.</span>`;
+    }
+
+    function addColorChipRow() {
+        const palette = ['#000000', '#ffffff', '#e11d48', '#2563eb', '#16a34a', '#f59e0b', '#7c3aed', '#c0c0c0'];
+        let hex = palette[colorChipsState.length % palette.length];
+        colorChipsState.push({ name: '', hex });
+        renderColorChipsEditor();
+    }
+
+    function updateColorChip(idx, field, value) {
+        if (!colorChipsState[idx]) return;
+        colorChipsState[idx][field] = value;
+    }
+
+    function removeColorChip(idx) {
+        colorChipsState.splice(idx, 1);
+        renderColorChipsEditor();
+    }
+
+    function renderLentaChipsEditor() {
+        const container = document.getElementById('lentaChipsEditor');
+        if (!container) return;
+        container.innerHTML = lentaChipsState.length > 0
+            ? lentaChipsState.map((l, idx) => `
+                <div class="lenta-chip-row">
+                    <img src="${l.image || 'https://via.placeholder.com/150?text=Lenta'}" alt="Lenta" onerror="this.src='https://via.placeholder.com/150?text=Lenta'">
+                    <input type="file" accept="image/*" onchange="updateLentaImage(${idx}, this)">
+                    <input type="text" value="${(l.name || '').replace(/"/g, '&quot;')}" placeholder="Lenta nomi" oninput="updateLenta(${idx}, 'name', this.value)">
+                    <input type="number" value="${l.price || 0}" placeholder="Narxi (so'm)" oninput="updateLenta(${idx}, 'price', this.value)">
+                    <button type="button" class="lenta-chip-remove" onclick="removeLentaRow(${idx})">✕ O'chirish</button>
+                </div>
+            `).join('')
+            : `<span style="color:var(--text-muted); font-size:0.82rem;">Hali lenta qo'shilmagan. "+ Lenta qo'shish" tugmasini bosing.</span>`;
+    }
+
+    function addLentaRow() {
+        lentaChipsState.push({ id: 'LENTA-' + Date.now() + '-' + lentaChipsState.length, name: '', price: 0, image: '' });
+        renderLentaChipsEditor();
+    }
+
+    function updateLenta(idx, field, value) {
+        if (!lentaChipsState[idx]) return;
+        lentaChipsState[idx][field] = field === 'price' ? (parseFloat(value) || 0) : value;
+    }
+
+    async function updateLentaImage(idx, inputEl) {
+        if (!lentaChipsState[idx] || !inputEl.files || !inputEl.files[0]) return;
+        lentaChipsState[idx].image = await convertBase64(inputEl.files[0]);
+        renderLentaChipsEditor();
+    }
+
+    function removeLentaRow(idx) {
+        lentaChipsState.splice(idx, 1);
+        renderLentaChipsEditor();
+    }
+
     async function savePen() {
         if (!currentManagingProduct) return;
         if (!pensDatabase[currentManagingProduct]) pensDatabase[currentManagingProduct] = [];
@@ -1778,25 +1974,28 @@
         let price = parseFloat(document.getElementById('newPenPrice').value) || 0;
 
         let allowUv = document.getElementById('chkUv').checked;
-        let allowDtf = document.getElementById('chkDtf').checked;
-        let isNoTisneniya = noTisneniyaSouvenirs.includes(currentManagingProduct);
-        let allowTisneniya = isNoTisneniya ? false : document.getElementById('chkTisneniya').checked;
-        let allowLaser = document.getElementById('chkLaser').checked;
+        let allowSifravoy = document.getElementById('chkSifravoy').checked;
 
         let pUv = parseFloat(document.getElementById('pricePrintUv').value) || 0;
-        let pDtf = parseFloat(document.getElementById('pricePrintDtf').value) || 0;
-        let pTisneniya = parseFloat(document.getElementById('pricePrintTisneniya').value) || 0;
-        let pLaser = parseFloat(document.getElementById('pricePrintLaser').value) || 0;
-        let pKlishe = parseFloat(document.getElementById('priceKlishe').value) || 0;
+        let pSifravoy = parseFloat(document.getElementById('pricePrintSifravoy').value) || 0;
 
         let pSmall = parseFloat(document.getElementById('priceSizeSmall').value) || 0;
         let pMedium = parseFloat(document.getElementById('priceSizeMedium').value) || 0;
         let pLarge = parseFloat(document.getElementById('priceSizeLarge').value) || 0;
 
-        let colors = (document.getElementById('newPenColors')?.value || '')
-            .split(',')
-            .map(c => c.trim())
-            .filter(c => c.length > 0);
+        let colors = colorChipsState
+            .map(c => ({ name: (c.name && c.name.trim()) ? c.name.trim() : c.hex, hex: c.hex || '#94a3b8' }));
+
+        let lentas = (currentManagingProduct === 'beyjik')
+            ? lentaChipsState
+                .filter(l => (l.name && l.name.trim()) || l.image)
+                .map(l => ({
+                    id: l.id || ('LENTA-' + Math.random().toString(36).slice(2)),
+                    name: (l.name && l.name.trim()) ? l.name.trim() : 'Lenta',
+                    price: parseFloat(l.price) || 0,
+                    image: l.image || 'https://via.placeholder.com/150?text=Lenta'
+                }))
+            : [];
 
         if (!id || !name) { showToast("⚠️ ID va nomini kiriting!"); return; }
 
@@ -1813,11 +2012,11 @@
 
         let penData = {
             id, name, basePrice: price, image,
-            allowUv, allowDtf, allowTisneniya, allowLaser,
-            printPrices: { uv: pUv, dtf: pDtf, tisneniya: pTisneniya, laser: pLaser },
-            klishePrice: pKlishe,
+            allowUv, allowSifravoy,
+            printPrices: { uv: pUv, sifravoy: pSifravoy },
             sizes: { small: pSmall, medium: pMedium, large: pLarge },
-            colors: colors
+            colors: colors,
+            lentas: lentas
         };
 
         if (editIdx >= 0) {
@@ -1843,20 +2042,11 @@
         document.getElementById('newPenPrice').value = pen.basePrice;
 
         document.getElementById('chkUv').checked = pen.allowUv;
-        document.getElementById('chkDtf').checked = pen.allowDtf;
-        if (!noTisneniyaSouvenirs.includes(currentManagingProduct)) {
-            document.getElementById('chkTisneniya').checked = pen.allowTisneniya;
-        }
-        document.getElementById('chkLaser').checked = pen.allowLaser;
+        document.getElementById('chkSifravoy').checked = pen.allowSifravoy !== undefined ? pen.allowSifravoy : true;
 
         if (pen.printPrices) {
             document.getElementById('pricePrintUv').value = pen.printPrices.uv || 0;
-            document.getElementById('pricePrintDtf').value = pen.printPrices.dtf || 0;
-            document.getElementById('pricePrintTisneniya').value = pen.printPrices.tisneniya || 0;
-            document.getElementById('pricePrintLaser').value = pen.printPrices.laser || 0;
-        }
-        if (pen.klishePrice !== undefined) {
-            document.getElementById('priceKlishe').value = pen.klishePrice;
+            document.getElementById('pricePrintSifravoy').value = pen.printPrices.sifravoy || 4000;
         }
 
         if (pen.sizes) {
@@ -1865,9 +2055,11 @@
             document.getElementById('priceSizeLarge').value = pen.sizes.large || 0;
         }
 
-        if (document.getElementById('newPenColors')) {
-            document.getElementById('newPenColors').value = (pen.colors || []).join(', ');
-        }
+        colorChipsState = (pen.colors || []).map(normalizeColorEntry);
+        renderColorChipsEditor();
+
+        lentaChipsState = (pen.lentas || []).map(l => ({ ...l }));
+        renderLentaChipsEditor();
 
         document.getElementById('penFormTitle').innerText = `✏️ Modelni Tahrirlash (${pen.id})`;
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
@@ -1881,23 +2073,20 @@
         document.getElementById('newPenPrice').value = '';
         document.getElementById('newPenFile').value = '';
         document.getElementById('chkUv').checked = true;
-        document.getElementById('chkDtf').checked = true;
-        document.getElementById('chkTisneniya').checked = true;
-        document.getElementById('chkLaser').checked = true;
+        document.getElementById('chkSifravoy').checked = true;
 
         document.getElementById('pricePrintUv').value = 5000;
-        document.getElementById('pricePrintDtf').value = 6000;
-        document.getElementById('pricePrintTisneniya').value = 8000;
-        document.getElementById('pricePrintLaser').value = 7000;
-        document.getElementById('priceKlishe').value = 50000;
+        document.getElementById('pricePrintSifravoy').value = 4000;
 
         document.getElementById('priceSizeSmall').value = 0;
         document.getElementById('priceSizeMedium').value = 5000;
         document.getElementById('priceSizeLarge').value = 12000;
 
-        if (document.getElementById('newPenColors')) {
-            document.getElementById('newPenColors').value = '';
-        }
+        colorChipsState = [];
+        renderColorChipsEditor();
+
+        lentaChipsState = [];
+        renderLentaChipsEditor();
 
         document.getElementById('penFormTitle').innerText = "➕ Yangi Model Qo'shish";
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
@@ -1971,13 +2160,41 @@
             let activeDb = pensDatabase[type] || [];
             if (activeDb.length > 0) {
                 selectedPen = activeDb[0];
-                selectedPrintType = selectedPen.allowUv ? 'uv' : (selectedPen.allowDtf ? 'dtf' : (selectedPen.allowTisneniya ? 'tisneniya' : 'laser'));
+                selectedPrintType = selectedPen.allowUv ? 'uv' : 'sifravoy';
                 selectedPrintSize = 'small';
                 selectedSide = 1;
-                includeKlishe = false;
+                selectedLenta = null;
 
                 let hasSizes = hasSizesTypes.includes(type);
-                let isNoTisneniya = noTisneniyaSouvenirs.includes(type);
+                let isOneSidedOnly = oneSidedOnlySouvenirs.includes(type);
+
+                let stepNum = 2;
+                let sizeStepHtml = '';
+                if (hasSizes) {
+                    stepNum++;
+                    sizeStepHtml = `
+                        <div class="step-title">${stepNum}. Chop etish razmeri (o'lchami):</div>
+                        <div class="options-group" id="printSizeGroup">
+                            <button class="opt-btn active" id="sizeSmallBtn" onclick="selectPenSize('small')">Kichik (Standart)</button>
+                            <button class="opt-btn" id="sizeMediumBtn" onclick="selectPenSize('medium')">O'rta</button>
+                            <button class="opt-btn" id="sizeLargeBtn" onclick="selectPenSize('large')">Katta</button>
+                        </div>
+                    `;
+                }
+
+                let sideStepHtml = '';
+                if (!isOneSidedOnly) {
+                    stepNum++;
+                    sideStepHtml = `
+                        <div class="step-title">${stepNum}. Bosma tomoni:</div>
+                        <div class="options-group">
+                            <button class="opt-btn active" id="side1Btn" onclick="selectPenSide(1)">1 tomonlama</button>
+                            <button class="opt-btn" id="side2Btn" onclick="selectPenSide(2)">2 tomonlama</button>
+                        </div>
+                    `;
+                }
+
+                stepNum++;
 
                 html = `
                     <div class="step-title">1. Modelni tanlang (${activeDb.length} ta mavjud):</div>
@@ -1988,34 +2205,20 @@
                         <div class="options-group" id="colorButtonsContainer"></div>
                     </div>
 
+                    <div id="lentaOptionsGroup" style="display:none; margin-bottom:12px;">
+                        <div class="step-title" style="margin-bottom:8px;">🎗️ Lentani tanlang:</div>
+                        <div class="lenta-grid" id="lentaButtonsContainer"></div>
+                    </div>
+
                     <div class="step-title">2. Chop etish turi:</div>
                     <div class="options-group" id="printTypeGroup"></div>
 
-                    ${!isNoTisneniya ? `
-                        <div id="klisheBoxContainer" style="margin-bottom: 12px; display: none;">
-                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
-                                <input type="checkbox" id="chkIncludeKlishe" onchange="toggleKlishe()" style="width: 16px; height: 16px; accent-color: var(--primary);"> Qolip (Klishe) tayyorlash qo'shilsinmi?
-                            </label>
-                        </div>
-                    ` : ''}
+                    ${sizeStepHtml}
 
-                    ${hasSizes ? `
-                        <div class="step-title">3. Chop etish razmeri (o'lchami):</div>
-                        <div class="options-group" id="printSizeGroup">
-                            <button class="opt-btn active" id="sizeSmallBtn" onclick="selectPenSize('small')">Kichik (Standart)</button>
-                            <button class="opt-btn" id="sizeMediumBtn" onclick="selectPenSize('medium')">O'rta</button>
-                            <button class="opt-btn" id="sizeLargeBtn" onclick="selectPenSize('large')">Katta</button>
-                        </div>
-                    ` : ''}
-
-                    <div class="step-title">${hasSizes ? '4' : '3'}. Bosma tomoni:</div>
-                    <div class="options-group">
-                        <button class="opt-btn active" id="side1Btn" onclick="selectPenSide(1)">1 tomonlama</button>
-                        <button class="opt-btn" id="side2Btn" onclick="selectPenSide(2)">2 tomonlama</button>
-                    </div>
+                    ${sideStepHtml}
 
                     <div class="form-group" style="margin-top:10px;">
-                        <label>${hasSizes ? '5' : '4'}. Adad (dona):</label>
+                        <label>${stepNum}. Adad (dona):</label>
                         <input type="number" id="inpQuantity" value="50" min="1" oninput="calculate()">
                     </div>
                 `;
@@ -2023,12 +2226,15 @@
                 renderPensList(activeDb);
                 renderPrintOptions();
                 renderColorOptions();
+                renderLentaOptions();
                 return;
             } else {
+                let isOneSidedOnlyFallback = oneSidedOnlySouvenirs.includes(type);
                 html = `
                     <div style="background:#fff3cd; color:#856404; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.88rem;">
                         ⚠️ Ushbu mahsulot uchun hali alohida modellar kiritilmagan. Standart hisob ishlatiladi.
                     </div>
+                    ${isOneSidedOnlyFallback ? '' : `
                     <div class="form-group" style="margin-bottom:12px;">
                         <label>Bosma Turi:</label>
                         <select id="inpSides" onchange="calculate()">
@@ -2036,6 +2242,7 @@
                             <option value="1.5">Ikki tomonlama</option>
                         </select>
                     </div>
+                    `}
                     <div class="form-group">
                         <label>Adad (dona):</label>
                         <input type="number" id="inpQuantity" value="50" min="1" oninput="calculate()">
@@ -3205,14 +3412,16 @@
         if (!selectedPen) return;
 
         if (selectedPrintType === 'uv' && !selectedPen.allowUv) {
-            selectedPrintType = selectedPen.allowDtf ? 'dtf' : (selectedPen.allowTisneniya ? 'tisneniya' : (selectedPen.allowLaser ? 'laser' : 'uv'));
+            selectedPrintType = selectedPen.allowSifravoy ? 'sifravoy' : 'uv';
         }
 
         document.querySelectorAll('.pen-card').forEach(c => c.classList.remove('active'));
         document.getElementById(`pen-card-${penId}`)?.classList.add('active');
         selectedColor = null;
+        selectedLenta = null;
         renderPrintOptions();
         renderColorOptions();
+        renderLentaOptions();
         calculate();
     }
 
@@ -3221,7 +3430,7 @@
         let container = document.getElementById('colorButtonsContainer');
         if (!wrap || !container || !selectedPen) return;
 
-        let colors = selectedPen.colors || [];
+        let colors = (selectedPen.colors || []).map(normalizeColorEntry);
         if (colors.length === 0) {
             wrap.style.display = 'none';
             selectedColor = null;
@@ -3229,11 +3438,16 @@
         }
 
         wrap.style.display = 'block';
-        if (!selectedColor || !colors.includes(selectedColor)) {
-            selectedColor = colors[0];
+        if (!selectedColor || !colors.some(c => c.name === selectedColor)) {
+            selectedColor = colors[0].name;
         }
 
-        container.innerHTML = colors.map(c => `<button class="opt-btn ${selectedColor === c ? 'active' : ''}" onclick="selectPenColor('${c.replace(/'/g, "\\'")}')">${c}</button>`).join('');
+        container.innerHTML = colors.map(c => `
+            <button type="button" class="color-swatch-btn ${selectedColor === c.name ? 'active' : ''}" onclick="selectPenColor('${c.name.replace(/'/g, "\\'")}')" title="${c.name}">
+                <span class="color-swatch-dot" style="background:${c.hex};"></span>
+                <span>${c.name}</span>
+            </button>
+        `).join('');
     }
 
     function selectPenColor(color) {
@@ -3242,40 +3456,54 @@
         calculate();
     }
 
+    function renderLentaOptions() {
+        let wrap = document.getElementById('lentaOptionsGroup');
+        let container = document.getElementById('lentaButtonsContainer');
+        if (!wrap || !container || !selectedPen) return;
+
+        let lentas = selectedPen.lentas || [];
+        if (lentas.length === 0) {
+            wrap.style.display = 'none';
+            selectedLenta = null;
+            return;
+        }
+
+        wrap.style.display = 'block';
+        if (!selectedLenta || !lentas.some(l => l.id === selectedLenta)) {
+            selectedLenta = lentas[0].id;
+        }
+
+        container.innerHTML = lentas.map(l => `
+            <div class="lenta-card ${selectedLenta === l.id ? 'active' : ''}" onclick="selectLenta('${l.id.replace(/'/g, "\\'")}')" title="${l.name}">
+                <img src="${l.image}" alt="${l.name}" onerror="this.src='https://via.placeholder.com/150?text=Lenta'">
+                <span class="lenta-name">${l.name}</span>
+                <span class="lenta-price">+${(l.price || 0).toLocaleString()} so'm</span>
+            </div>
+        `).join('');
+    }
+
+    function selectLenta(lentaId) {
+        selectedLenta = lentaId;
+        renderLentaOptions();
+        calculate();
+    }
+
     function renderPrintOptions() {
         const group = document.getElementById('printTypeGroup');
         if (!group || !selectedPen) return;
-        let isNoTisneniya = noTisneniyaSouvenirs.includes(activeProductType);
         let html = '';
         if (selectedPen.allowUv) {
             html += `<button class="opt-btn ${selectedPrintType === 'uv' ? 'active' : ''}" onclick="selectPenPrint('uv')">UF Pechat</button>`;
         }
-        if (selectedPen.allowDtf) {
-            html += `<button class="opt-btn ${selectedPrintType === 'dtf' ? 'active' : ''}" onclick="selectPenPrint('dtf')">UF DTF</button>`;
-        }
-        if (selectedPen.allowTisneniya && !isNoTisneniya) {
-            html += `<button class="opt-btn ${selectedPrintType === 'tisneniya' ? 'active' : ''}" onclick="selectPenPrint('tisneniya')">Tisneniya</button>`;
-        }
-        if (selectedPen.allowLaser) {
-            html += `<button class="opt-btn ${selectedPrintType === 'laser' ? 'active' : ''}" onclick="selectPenPrint('laser')">Gravirovka</button>`;
+        if (selectedPen.allowSifravoy) {
+            html += `<button class="opt-btn ${selectedPrintType === 'sifravoy' ? 'active' : ''}" onclick="selectPenPrint('sifravoy')">Sifravoy Pechat</button>`;
         }
         group.innerHTML = html;
-
-        let klisheBox = document.getElementById('klisheBoxContainer');
-        if (klisheBox) {
-            klisheBox.style.display = (selectedPrintType === 'tisneniya' && !isNoTisneniya) ? 'block' : 'none';
-        }
     }
 
     function selectPenPrint(type) {
         selectedPrintType = type;
         renderPrintOptions();
-        calculate();
-    }
-
-    function toggleKlishe() {
-        let chk = document.getElementById('chkIncludeKlishe');
-        includeKlishe = chk ? chk.checked : false;
         calculate();
     }
 
@@ -3661,13 +3889,11 @@
                 previewNameText = `${selectedPen.id} - ${selectedPen.name}`;
 
                 let itemPrice = selectedPen.basePrice > 0 ? selectedPen.basePrice : baseCost;
-                let printPrices = selectedPen.printPrices || { uv: 5000, dtf: 6000, tisneniya: 8000, laser: 7000 };
+                let printPrices = selectedPen.printPrices || { uv: 5000, sifravoy: 4000 };
                 let basePrintCost = printPrices[selectedPrintType] || 5000;
 
                 let printName = 'UF Pechat';
-                if (selectedPrintType === 'dtf') printName = 'UF DTF';
-                else if (selectedPrintType === 'tisneniya') printName = 'Tisneniya';
-                else if (selectedPrintType === 'laser') printName = 'Gravirovka';
+                if (selectedPrintType === 'sifravoy') printName = 'Sifravoy Pechat';
 
                 let sizeExtra = 0;
                 let sizeLabel = 'Standart';
@@ -3680,13 +3906,16 @@
                 details = `${selectedPen.id} (${selectedPen.name}) | ${printName} [${sizeLabel}] (${selectedSide} tomon)`;
                 if (selectedColor) details += ` | Rang: ${selectedColor}`;
 
-                let totalItemSum = itemPrice + printCost;
-                let isNoTisneniya = noTisneniyaSouvenirs.includes(activeProductType);
-                if (includeKlishe && selectedPrintType === 'tisneniya' && !isNoTisneniya) {
-                    let klishePrice = selectedPen.klishePrice !== undefined ? selectedPen.klishePrice : 50000;
-                    totalItemSum += (klishePrice / qty);
-                    details += ` + Qolip`;
+                let lentaCost = 0;
+                if (selectedLenta && selectedPen.lentas) {
+                    let lentaObj = selectedPen.lentas.find(l => l.id === selectedLenta);
+                    if (lentaObj) {
+                        lentaCost = lentaObj.price || 0;
+                        details += ` | Lenta: ${lentaObj.name}`;
+                    }
                 }
+
+                let totalItemSum = itemPrice + printCost + lentaCost;
 
                 baseUnitPrice = totalItemSum;
             } else {
