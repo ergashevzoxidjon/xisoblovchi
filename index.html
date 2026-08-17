@@ -919,6 +919,14 @@
                     </div>
                 </div>
 
+                <div id="colorsBox" class="price-size-box" style="display: none;">
+                    <div class="price-size-title">🎨 Mavjud ranglar (narxga ta'sir qilmaydi):</div>
+                    <div class="form-group">
+                        <label>Ranglar (vergul bilan ajrating):</label>
+                        <input type="text" id="newPenColors" placeholder="Qora, Oq, Qizil, Ko'k">
+                    </div>
+                </div>
+
                 <div class="form-actions">
                     <button class="btn btn-outline" id="btnCancelEdit" style="display:none;" onclick="cancelPenEdit()">Bekor qilish</button>
                     <button class="btn" id="btnSavePen" onclick="savePen()">💾 Saqlash</button>
@@ -1034,11 +1042,12 @@
     const souvenirKeys = allCategories.souvenir.map(item => item.key);
     const noTisneniyaSouvenirs = ['ruchka', 'brelok', 'bakal', 'suv_idishlar', 'beyjik', 'powerbanklar'];
     const reklamaBanTypes = ['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'];
+    const hasSizesTypes = ['termos']; // razmerlar (Kichik/O'rta/Katta) bo'yicha ustama qo'llaniladigan turlar
     // Har bir reklama turi uchun qaysi qo'shimcha xizmatlar tegishli ekanligi
     const reklamaExtraOptionsConfig = {
         baner:         { xalqacha: true,  reyka: true,  ustanovka: true, ploter: false },
         orakal:        { xalqacha: false, reyka: false, ustanovka: true, ploter: true  },
-        setka_orakal:  { xalqacha: false, reyka: false, ustanovka: true, ploter: true  },
+        setka_orakal:  { xalqacha: false, reyka: false, ustanovka: true, ploter: false },
         tumanka:       { xalqacha: false, reyka: false, ustanovka: true, ploter: true  },
         xolst:         { xalqacha: false, reyka: true,  ustanovka: false, ploter: false }
     };
@@ -1146,6 +1155,7 @@
     let selectedPrintSize = 'small';
     let selectedSide = 1;
     let includeKlishe = false;
+    let selectedColor = null;
 
     let currentPaper = { name: 'Melovka 130g', q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 800, price2: 1200 };
     let printSidesDigital = 1;
@@ -1159,14 +1169,20 @@
     function getDefaultPensDatabase() {
         // Test/namuna maqsadida har bir souvenir bo'limiga 5tadan namuna mahsulot.
         // Narxlar va nomlar shartli (test uchun) — real ishlatishdan oldin admin panelda tahrirlang.
+        const samplePalette = ["Qora", "Oq", "Qizil", "Ko'k", "Yashil", "Kumush", "Oltin"];
         const db = {};
         souvenirKeys.forEach((key, catIdx) => {
-            const hasSizes = (key === 'yejidnevnik' || key === 'termos');
+            const hasSizes = hasSizesTypes.includes(key);
             const isNoTisneniya = noTisneniyaSouvenirs.includes(key);
             const catInfo = allCategories.souvenir.find(c => c.key === key);
             const catName = catInfo ? catInfo.name : key;
             db[key] = [];
             for (let i = 1; i <= 5; i++) {
+                let colorCount = 2 + (i % 3); // 2-4 ta rang, namuna uchun
+                let colors = [];
+                for (let c = 0; c < colorCount; c++) {
+                    colors.push(samplePalette[(i + c + catIdx) % samplePalette.length]);
+                }
                 db[key].push({
                     id: `${key.toUpperCase()}-00${i}`,
                     name: `${catName} Model ${i}`,
@@ -1180,7 +1196,8 @@
                     klishePrice: 50000,
                     sizes: hasSizes
                         ? { small: 2000 + i * 200, medium: 3500 + i * 300, large: 5000 + i * 400 }
-                        : { small: 0, medium: 0, large: 0 }
+                        : { small: 0, medium: 0, large: 0 },
+                    colors: colors
                 });
             }
         });
@@ -1335,13 +1352,14 @@
 
         let isSouvenir = souvenirKeys.includes(key);
         document.getElementById('souvenirFieldsRow').style.display = isSouvenir ? 'grid' : 'none';
+        document.getElementById('colorsBox').style.display = isSouvenir ? 'block' : 'none';
 
         let isNoTisneniya = noTisneniyaSouvenirs.includes(key);
         document.getElementById('chkTisneniyaLabel').style.display = isNoTisneniya ? 'none' : 'inline-flex';
         document.getElementById('priceTisneniyaGroup').style.display = isNoTisneniya ? 'none' : 'block';
         document.getElementById('klishePriceGroup').style.display = isNoTisneniya ? 'none' : 'block';
 
-        let hasSizes = (key === 'yejidnevnik' || key === 'termos');
+        let hasSizes = hasSizesTypes.includes(key);
         document.getElementById('sizePricesBox').style.display = hasSizes ? 'block' : 'none';
 
         cancelPenEdit();
@@ -1775,6 +1793,11 @@
         let pMedium = parseFloat(document.getElementById('priceSizeMedium').value) || 0;
         let pLarge = parseFloat(document.getElementById('priceSizeLarge').value) || 0;
 
+        let colors = (document.getElementById('newPenColors')?.value || '')
+            .split(',')
+            .map(c => c.trim())
+            .filter(c => c.length > 0);
+
         if (!id || !name) { showToast("⚠️ ID va nomini kiriting!"); return; }
 
         let image = '';
@@ -1788,12 +1811,13 @@
             image = 'https://via.placeholder.com/150?text=Model';
         }
 
-        let penData = { 
-            id, name, basePrice: price, image, 
+        let penData = {
+            id, name, basePrice: price, image,
             allowUv, allowDtf, allowTisneniya, allowLaser,
             printPrices: { uv: pUv, dtf: pDtf, tisneniya: pTisneniya, laser: pLaser },
             klishePrice: pKlishe,
-            sizes: { small: pSmall, medium: pMedium, large: pLarge }
+            sizes: { small: pSmall, medium: pMedium, large: pLarge },
+            colors: colors
         };
 
         if (editIdx >= 0) {
@@ -1841,6 +1865,10 @@
             document.getElementById('priceSizeLarge').value = pen.sizes.large || 0;
         }
 
+        if (document.getElementById('newPenColors')) {
+            document.getElementById('newPenColors').value = (pen.colors || []).join(', ');
+        }
+
         document.getElementById('penFormTitle').innerText = `✏️ Modelni Tahrirlash (${pen.id})`;
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
         document.getElementById('btnCancelEdit').style.display = "inline-flex";
@@ -1866,6 +1894,10 @@
         document.getElementById('priceSizeSmall').value = 0;
         document.getElementById('priceSizeMedium').value = 5000;
         document.getElementById('priceSizeLarge').value = 12000;
+
+        if (document.getElementById('newPenColors')) {
+            document.getElementById('newPenColors').value = '';
+        }
 
         document.getElementById('penFormTitle').innerText = "➕ Yangi Model Qo'shish";
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
@@ -1944,12 +1976,17 @@
                 selectedSide = 1;
                 includeKlishe = false;
 
-                let hasSizes = (type === 'yejidnevnik' || type === 'termos');
+                let hasSizes = hasSizesTypes.includes(type);
                 let isNoTisneniya = noTisneniyaSouvenirs.includes(type);
 
                 html = `
                     <div class="step-title">1. Modelni tanlang (${activeDb.length} ta mavjud):</div>
                     <div class="pen-grid" id="penGrid"></div>
+
+                    <div id="colorOptionsGroup" style="display:none; margin-bottom:12px;">
+                        <div class="step-title" style="margin-bottom:8px;">🎨 Rangni tanlang:</div>
+                        <div class="options-group" id="colorButtonsContainer"></div>
+                    </div>
 
                     <div class="step-title">2. Chop etish turi:</div>
                     <div class="options-group" id="printTypeGroup"></div>
@@ -1985,6 +2022,7 @@
                 form.innerHTML = html;
                 renderPensList(activeDb);
                 renderPrintOptions();
+                renderColorOptions();
                 return;
             } else {
                 html = `
@@ -3172,7 +3210,35 @@
 
         document.querySelectorAll('.pen-card').forEach(c => c.classList.remove('active'));
         document.getElementById(`pen-card-${penId}`)?.classList.add('active');
+        selectedColor = null;
         renderPrintOptions();
+        renderColorOptions();
+        calculate();
+    }
+
+    function renderColorOptions() {
+        let wrap = document.getElementById('colorOptionsGroup');
+        let container = document.getElementById('colorButtonsContainer');
+        if (!wrap || !container || !selectedPen) return;
+
+        let colors = selectedPen.colors || [];
+        if (colors.length === 0) {
+            wrap.style.display = 'none';
+            selectedColor = null;
+            return;
+        }
+
+        wrap.style.display = 'block';
+        if (!selectedColor || !colors.includes(selectedColor)) {
+            selectedColor = colors[0];
+        }
+
+        container.innerHTML = colors.map(c => `<button class="opt-btn ${selectedColor === c ? 'active' : ''}" onclick="selectPenColor('${c.replace(/'/g, "\\'")}')">${c}</button>`).join('');
+    }
+
+    function selectPenColor(color) {
+        selectedColor = color;
+        renderColorOptions();
         calculate();
     }
 
@@ -3605,13 +3671,14 @@
 
                 let sizeExtra = 0;
                 let sizeLabel = 'Standart';
-                if ((activeProductType === 'yejidnevnik' || activeProductType === 'termos') && selectedPen.sizes) {
+                if (hasSizesTypes.includes(activeProductType) && selectedPen.sizes) {
                     sizeExtra = selectedPen.sizes[selectedPrintSize] || 0;
                     sizeLabel = selectedPrintSize === 'small' ? 'Kichik' : (selectedPrintSize === 'medium' ? "O'rta" : 'Katta');
                 }
 
                 let printCost = (basePrintCost + sizeExtra) * (selectedSide === 2 ? 1.5 : 1);
                 details = `${selectedPen.id} (${selectedPen.name}) | ${printName} [${sizeLabel}] (${selectedSide} tomon)`;
+                if (selectedColor) details += ` | Rang: ${selectedColor}`;
 
                 let totalItemSum = itemPrice + printCost;
                 let isNoTisneniya = noTisneniyaSouvenirs.includes(activeProductType);
