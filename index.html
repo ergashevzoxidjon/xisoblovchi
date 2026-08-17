@@ -680,6 +680,152 @@
                 </div>
             </div>
 
+            <!-- BLOKNOT ADMIN PANEL BLOKI -->
+            <div id="bloknotAdminBox" style="display: none; margin-bottom: 28px;">
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📐 Bloknot O'lchamlari va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Bloknot narxi ikki qismdan iborat: <b>usti</b> (karton muqova) va <b>ichki varoqlar</b>.
+                        Har biriga aniq narx kiriting — koeffitsient ishlatilmaydi.<br>
+                        <b>A3 ulushi</b> — bitta bloknot ustiga necha A3 list ketishi (lak hisobi uchun):
+                        A4 = 1, A5 = 0.5, A6 = 0.25.
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">Nomi</th>
+                                    <th style="width: 120px;">O'lchami (mm)</th>
+                                    <th style="width: 90px;">Varoq soni</th>
+                                    <th style="width: 90px;">A3 ulushi</th>
+                                    <th style="width: 130px;">Usti narxi (so'm)</th>
+                                    <th style="width: 140px;">Ichki 1 tom. (so'm)</th>
+                                    <th style="width: 140px;">Ichki 2 tom. (so'm)</th>
+                                    <th style="width: 80px; text-align:center;">Standart</th>
+                                    <th style="width: 60px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBloknotSizeTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addBloknotSizeRow()">+ Yangi o'lcham qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📊 Adad Pog'onalari (chegirma)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Adad oshgan sari narx qanday kamayishini shu yerda belgilaysiz.
+                        Koeffitsient <b>faqat usti va ichki varoqlarga</b> qo'llanadi —
+                        lak va tisneniyaning o'z hisobi bor.<br>
+                        Masalan: 1 dan → 1.0 (chegirmasiz), 1000 dan → 0.85 (15% arzon), 5000 dan → 0.75 (25% arzon).
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Adad (shu sondan boshlab)</th>
+                                    <th style="width: 180px;">Koeffitsient</th>
+                                    <th style="width: 140px;">Chegirma</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBloknotTierTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addBloknotTierRow()">+ Yangi pog'ona qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🌀 Prujina Joyi va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Prujina joylashuvi bo'yicha qo'shimcha narx (so'm/dona). Farq bo'lmasa 0 qoldiring.
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Nomi</th>
+                                    <th style="width: 160px;">Qo'shimcha narx (so'm/dona)</th>
+                                    <th style="width: 90px; text-align:center;">Standart</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBloknotSpringTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addBloknotSpringRow()">+ Yangi variant qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">✨ Usti Lak Narxi (A3 list bo'yicha)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Lak A3 listlar soni bo'yicha hisoblanadi.
+                        <b>A3 listlar soni = adad × o'lchamning A3 ulushi.</b><br>
+                        Birinchi paket — minimal to'lov: listlar soni undan kam bo'lsa ham to'liq olinadi.
+                        Undan oshgan har bir list alohida narxlanadi.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Birinchi paket (necha A3 list):</label>
+                            <input type="number" min="1" id="bloknotLakFirstSheets" value="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Birinchi paket narxi (so'm):</label>
+                            <input type="number" min="0" id="bloknotLakFirstPrice" value="350000">
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top: 12px;">
+                        <div class="form-group">
+                            <label>Keyingi har bir A3 list (so'm):</label>
+                            <input type="number" min="0" id="bloknotLakNextPrice" value="500">
+                        </div>
+                        <div class="form-group">
+                            <label style="color: var(--text-muted);">Namuna hisob:</label>
+                            <div id="bloknotLakPreview" style="font-family: var(--font-mono); font-size: 0.82rem; padding: 10px 0; color: var(--text-main);"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🔨 Tisneniya Narxi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Dona narxi har bir bloknotga qo'shiladi. Klishe bir marta olinib, adadga bo'linadi.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tisneniya (so'm/dona):</label>
+                            <input type="number" min="0" id="bloknotTisneniyaPrice" value="800">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="bloknotKlishePrice" value="50000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">ℹ️ Mijozga Ko'rsatiladigan Ma'lumot</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Hisoblash sahifasida ma'lumot blokida chiqadi. O'lcham va varoq soni avtomatik qo'shiladi.
+                    </p>
+                    <div class="form-group">
+                        <label>Matn:</label>
+                        <input type="text" id="bloknotInfoTextInput" value="Bloknot usti 250-300gr kartondan tayyorlanadi.">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-success" onclick="saveBloknotConfig()">💾 Bloknot sozlamalarini saqlash</button>
+                </div>
+            </div>
+
             <div class="add-pen-card" id="adminModelAddForm">
                 <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
                 <input type="hidden" id="editPenIndex" value="-1">
@@ -875,7 +1021,8 @@
     };
 
     const souvenirKeys = allCategories.souvenir.map(item => item.key);
-    const noTisneniyaSouvenirs = ['brelok', 'bakal', 'suv_idishlar', 'beyjik', 'powerbanklar'];
+    const noTisneniyaSouvenirs = ['ruchka', 'brelok', 'bakal', 'suv_idishlar', 'beyjik', 'powerbanklar'];
+    const reklamaBanTypes = ['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'];
     const poligrafiyaKeys = allCategories.poligrafiya.map(item => item.key);
 
     let poligrafiyaSizeLabels = {
@@ -893,6 +1040,52 @@
     let poligrafiyaSideTypes = {
         flayer: 1.6, listovka: 1.6, doorhanger: 1.6, buklet: 1.6, bloknot: 1.6,
         paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6
+    };
+
+    // ====================== BLOKNOT SOZLAMALARI ======================
+    // Barcha qiymatlar Admin Panel > Bloknot bo'limidan o'zgartiriladi.
+    let bloknotConfig = {
+        // O'lchamlar: usti va ichki varoqlar narxi alohida kiritiladi.
+        // a3Share — bitta bloknot ustiga necha A3 list ketishi (lak hisobi uchun).
+        sizes: [
+            { key: 'a6', name: 'A6', label: '105x148mm', sheets: 35, a3Share: 0.25,
+              coverPrice: 2000, innerOnePrice: 4000, innerTwoPrice: 6400, isDefault: true  },
+            { key: 'a5', name: 'A5', label: '148x210mm', sheets: 40, a3Share: 0.5,
+              coverPrice: 3000, innerOnePrice: 6000, innerTwoPrice: 9600, isDefault: false },
+            { key: 'a4', name: 'A4', label: '210x297mm', sheets: 50, a3Share: 1.0,
+              coverPrice: 4500, innerOnePrice: 9500, innerTwoPrice: 15200, isDefault: false }
+        ],
+        // Adad pog'onalari: qaysi adaddan boshlab qanday koeffitsient
+        // (faqat usti + ichki varoqlarga qo'llanadi)
+        qtyTiers: [
+            { from: 1,    factor: 1.0  },
+            { from: 1000, factor: 0.85 },
+            { from: 5000, factor: 0.75 }
+        ],
+        // Usti lak: A3 list bo'yicha pog'onali hisob
+        lak: {
+            firstPackSheets: 1000,     // birinchi paket - necha A3 list
+            firstPackPrice: 350000,    // birinchi paket narxi (minimal to'lov)
+            nextSheetPrice: 500        // undan keyingi har bir A3 list
+        },
+        // Tisneniya: dona narxi + bir martalik klishe
+        tisneniya: { pricePerUnit: 800, klishePrice: 50000 },
+        // Prujina joyi: har biriga alohida narx
+        spring: [
+            { key: 'top',  name: 'Yuqoridan', price: 0,    isDefault: true  },
+            { key: 'side', name: 'Yonidan',   price: 300,  isDefault: false }
+        ],
+        // Mijozga ma'lumot sifatida ko'rsatiladigan matn
+        infoText: "Bloknot usti 250-300gr kartondan tayyorlanadi."
+    };
+
+    // Mijoz ekranida tanlangan qiymatlar
+    // extra: 'yoq' | 'lak' | 'tisneniya'  — faqat bittasi tanlanadi
+    let bloknotSelected = {
+        sizeIndex: 0,
+        twoSide: false,
+        extra: 'yoq',
+        springIndex: 0
     };
 
     let poligrafiyaGsmDatabase = {
@@ -913,11 +1106,18 @@
             { gsm: 170, price: 800, isDefault: true },
             { gsm: 200, price: 900, isDefault: false },
             { gsm: 300, price: 1100, isDefault: false }
+        ],
+        doorhanger: [
+            { gsm: 250, price: 420, isDefault: false },
+            { gsm: 300, price: 450, isDefault: true },
+            { gsm: 350, price: 500, isDefault: false },
+            { gsm: 400, price: 560, isDefault: false }
         ]
     };
     let selectedPoligrafiyaGsmIndex = -1;
 
     let pensDatabase = {};
+    let reklamaExtraPrices = { xalqacha: 1000, reyka: 5000, ustanovka: 50000 };
     let activeProductType = '';
     let currentManagingProduct = null;
     let currentCalcResult = {};
@@ -937,13 +1137,49 @@
     let printSidesOfset = 1;
     let lastOfsetCalc = null;
 
+    function getDefaultPensDatabase() {
+        // Test/namuna maqsadida har bir souvenir bo'limiga 5tadan namuna mahsulot.
+        // Narxlar va nomlar shartli (test uchun) — real ishlatishdan oldin admin panelda tahrirlang.
+        const db = {};
+        souvenirKeys.forEach((key, catIdx) => {
+            const hasSizes = (key === 'yejidnevnik' || key === 'termos');
+            const isNoTisneniya = noTisneniyaSouvenirs.includes(key);
+            const catInfo = allCategories.souvenir.find(c => c.key === key);
+            const catName = catInfo ? catInfo.name : key;
+            db[key] = [];
+            for (let i = 1; i <= 5; i++) {
+                db[key].push({
+                    id: `${key.toUpperCase()}-00${i}`,
+                    name: `${catName} Model ${i}`,
+                    basePrice: 4000 + (i * 1500) + (catIdx * 300),
+                    image: 'https://via.placeholder.com/150?text=' + encodeURIComponent(catName + ' ' + i),
+                    allowUv: true,
+                    allowDtf: true,
+                    allowTisneniya: !isNoTisneniya,
+                    allowLaser: true,
+                    printPrices: { uv: 5000, dtf: 6000, tisneniya: isNoTisneniya ? 0 : 8000, laser: 7000 },
+                    klishePrice: 50000,
+                    sizes: hasSizes
+                        ? { small: 2000 + i * 200, medium: 3500 + i * 300, large: 5000 + i * 400 }
+                        : { small: 0, medium: 0, large: 0 }
+                });
+            }
+        });
+        return db;
+    }
+
     function init() {
         let savedPens = localStorage.getItem('erp_pens_db_v3');
-        pensDatabase = savedPens ? JSON.parse(savedPens) : {};
+        pensDatabase = savedPens ? JSON.parse(savedPens) : getDefaultPensDatabase();
 
         let savedPrices = localStorage.getItem('erp_default_prices');
         if (savedPrices) {
             defaultPrices = { ...defaultPrices, ...JSON.parse(savedPrices) };
+        }
+
+        let savedReklamaExtra = localStorage.getItem('erp_reklama_extra_prices');
+        if (savedReklamaExtra) {
+            reklamaExtraPrices = { ...reklamaExtraPrices, ...JSON.parse(savedReklamaExtra) };
         }
 
         let savedDigitalPapers = localStorage.getItem('erp_digital_papers_db');
@@ -977,6 +1213,15 @@
         let savedPoligrafiyaSideTypes = localStorage.getItem('erp_poligrafiya_side_types');
         if (savedPoligrafiyaSideTypes) {
             poligrafiyaSideTypes = { ...poligrafiyaSideTypes, ...JSON.parse(savedPoligrafiyaSideTypes) };
+        }
+
+        let savedBloknot = localStorage.getItem('erp_bloknot_config');
+        if (savedBloknot) {
+            try {
+                bloknotConfig = migrateBloknotConfig(JSON.parse(savedBloknot), bloknotConfig);
+            } catch (e) {
+                console.warn('Bloknot sozlamalarini o\'qishda xato:', e);
+            }
         }
 
         renderAdminCategoryGrid();
@@ -1037,13 +1282,17 @@
 
         let isDigital = (key === 'sifravoy_pechat');
         let isOfset = (key === 'ofset_pechat');
-        let isPoligrafiya = poligrafiyaKeys.includes(key);
+        let isBloknot = (key === 'bloknot');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot;
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
         document.getElementById('digitalAdminPanelBox').style.display = isDigital ? 'block' : 'none';
         document.getElementById('poligrafiyaSizeAdminBox').style.display = isPoligrafiya ? 'block' : 'none';
-        document.getElementById('adminModelAddForm').style.display = (isDigital || isOfset || isPoligrafiya) ? 'none' : 'block';
-        document.getElementById('adminModelTableCard').style.display = (isDigital || isOfset || isPoligrafiya) ? 'none' : 'block';
+        document.getElementById('bloknotAdminBox').style.display = isBloknot ? 'block' : 'none';
+
+        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot;
+        document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
+        document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
         if (isOfset) {
             renderAdminOfsetPapersMatrix();
@@ -1052,6 +1301,10 @@
         }
         if (isDigital) {
             renderAdminDigitalPaperTable();
+            return;
+        }
+        if (isBloknot) {
+            renderAdminBloknotTables();
             return;
         }
         if (isPoligrafiya) {
@@ -1338,7 +1591,7 @@
 
         if (!isSouvenir) {
             let basePrice = defaultPrices[currentManagingProduct] || 0;
-            tbody.innerHTML = `
+            let rows = `
                 <tr>
                     <td>-</td>
                     <td><strong>STANDART</strong></td>
@@ -1352,6 +1605,30 @@
                     </td>
                 </tr>
             `;
+
+            if (reklamaBanTypes.includes(currentManagingProduct)) {
+                const extraRows = [
+                    { field: 'xalqacha', label: "Xalqacha (dona narxi)" },
+                    { field: 'reyka', label: "Reyka (metr narxi)" },
+                    { field: 'ustanovka', label: "Ustanovka (bir martalik xizmat narxi)" }
+                ];
+                rows += extraRows.map(r => `
+                    <tr>
+                        <td>-</td>
+                        <td><strong>QO'SHIMCHA</strong></td>
+                        <td style="font-weight:600;">${r.label}</td>
+                        <td style="font-weight:700; color:var(--primary);">${(reklamaExtraPrices[r.field] || 0).toLocaleString()} so'm</td>
+                        <td><span class="badge badge-uv">Qo'shimcha xizmat</span></td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn btn-warning" style="height:32px; padding:0 12px; font-size:0.78rem;" onclick="editReklamaExtraPrice('${r.field}')">✏️ Narxni O'zgartirish</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            tbody.innerHTML = rows;
             return;
         }
 
@@ -1396,6 +1673,31 @@
             localStorage.setItem('erp_default_prices', JSON.stringify(defaultPrices));
             renderAdminPensTable();
             showToast("✅ Baza narxi yangilandi!");
+        }
+    }
+
+    function toggleReklamaExtra(name) {
+        if (name === 'xalqacha') {
+            let box = document.getElementById('xalqachaCountBox');
+            let chk = document.getElementById('chkXalqacha');
+            if (box && chk) box.style.display = chk.checked ? 'block' : 'none';
+        } else if (name === 'ustanovka') {
+            let box = document.getElementById('ustanovkaHeightBox');
+            let chk = document.getElementById('chkUstanovka');
+            if (box && chk) box.style.display = chk.checked ? 'block' : 'none';
+        }
+        calculate();
+    }
+
+    function editReklamaExtraPrice(field) {
+        let labels = { xalqacha: "Xalqacha narxi (so'm/dona)", reyka: "Reyka narxi (so'm/metr)", ustanovka: "Ustanovka narxi (so'm, bir martalik)" };
+        let oldPrice = reklamaExtraPrices[field] || 0;
+        let newPrice = prompt(`Yangi ${labels[field]} kiriting:`, oldPrice);
+        if (newPrice !== null && !isNaN(parseFloat(newPrice))) {
+            reklamaExtraPrices[field] = parseFloat(newPrice);
+            localStorage.setItem('erp_reklama_extra_prices', JSON.stringify(reklamaExtraPrices));
+            renderAdminPensTable();
+            showToast("✅ Narx yangilandi!");
         }
     }
 
@@ -1969,22 +2271,56 @@
                 </div>
             `;
         }
-        else if (['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'].includes(type)) {
+        else if (reklamaBanTypes.includes(type)) {
             html = `
-                <div class="form-group" style="margin-bottom:12px;">
-                    <label>Eni (metr):</label>
-                    <input type="number" id="inpWidth" value="2" min="0.1" step="0.1" oninput="calculate()">
+                <div class="form-group" style="margin-bottom:12px; flex-direction:row; gap:10px;">
+                    <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                        <label>Eni (metr):</label>
+                        <input type="number" id="inpWidth" value="2" min="0.1" step="0.1" oninput="calculate()">
+                    </div>
+                    <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                        <label>Bo'yi (metr):</label>
+                        <input type="number" id="inpHeight" value="1" min="0.1" step="0.1" oninput="calculate()">
+                    </div>
                 </div>
                 <div class="form-group" style="margin-bottom:12px;">
-                    <label>Bo'yi (metr):</label>
-                    <input type="number" id="inpHeight" value="1" min="0.1" step="0.1" oninput="calculate()">
-                </div>
-                <div class="form-group">
                     <label>Adad (dona):</label>
                     <input type="number" id="inpQuantity" value="1" min="1" oninput="calculate()">
                 </div>
+
+                <div class="form-group" style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+                        <input type="checkbox" id="chkXalqacha" onchange="toggleReklamaExtra('xalqacha')"> Xalqacha qo'yib berish
+                    </label>
+                    <div id="xalqachaCountBox" style="display:none; margin-top:8px;">
+                        <label>Nechta xalqacha (dona):</label>
+                        <input type="number" id="inpXalqachaCount" value="4" min="1" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+                        <input type="checkbox" id="chkReyka" onchange="calculate()"> Reyka bilan tayyorlash
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+                        <input type="checkbox" id="chkUstanovka" onchange="toggleReklamaExtra('ustanovka')"> Ustanovka qilish
+                    </label>
+                    <div id="ustanovkaHeightBox" style="display:none; margin-top:8px;">
+                        <label>O'rnatish balandligi (metr):</label>
+                        <input type="number" id="inpUstanovkaHeight" value="2" min="0.1" step="0.1" oninput="calculate()">
+                        <div id="ustanovkaWarning" style="display:none; margin-top:8px; padding:8px 10px; background:#fef3c7; color:#92400e; border:1px solid #fde68a; border-radius:6px; font-size:0.82rem;">
+                            ⚠️ 2 metrdan balandroqqa o'rnatish uchun Xosim bilan kelishib oling.
+                        </div>
+                    </div>
+                </div>
             `;
-        } 
+        }
+        else if (type === 'bloknot') {
+            html = buildBloknotForm();
+        }
         else {
             let sizeLabel = poligrafiyaSizeLabels[type] || '';
             let gsmList = poligrafiyaGsmDatabase[type] || [];
@@ -2021,6 +2357,11 @@
 
         form.innerHTML = html;
 
+        if (type === 'bloknot') {
+            renderBloknotOptions();
+            return;
+        }
+
         let gsmListForRender = poligrafiyaGsmDatabase[type] || [];
         if (gsmListForRender.length > 0 && document.getElementById('poligrafiyaGsmGroup')) {
             renderPoligrafiyaGsmOptions(gsmListForRender);
@@ -2033,6 +2374,572 @@
         group.innerHTML = gsmList.map((g, idx) => `
             <button class="opt-btn ${idx === selectedPoligrafiyaGsmIndex ? 'active' : ''}" onclick="selectPoligrafiyaGsm(${idx})">${g.gsm}gr</button>
         `).join('');
+    }
+
+    // ====================== BLOKNOT: MIJOZ EKRANI ======================
+
+    function buildBloknotForm() {
+        // standart qiymatlarni tiklaymiz
+        let defSize = bloknotConfig.sizes.findIndex(s => s.isDefault);
+        let defSpring = bloknotConfig.spring.findIndex(s => s.isDefault);
+        bloknotSelected = {
+            sizeIndex: defSize >= 0 ? defSize : 0,
+            twoSide: false,
+            extra: 'yoq',
+            springIndex: defSpring >= 0 ? defSpring : 0
+        };
+
+        return `
+            <div class="step-title">Bloknot o'lchami:</div>
+            <div class="options-group" id="bloknotSizeGroup"></div>
+
+            <div class="step-title" style="margin-top:16px;">Ichki varoqlar pechati:</div>
+            <div class="options-group" id="bloknotSideGroup"></div>
+
+            <div class="step-title" style="margin-top:16px;">Prujina joyi:</div>
+            <div class="options-group" id="bloknotSpringGroup"></div>
+
+            <div class="step-title" style="margin-top:16px;">Qo'shimcha ishlov (usti):</div>
+            <div class="options-group" id="bloknotExtraGroup"></div>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label>Adad (dona):</label>
+                <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate(); updateBloknotInfo();">
+            </div>
+
+            <div id="bloknotInfoBox" style="margin-top:18px; padding:14px 16px; background:#f0f7ff; border-left:4px solid var(--primary); border-radius:8px;">
+                <div style="font-weight:700; font-size:0.85rem; color:var(--primary); margin-bottom:8px;">ℹ️ Ma'lumot</div>
+                <div id="bloknotInfoText" style="font-size:0.85rem; color:var(--text-main); line-height:1.7;"></div>
+            </div>
+        `;
+    }
+
+    function renderBloknotOptions() {
+        const sizeGroup = document.getElementById('bloknotSizeGroup');
+        if (!sizeGroup) return;
+
+        sizeGroup.innerHTML = bloknotConfig.sizes.map((s, idx) => `
+            <button class="opt-btn ${idx === bloknotSelected.sizeIndex ? 'active' : ''}"
+                    onclick="selectBloknotSize(${idx})">${s.name}</button>
+        `).join('');
+
+        document.getElementById('bloknotSideGroup').innerHTML = `
+            <button class="opt-btn ${!bloknotSelected.twoSide ? 'active' : ''}"
+                    onclick="selectBloknotSide(false)">Bir tomonlama</button>
+            <button class="opt-btn ${bloknotSelected.twoSide ? 'active' : ''}"
+                    onclick="selectBloknotSide(true)">Ikki tomonlama</button>
+        `;
+
+        document.getElementById('bloknotSpringGroup').innerHTML = bloknotConfig.spring.map((s, idx) => `
+            <button class="opt-btn ${idx === bloknotSelected.springIndex ? 'active' : ''}"
+                    onclick="selectBloknotSpring(${idx})">${s.name}</button>
+        `).join('');
+
+        // Lak va tisneniya birgalikda tanlanmaydi — faqat bittasi
+        document.getElementById('bloknotExtraGroup').innerHTML = `
+            <button class="opt-btn ${bloknotSelected.extra === 'yoq' ? 'active' : ''}"
+                    onclick="selectBloknotExtra('yoq')">Yo'q</button>
+            <button class="opt-btn ${bloknotSelected.extra === 'lak' ? 'active' : ''}"
+                    onclick="selectBloknotExtra('lak')">Usti lak</button>
+            <button class="opt-btn ${bloknotSelected.extra === 'tisneniya' ? 'active' : ''}"
+                    onclick="selectBloknotExtra('tisneniya')">Tisneniya</button>
+        `;
+
+        updateBloknotInfo();
+    }
+
+    function updateBloknotInfo() {
+        const box = document.getElementById('bloknotInfoText');
+        if (!box) return;
+        let s = bloknotConfig.sizes[bloknotSelected.sizeIndex] || bloknotConfig.sizes[0];
+        let qatorlar = [];
+        if (bloknotConfig.infoText) qatorlar.push(bloknotConfig.infoText);
+        qatorlar.push(`<b>${s.name}</b> o'lchami: ${s.label}`);
+        qatorlar.push(`Ichki varoqlar soni: <b>${s.sheets} ta</b>`);
+        qatorlar.push(`Bitta ${s.name} bloknot ustiga <b>${s.a3Share} ta A3 list</b> ketadi`);
+        qatorlar.push(`<span style="color:var(--text-muted)">Usti lak va tisneniya birgalikda qo'llanilmaydi — bittasini tanlang.</span>`);
+
+        let qty = parseInt(document.getElementById('inpQuantity')?.value) || 0;
+
+        if (bloknotSelected.extra === 'lak' && qty > 0) {
+            let a3 = qty * (s.a3Share || 0);
+            let jami = bloknotLakTotal(qty, s.a3Share);
+            let L = bloknotConfig.lak;
+            let izoh = a3 <= (L.firstPackSheets ?? 1000)
+                ? `birinchi paket (${L.firstPackSheets} listgacha)`
+                : `${L.firstPackSheets} list + ${(a3 - L.firstPackSheets).toLocaleString('ru-RU')} ta qo'shimcha`;
+            qatorlar.push(
+                `Lak: <b>${a3.toLocaleString('ru-RU')} ta A3 list</b> → ` +
+                `<b>${jami.toLocaleString('ru-RU')} so'm</b> <span style="color:var(--text-muted)">(${izoh})</span>`
+            );
+        }
+
+        if (bloknotSelected.extra === 'tisneniya' && bloknotConfig.tisneniya.klishePrice > 0) {
+            qatorlar.push(`Tisneniya klishesi: <b>${bloknotConfig.tisneniya.klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
+        }
+
+        box.innerHTML = qatorlar.join('<br>');
+    }
+
+    function selectBloknotSize(idx) {
+        bloknotSelected.sizeIndex = idx;
+        renderBloknotOptions();
+        calculate();
+    }
+
+    function selectBloknotSide(twoSide) {
+        bloknotSelected.twoSide = twoSide;
+        renderBloknotOptions();
+        calculate();
+    }
+
+    function selectBloknotSpring(idx) {
+        bloknotSelected.springIndex = idx;
+        renderBloknotOptions();
+        calculate();
+    }
+
+    // Lak va tisneniya bir vaqtda bo'lmaydi — bittasini tanlash
+    function selectBloknotExtra(tur) {
+        bloknotSelected.extra = tur;
+        renderBloknotOptions();
+        calculate();
+    }
+
+    // ====================== BLOKNOT: SOZLAMA MIGRATSIYASI ======================
+    // Eski tuzilmadagi saqlangan sozlamalarni yangisiga o'tkazadi,
+    // shunda foydalanuvchi kiritgan narxlar yo'qolmaydi.
+
+    function migrateBloknotConfig(saqlangan, standart) {
+        let cfg = { ...standart };
+
+        // --- o'lchamlar ---
+        if (Array.isArray(saqlangan.sizes) && saqlangan.sizes.length > 0) {
+            // eski koeffitsientlar (bo'lsa) ichki narxni hisoblash uchun kerak
+            let eskiIkkiTom = saqlangan.innerPrint?.twoSideFactor ?? 1.6;
+
+            cfg.sizes = saqlangan.sizes.map((s, i) => {
+                let standartOlcham = standart.sizes.find(d => d.name === s.name) || standart.sizes[i] || standart.sizes[0];
+
+                // A3 ulushi: saqlangan bo'lsa o'sha, bo'lmasa nomiga qarab taxmin
+                let a3 = s.a3Share;
+                if (a3 === undefined) {
+                    let nom = (s.name || '').toUpperCase();
+                    a3 = nom === 'A4' ? 1.0 : nom === 'A5' ? 0.5 : nom === 'A6' ? 0.25
+                       : (standartOlcham.a3Share ?? 0.5);
+                }
+
+                // Eski `basePrice` butun bloknot narxi edi.
+                // Uni taxminan uchdan bir usti + qolgani ichki qilib bo'lamiz.
+                let usti  = s.coverPrice;
+                let ich1  = s.innerOnePrice;
+                let ich2  = s.innerTwoPrice;
+
+                if (usti === undefined || ich1 === undefined) {
+                    let baza = (s.basePrice !== undefined) ? s.basePrice
+                             : (standartOlcham.coverPrice + standartOlcham.innerOnePrice);
+                    usti = Math.round(baza / 3);
+                    ich1 = baza - usti;
+                }
+                if (ich2 === undefined) {
+                    ich2 = Math.round(ich1 * eskiIkkiTom);
+                }
+
+                return {
+                    key: s.key || ('s' + i),
+                    name: s.name || standartOlcham.name,
+                    label: s.label || standartOlcham.label,
+                    sheets: s.sheets ?? standartOlcham.sheets,
+                    a3Share: a3,
+                    coverPrice: usti,
+                    innerOnePrice: ich1,
+                    innerTwoPrice: ich2,
+                    isDefault: !!s.isDefault
+                };
+            });
+            if (!cfg.sizes.some(s => s.isDefault)) cfg.sizes[0].isDefault = true;
+        }
+
+        // --- prujina ---
+        if (Array.isArray(saqlangan.spring) && saqlangan.spring.length > 0) {
+            cfg.spring = saqlangan.spring.map((s, i) => ({
+                key: s.key || ('p' + i),
+                name: s.name || `Variant ${i + 1}`,
+                price: s.price ?? 0,
+                isDefault: !!s.isDefault
+            }));
+            if (!cfg.spring.some(s => s.isDefault)) cfg.spring[0].isDefault = true;
+        }
+
+        // --- adad pog'onalari ---
+        if (Array.isArray(saqlangan.qtyTiers) && saqlangan.qtyTiers.length > 0) {
+            cfg.qtyTiers = saqlangan.qtyTiers
+                .map(t => ({ from: t.from ?? 1, factor: t.factor ?? 1 }))
+                .sort((a, b) => a.from - b.from);
+        }
+
+        // --- lak: eski (dona narxi) -> yangi (A3 pog'onali) ---
+        cfg.lak = { ...standart.lak };
+        if (saqlangan.lak) {
+            if (saqlangan.lak.firstPackSheets !== undefined) {
+                cfg.lak = { ...cfg.lak, ...saqlangan.lak };
+            }
+            // eski `pricePerUnit`/`setupPrice` bo'lsa — tashlab yuboriladi,
+            // chunki yangi model butunlay boshqacha hisoblanadi.
+        }
+
+        // --- tisneniya ---
+        cfg.tisneniya = { ...standart.tisneniya, ...(saqlangan.tisneniya || {}) };
+
+        // --- ma'lumot matni ---
+        if (typeof saqlangan.infoText === 'string') cfg.infoText = saqlangan.infoText;
+
+        return cfg;
+    }
+
+    // ====================== BLOKNOT: ADMIN PANEL ======================
+
+    function renderAdminBloknotTables() {
+        // --- o'lchamlar jadvali ---
+        let tb = document.getElementById('adminBloknotSizeTableBody');
+        if (tb) {
+            if (bloknotConfig.sizes.length === 0) {
+                tb.innerHTML = `<tr><td colspan="9" style="text-align:center; color: var(--text-muted); padding:20px;">O'lcham kiritilmagan.</td></tr>`;
+            } else {
+                tb.innerHTML = bloknotConfig.sizes.map((s, idx) => `
+                    <tr>
+                        <td><input type="text" class="bl-size-name" value="${s.name}" style="width:100%;"></td>
+                        <td><input type="text" class="bl-size-label" value="${s.label}" style="width:100%;"></td>
+                        <td><input type="number" min="1" class="bl-size-sheets" value="${s.sheets}" style="width:100%;"></td>
+                        <td><input type="number" min="0" step="0.05" class="bl-size-a3" value="${s.a3Share}" style="width:100%;" oninput="updateBloknotLakPreview()"></td>
+                        <td><input type="number" min="0" class="bl-size-cover" value="${s.coverPrice}" style="width:100%;"></td>
+                        <td><input type="number" min="0" class="bl-size-inner1" value="${s.innerOnePrice}" style="width:100%;"></td>
+                        <td><input type="number" min="0" class="bl-size-inner2" value="${s.innerTwoPrice}" style="width:100%;"></td>
+                        <td style="text-align:center;">
+                            <input type="radio" name="blSizeDefault" class="bl-size-default" ${s.isDefault ? 'checked' : ''}>
+                        </td>
+                        <td style="text-align:right;">
+                            <button class="btn btn-sm btn-danger" onclick="deleteBloknotSize(${idx})">🗑</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // --- adad pog'onalari jadvali ---
+        let tt = document.getElementById('adminBloknotTierTableBody');
+        if (tt) {
+            let tiers = bloknotConfig.qtyTiers || [];
+            if (tiers.length === 0) {
+                tt.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding:20px;">Pog'ona kiritilmagan — narx chegirmasiz hisoblanadi.</td></tr>`;
+            } else {
+                tt.innerHTML = tiers.map((t, idx) => {
+                    let chegirma = Math.round((1 - (t.factor ?? 1)) * 100);
+                    return `
+                    <tr>
+                        <td><input type="number" min="1" class="bl-tier-from" value="${t.from}" style="width:100%;" oninput="updateBloknotTierHints()"></td>
+                        <td><input type="number" min="0" step="0.01" class="bl-tier-factor" value="${t.factor}" style="width:100%;" oninput="updateBloknotTierHints()"></td>
+                        <td class="bl-tier-hint" style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.82rem;">
+                            ${chegirma > 0 ? '-' + chegirma + '%' : (chegirma < 0 ? '+' + (-chegirma) + '%' : 'chegirmasiz')}
+                        </td>
+                        <td style="text-align:right;">
+                            <button class="btn btn-sm btn-danger" onclick="deleteBloknotTier(${idx})">🗑</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        // --- prujina jadvali ---
+        let tp = document.getElementById('adminBloknotSpringTableBody');
+        if (tp) {
+            if (bloknotConfig.spring.length === 0) {
+                tp.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding:20px;">Variant kiritilmagan.</td></tr>`;
+            } else {
+                tp.innerHTML = bloknotConfig.spring.map((s, idx) => `
+                    <tr>
+                        <td><input type="text" class="bl-spring-name" value="${s.name}" style="width:100%;"></td>
+                        <td><input type="number" min="0" class="bl-spring-price" value="${s.price}" style="width:100%;"></td>
+                        <td style="text-align:center;">
+                            <input type="radio" name="blSpringDefault" class="bl-spring-default" ${s.isDefault ? 'checked' : ''}>
+                        </td>
+                        <td style="text-align:right;">
+                            <button class="btn btn-sm btn-danger" onclick="deleteBloknotSpring(${idx})">🗑</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // --- boshqa maydonlar ---
+        let q = (id) => document.getElementById(id);
+        if (q('bloknotLakFirstSheets'))  q('bloknotLakFirstSheets').value  = bloknotConfig.lak.firstPackSheets;
+        if (q('bloknotLakFirstPrice'))   q('bloknotLakFirstPrice').value   = bloknotConfig.lak.firstPackPrice;
+        if (q('bloknotLakNextPrice'))    q('bloknotLakNextPrice').value    = bloknotConfig.lak.nextSheetPrice;
+        if (q('bloknotTisneniyaPrice'))  q('bloknotTisneniyaPrice').value  = bloknotConfig.tisneniya.pricePerUnit;
+        if (q('bloknotKlishePrice'))     q('bloknotKlishePrice').value     = bloknotConfig.tisneniya.klishePrice;
+        if (q('bloknotInfoTextInput'))   q('bloknotInfoTextInput').value   = bloknotConfig.infoText || '';
+
+        ['bloknotLakFirstSheets','bloknotLakFirstPrice','bloknotLakNextPrice'].forEach(id => {
+            let el = q(id);
+            if (el) el.oninput = updateBloknotLakPreview;
+        });
+        updateBloknotLakPreview();
+    }
+
+    // Adad pog'onalari jadvalidagi "chegirma" ustunini jonli yangilaydi
+    function updateBloknotTierHints() {
+        let factors = document.querySelectorAll('.bl-tier-factor');
+        let hints = document.querySelectorAll('.bl-tier-hint');
+        factors.forEach((el, i) => {
+            let f = parseFloat(el.value);
+            if (isNaN(f)) { if (hints[i]) hints[i].innerText = '—'; return; }
+            let ch = Math.round((1 - f) * 100);
+            if (hints[i]) hints[i].innerText = ch > 0 ? `-${ch}%` : (ch < 0 ? `+${-ch}%` : 'chegirmasiz');
+        });
+    }
+
+    // Admin panelda lak formulasini namuna bilan ko'rsatadi
+    function updateBloknotLakPreview() {
+        let box = document.getElementById('bloknotLakPreview');
+        if (!box) return;
+
+        let son = (id, d) => { let v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? d : v; };
+        let birinchiList = son('bloknotLakFirstSheets', 1000);
+        let birinchiNarx = son('bloknotLakFirstPrice', 350000);
+        let keyingiNarx  = son('bloknotLakNextPrice', 500);
+
+        // birinchi o'lchamning A3 ulushi bilan namuna
+        let a3El = document.querySelector('.bl-size-a3');
+        let a3Ulush = a3El ? (parseFloat(a3El.value) || 1) : 1;
+
+        let namuna = [1000, 3000];
+        let qatorlar = namuna.map(qty => {
+            let a3 = qty * a3Ulush;
+            let jami = a3 <= birinchiList ? birinchiNarx : birinchiNarx + (a3 - birinchiList) * keyingiNarx;
+            return `${qty} dona → ${a3.toLocaleString('ru-RU')} A3 → ${jami.toLocaleString('ru-RU')} so'm`;
+        });
+        box.innerHTML = qatorlar.join('<br>') +
+            `<div style="color:var(--text-muted); margin-top:4px;">(1-o'lcham, A3 ulushi ${a3Ulush})</div>`;
+    }
+
+    function addBloknotSizeRow() {
+        collectBloknotTablesFromUI();
+        bloknotConfig.sizes.push({
+            key: 'yangi' + Date.now(), name: 'A5', label: '148x210mm',
+            sheets: 40, a3Share: 0.5, coverPrice: 0, innerOnePrice: 0, innerTwoPrice: 0,
+            isDefault: false
+        });
+        renderAdminBloknotTables();
+    }
+
+    function addBloknotTierRow() {
+        collectBloknotTablesFromUI();
+        if (!Array.isArray(bloknotConfig.qtyTiers)) bloknotConfig.qtyTiers = [];
+        let oxirgi = bloknotConfig.qtyTiers[bloknotConfig.qtyTiers.length - 1];
+        bloknotConfig.qtyTiers.push({
+            from: oxirgi ? (oxirgi.from * 2 || 1000) : 1,
+            factor: oxirgi ? Math.max(0.5, +(oxirgi.factor - 0.1).toFixed(2)) : 1
+        });
+        renderAdminBloknotTables();
+    }
+
+    function deleteBloknotTier(idx) {
+        if (!confirm("Ushbu pog'onani o'chirmoqchimisiz?")) return;
+        collectBloknotTablesFromUI();
+        bloknotConfig.qtyTiers.splice(idx, 1);
+        renderAdminBloknotTables();
+    }
+
+    function deleteBloknotSize(idx) {
+        if (bloknotConfig.sizes.length <= 1) {
+            showToast("⚠️ Kamida bitta o'lcham qolishi kerak!");
+            return;
+        }
+        if (!confirm("Ushbu o'lchamni o'chirmoqchimisiz?")) return;
+        collectBloknotTablesFromUI();
+        let ediStandart = bloknotConfig.sizes[idx].isDefault;
+        bloknotConfig.sizes.splice(idx, 1);
+        if (ediStandart && bloknotConfig.sizes.length > 0) bloknotConfig.sizes[0].isDefault = true;
+        renderAdminBloknotTables();
+    }
+
+    function addBloknotSpringRow() {
+        collectBloknotTablesFromUI();
+        bloknotConfig.spring.push({
+            key: 'yangi' + Date.now(), name: 'Yangi variant', price: 0, isDefault: false
+        });
+        renderAdminBloknotTables();
+    }
+
+    function deleteBloknotSpring(idx) {
+        if (bloknotConfig.spring.length <= 1) {
+            showToast("⚠️ Kamida bitta variant qolishi kerak!");
+            return;
+        }
+        if (!confirm("Ushbu variantni o'chirmoqchimisiz?")) return;
+        collectBloknotTablesFromUI();
+        let ediStandart = bloknotConfig.spring[idx].isDefault;
+        bloknotConfig.spring.splice(idx, 1);
+        if (ediStandart && bloknotConfig.spring.length > 0) bloknotConfig.spring[0].isDefault = true;
+        renderAdminBloknotTables();
+    }
+
+    // jadvaldagi kiritilgan qiymatlarni obyektga yig'adi
+    function collectBloknotTablesFromUI() {
+        let nomlar = document.querySelectorAll('.bl-size-name');
+        if (nomlar.length > 0) {
+            let labels   = document.querySelectorAll('.bl-size-label');
+            let sheets   = document.querySelectorAll('.bl-size-sheets');
+            let a3s      = document.querySelectorAll('.bl-size-a3');
+            let covers   = document.querySelectorAll('.bl-size-cover');
+            let inner1   = document.querySelectorAll('.bl-size-inner1');
+            let inner2   = document.querySelectorAll('.bl-size-inner2');
+            let defaults = document.querySelectorAll('.bl-size-default');
+            let yangi = [];
+            nomlar.forEach((el, i) => {
+                yangi.push({
+                    key: bloknotConfig.sizes[i]?.key || ('s' + i),
+                    name: (el.value || '').trim() || `O'lcham ${i + 1}`,
+                    label: (labels[i]?.value || '').trim(),
+                    sheets: parseInt(sheets[i]?.value) || 0,
+                    a3Share: parseFloat(a3s[i]?.value) || 0,
+                    coverPrice: parseFloat(covers[i]?.value) || 0,
+                    innerOnePrice: parseFloat(inner1[i]?.value) || 0,
+                    innerTwoPrice: parseFloat(inner2[i]?.value) || 0,
+                    isDefault: defaults[i]?.checked || false
+                });
+            });
+            if (yangi.length > 0 && !yangi.some(s => s.isDefault)) yangi[0].isDefault = true;
+            bloknotConfig.sizes = yangi;
+        }
+
+        // --- adad pog'onalari ---
+        let tierFrom = document.querySelectorAll('.bl-tier-from');
+        if (tierFrom.length > 0) {
+            let tierFactor = document.querySelectorAll('.bl-tier-factor');
+            let yangi = [];
+            tierFrom.forEach((el, i) => {
+                let from = parseInt(el.value);
+                let factor = parseFloat(tierFactor[i]?.value);
+                if (isNaN(from) || from < 1) from = 1;
+                if (isNaN(factor) || factor < 0) factor = 1;
+                yangi.push({ from, factor });
+            });
+            yangi.sort((a, b) => a.from - b.from);
+            bloknotConfig.qtyTiers = yangi;
+        }
+
+        let sNomlar = document.querySelectorAll('.bl-spring-name');
+        if (sNomlar.length > 0) {
+            let sPrices   = document.querySelectorAll('.bl-spring-price');
+            let sDefaults = document.querySelectorAll('.bl-spring-default');
+            let yangi = [];
+            sNomlar.forEach((el, i) => {
+                yangi.push({
+                    key: bloknotConfig.spring[i]?.key || ('p' + i),
+                    name: (el.value || '').trim() || `Variant ${i + 1}`,
+                    price: parseFloat(sPrices[i]?.value) || 0,
+                    isDefault: sDefaults[i]?.checked || false
+                });
+            });
+            if (yangi.length > 0 && !yangi.some(s => s.isDefault)) yangi[0].isDefault = true;
+            bloknotConfig.spring = yangi;
+        }
+    }
+
+    function saveBloknotConfig() {
+        collectBloknotTablesFromUI();
+
+        let son = (id, standart) => {
+            let v = parseFloat(document.getElementById(id)?.value);
+            return isNaN(v) || v < 0 ? standart : v;
+        };
+
+        bloknotConfig.lak.firstPackSheets       = Math.max(1, son('bloknotLakFirstSheets', 1000));
+        bloknotConfig.lak.firstPackPrice        = son('bloknotLakFirstPrice', 0);
+        bloknotConfig.lak.nextSheetPrice        = son('bloknotLakNextPrice', 0);
+        bloknotConfig.tisneniya.pricePerUnit    = son('bloknotTisneniyaPrice', 0);
+        bloknotConfig.tisneniya.klishePrice     = son('bloknotKlishePrice', 0);
+        bloknotConfig.infoText = (document.getElementById('bloknotInfoTextInput')?.value || '').trim();
+
+        // asosiy o'lcham yorlig'ini ham yangilaymiz
+        let std = bloknotConfig.sizes.find(s => s.isDefault) || bloknotConfig.sizes[0];
+        if (std && std.label) poligrafiyaSizeLabels.bloknot = std.label;
+
+        localStorage.setItem('erp_bloknot_config', JSON.stringify(bloknotConfig));
+        renderAdminBloknotTables();
+        showToast("💾 Bloknot sozlamalari saqlandi!");
+    }
+
+    // ====================== BLOKNOT: HISOB-KITOB ======================
+
+    // Adad bo'yicha koeffitsientni topadi
+    function bloknotQtyFactor(qty) {
+        let tiers = (bloknotConfig.qtyTiers || []).slice().sort((a, b) => a.from - b.from);
+        let k = 1;
+        for (const t of tiers) {
+            if (qty >= t.from) k = t.factor;
+        }
+        return k;
+    }
+
+    // Lak umumiy summasi — A3 listlar soni bo'yicha pog'onali hisob
+    function bloknotLakTotal(qty, a3Share) {
+        let L = bloknotConfig.lak || {};
+        let birinchiList = L.firstPackSheets ?? 1000;
+        let birinchiNarx = L.firstPackPrice ?? 0;
+        let keyingiNarx  = L.nextSheetPrice ?? 0;
+
+        let a3Soni = qty * (a3Share || 0);
+        if (a3Soni <= birinchiList) return birinchiNarx;          // minimal to'lov
+        return birinchiNarx + (a3Soni - birinchiList) * keyingiNarx;
+    }
+
+    function calculateBloknot(qty) {
+        let size = bloknotConfig.sizes[bloknotSelected.sizeIndex] || bloknotConfig.sizes[0];
+        let spring = bloknotConfig.spring[bloknotSelected.springIndex] || bloknotConfig.spring[0];
+
+        // 1) Usti + ichki varoqlar narxi (aniq narxlar, koeffitsientsiz)
+        let ichkiNarx = bloknotSelected.twoSide
+            ? (size.innerTwoPrice || 0)
+            : (size.innerOnePrice || 0);
+
+        let unit = (size.coverPrice || 0) + ichkiNarx;
+
+        // 2) Adad pog'onasi — faqat usti va ichki varoqlarga
+        unit *= bloknotQtyFactor(qty);
+
+        // 3) Prujina joyi narxi (chegirmasiz)
+        unit += (spring.price || 0);
+
+        // 4) Qo'shimcha ishlov — lak YOKI tisneniya (ikkalasi birga emas)
+        let lakJami = 0;
+        if (bloknotSelected.extra === 'lak') {
+            lakJami = bloknotLakTotal(qty, size.a3Share);
+            unit += lakJami / qty;
+        } else if (bloknotSelected.extra === 'tisneniya') {
+            unit += (bloknotConfig.tisneniya.pricePerUnit || 0);
+            if (bloknotConfig.tisneniya.klishePrice > 0) {
+                unit += (bloknotConfig.tisneniya.klishePrice / qty);
+            }
+        }
+
+        // Tafsilot matni
+        let qismlar = [
+            `Bloknot ${size.name} (${size.label})`,
+            `${size.sheets} varoq`,
+            bloknotSelected.twoSide ? 'ichki 2 tomonlama' : 'ichki 1 tomonlama',
+            `prujina ${(spring.name || '').toLowerCase()}`
+        ];
+        if (bloknotSelected.extra === 'lak') {
+            let a3 = qty * (size.a3Share || 0);
+            qismlar.push(`usti lak (${a3} A3 list)`);
+        } else if (bloknotSelected.extra === 'tisneniya') {
+            qismlar.push('tisneniya + klishe');
+        }
+
+        return { unitPrice: unit, details: qismlar.join(' | '), lakTotal: lakJami };
     }
 
     function selectPoligrafiyaGsm(index) {
@@ -2658,18 +3565,52 @@
         } 
         else {
             if(previewBox) previewBox.style.display = 'none';
-            if (['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'].includes(activeProductType)) {
+            if (reklamaBanTypes.includes(activeProductType)) {
                 let w = parseFloat(document.getElementById('inpWidth')?.value) || 0;
                 let h = parseFloat(document.getElementById('inpHeight')?.value) || 0;
                 let sqMetr = w * h;
                 baseUnitPrice = sqMetr * baseCost;
                 details = `${w}m x ${h}m (${sqMetr.toFixed(2)} kv.m)`;
-            } 
+
+                let extraParts = [];
+
+                let chkXalqacha = document.getElementById('chkXalqacha');
+                if (chkXalqacha && chkXalqacha.checked) {
+                    let xCount = parseInt(document.getElementById('inpXalqachaCount')?.value) || 0;
+                    baseUnitPrice += xCount * (reklamaExtraPrices.xalqacha || 0);
+                    extraParts.push(`Xalqacha: ${xCount} dona`);
+                }
+
+                let chkReyka = document.getElementById('chkReyka');
+                if (chkReyka && chkReyka.checked) {
+                    baseUnitPrice += w * (reklamaExtraPrices.reyka || 0);
+                    extraParts.push(`Reyka bilan tayyorlangan`);
+                }
+
+                let chkUstanovka = document.getElementById('chkUstanovka');
+                let ustanovkaWarningBox = document.getElementById('ustanovkaWarning');
+                if (chkUstanovka && chkUstanovka.checked) {
+                    let uHeight = parseFloat(document.getElementById('inpUstanovkaHeight')?.value) || 0;
+                    extraParts.push(`Ustanovka (${uHeight}m balandlik)`);
+                    if (ustanovkaWarningBox) {
+                        ustanovkaWarningBox.style.display = uHeight > 2 ? 'block' : 'none';
+                    }
+                } else if (ustanovkaWarningBox) {
+                    ustanovkaWarningBox.style.display = 'none';
+                }
+
+                if (extraParts.length > 0) details += ` | ${extraParts.join(', ')}`;
+            }
             else if (['futbolka', 'kepka', 'svitshot', 'xudi', 'jiletka', 'shoper'].includes(activeProductType)) {
                 let printPrice = parseFloat(document.getElementById('inpPrintSize')?.value || 0);
                 let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
                 baseUnitPrice = baseCost + (printPrice * sideFactor);
                 details = "Textile tayyorlash + Pechat";
+            }
+            else if (activeProductType === 'bloknot') {
+                let res = calculateBloknot(qty);
+                baseUnitPrice = res.unitPrice;
+                details = res.details;
             }
             else {
                 let sideFactor = poligrafiyaSideTypes[activeProductType] ?? 1.6;
@@ -2697,6 +3638,14 @@
 
         let unitPrice = Math.round(baseUnitPrice * (1 + marginPercent / 100));
         let totalPrice = unitPrice * qty;
+
+        // Ustanovka — butun buyurtma uchun bir martalik xizmat, donaga ko'paytirilmaydi
+        if (reklamaBanTypes.includes(activeProductType)) {
+            let chkUstanovka = document.getElementById('chkUstanovka');
+            if (chkUstanovka && chkUstanovka.checked) {
+                totalPrice += Math.round((reklamaExtraPrices.ustanovka || 0) * (1 + marginPercent / 100));
+            }
+        }
 
         document.getElementById('resDetails').innerText = details;
         document.getElementById('resQuantity').innerText = qty.toLocaleString() + " dona";
