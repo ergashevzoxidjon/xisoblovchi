@@ -1235,7 +1235,8 @@
     const printTypeSchemes = {
         statuetka: { uv: 'UF Pechat', dtf: 'UF DTF', gravirovka: 'Gravirovka' },
         zontik: { dtf: 'DTF', gravirovka: 'Vinil pechat' },
-        fleshka: { uv: 'UF Pechat', dtf: 'UF DTF', gravirovka: 'Gravirovka' }
+        fleshka: { uv: 'UF Pechat', dtf: 'UF DTF', gravirovka: 'Gravirovka' },
+        kardxolder: { uv: 'UF Pechat', dtf: 'UF DTF' }
     };
     // Har bir reklama turi uchun qaysi qo'shimcha xizmatlar tegishli ekanligi
     const reklamaExtraOptionsConfig = {
@@ -1590,18 +1591,25 @@
 
         let isNaborType = (key === 'naborlar');
         let printScheme = printTypeSchemes[key] || null;
-        let showsDtfGravirovkaCheckboxes = isNaborType || !!printScheme;
-        document.getElementById('uvCheckLabel').style.display = (printScheme && !printScheme.uv) ? 'none' : 'flex';
-        document.getElementById('sifravoyCheckLabel').style.display = showsDtfGravirovkaCheckboxes ? 'none' : 'flex';
-        document.getElementById('dtfCheckLabel').style.display = showsDtfGravirovkaCheckboxes ? 'flex' : 'none';
-        document.getElementById('gravirovkaCheckLabel').style.display = showsDtfGravirovkaCheckboxes ? 'flex' : 'none';
+
+        // Sxemada aynan qaysi kalitlar borligiga qarab ko'rsatamiz.
+        // Masalan kardxolder sxemasida gravirovka yo'q — u umuman chiqmaydi.
+        let showUv    = !printScheme || !!printScheme.uv;
+        let showDtf   = isNaborType || (printScheme && !!printScheme.dtf);
+        let showGrav  = isNaborType || (printScheme && !!printScheme.gravirovka);
+        let showSifra = !isNaborType && !printScheme;
+
+        document.getElementById('uvCheckLabel').style.display         = showUv    ? 'flex' : 'none';
+        document.getElementById('sifravoyCheckLabel').style.display   = showSifra ? 'flex' : 'none';
+        document.getElementById('dtfCheckLabel').style.display        = showDtf   ? 'flex' : 'none';
+        document.getElementById('gravirovkaCheckLabel').style.display = showGrav  ? 'flex' : 'none';
         document.getElementById('dtfCheckLabelText').innerText = (printScheme && printScheme.dtf) || 'UF DTF';
         document.getElementById('gravirovkaCheckLabelText').innerText = (printScheme && printScheme.gravirovka) || 'Gravirovka';
 
-        document.getElementById('uvPriceGroup').style.display = (printScheme && !printScheme.uv) ? 'none' : 'flex';
-        document.getElementById('sifravoyPriceGroup').style.display = printScheme ? 'none' : 'flex';
-        document.getElementById('dtfPriceGroup').style.display = printScheme ? 'flex' : 'none';
-        document.getElementById('gravirovkaPriceGroup').style.display = printScheme ? 'flex' : 'none';
+        document.getElementById('uvPriceGroup').style.display         = showUv    ? 'flex' : 'none';
+        document.getElementById('sifravoyPriceGroup').style.display   = showSifra ? 'flex' : 'none';
+        document.getElementById('dtfPriceGroup').style.display        = showDtf   ? 'flex' : 'none';
+        document.getElementById('gravirovkaPriceGroup').style.display = showGrav  ? 'flex' : 'none';
         document.getElementById('dtfPriceLabelText').innerText = (printScheme && printScheme.dtf) || 'UF DTF';
         document.getElementById('gravirovkaPriceLabelText').innerText = (printScheme && printScheme.gravirovka) || 'Gravirovka';
 
