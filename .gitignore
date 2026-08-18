@@ -22,6 +22,7 @@ desktop.ini
 
 # Yuklash va avtomatlashtirish skriptlari (mahalliy ish qurollari)
 push.bat
+pull.bat
 AVTO-SOZLASH.bat
 AVTO-TOXTATISH.bat
 HOLAT.bat
