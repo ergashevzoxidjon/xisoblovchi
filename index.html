@@ -532,6 +532,61 @@
         }
         .price-size-title { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
 
+        /* --- Miqdor oraliqlari (tiraj bo'yicha narx jadvali) --- */
+        .tier-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .tier-table th {
+            text-align: left;
+            padding: 6px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .tier-table td { padding: 4px 6px; vertical-align: middle; }
+        .tier-table input[type="number"] {
+            width: 100%;
+            min-width: 74px;
+            height: 34px;
+            padding: 0 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-family: inherit;
+        }
+        .tier-table tr.tier-invalid input[type="number"] { border-color: #f87171; background: #fef2f2; }
+        .tier-remove {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #dc2626;
+            border-radius: 6px;
+            height: 34px;
+            padding: 0 10px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .tier-remove:hover { background: #fee2e2; }
+        .tier-warning {
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: #b45309;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+        .tier-preview-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 8px; }
+        .tier-preview-table th, .tier-preview-table td {
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+        .tier-preview-table th { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
+        .tier-preview-table tr.tier-active td { background: #eef2ff; font-weight: 700; color: #4338ca; }
+
         .form-actions {
             display: flex;
             gap: 12px;
@@ -1072,6 +1127,24 @@
                     </div>
                 </div>
 
+                <div id="tiersBox" class="price-size-box" style="display: none;">
+                    <div class="price-size-title">📊 Miqdor oraliqlari bo'yicha narxlar (tiraj jadvali):</div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                        Buyurtma miqdoriga qarab narx o'zgaradi. Masalan: 1–10 dona uchun bir narx, 11–50 dona uchun arzonroq narx.
+                        <strong>"Gacha" ustunini bo'sh yoki 0 qoldirsangiz — cheksiz</strong> (ya'ni "va undan yuqori") deb qabul qilinadi.<br>
+                        Agar birorta ham oraliq qo'shilmasa, yuqoridagi bitta baza narx va chop narxlari ishlatiladi (eski tartib).
+                    </p>
+                    <div style="overflow-x:auto;">
+                        <table class="tier-table">
+                            <thead><tr id="tierTableHeader"></tr></thead>
+                            <tbody id="tierTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="tierWarningBox"></div>
+                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="addTierRow()">+ Oraliq qo'shish</button>
+                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="fillDefaultTiers()">⚡ Namuna oraliqlar (1-10, 11-50, 51-100, 101-200, 201-500, 500+)</button>
+                </div>
+
                 <div id="sizePricesBox" class="price-size-box" style="display: none;">
                     <div class="price-size-title" id="sizeBoxTitleText">📏 Razmerlar bo'yicha qo'shimcha koeffitsient/ustamalar:</div>
                     <div class="form-row">
@@ -1355,6 +1428,9 @@
     let selectedLenta = null; // kalkulyatorda tanlangan lenta id
     let lentaChipsState = []; // admin formasida tahrirlanayotgan { id, name, price, image } lentalar ro'yxati (faqat Beyjik uchun)
     let detailsChipsState = []; // admin formasida tahrirlanayotgan nabor tarkibidagi detallar ro'yxati (matn, faqat Naborlar uchun)
+    let tierChipsState = []; // admin formasida tahrirlanayotgan miqdor oraliqlari: { from, to, basePrice, printPrices:{uv,sifravoy,dtf,gravirovka} }
+    // Joriy boshqarilayotgan mahsulot turida qaysi chop ustunlari ko'rinishini eslab turamiz (oraliq jadvali shu bo'yicha ustun chiqaradi)
+    let currentPrintColumns = { uv: true, sifravoy: true, dtf: false, gravirovka: false, labels: { uv: 'UF Pechat', sifravoy: 'Sifravoy', dtf: 'UF DTF', gravirovka: 'Gravirovka' } };
 
     let currentPaper = { name: 'Melovka 130g', q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 800, price2: 1200 };
     let printSidesDigital = 1;
@@ -1404,10 +1480,32 @@
                 for (let c = 0; c < colorCount; c++) {
                     colors.push({ ...samplePalette[(i + c + catIdx) % samplePalette.length] });
                 }
+                let sampleBase = 4000 + (i * 1500) + (catIdx * 300);
+                // Namuna miqdor oraliqlari: tiraj oshgani sari dona narxi pasayadi.
+                // Admin bularni istalgancha o'zgartiradi.
+                let sampleTiers = [
+                    { from: 1,   to: 10,  mul: 1.00, pMul: 1.00 },
+                    { from: 11,  to: 50,  mul: 0.92, pMul: 0.90 },
+                    { from: 51,  to: 100, mul: 0.85, pMul: 0.80 },
+                    { from: 101, to: 200, mul: 0.79, pMul: 0.72 },
+                    { from: 201, to: 500, mul: 0.74, pMul: 0.65 },
+                    { from: 501, to: 0,   mul: 0.70, pMul: 0.60 }
+                ].map(r => ({
+                    from: r.from,
+                    to: r.to,
+                    basePrice: Math.round(sampleBase * r.mul / 100) * 100,
+                    printPrices: {
+                        uv: Math.round(5000 * r.pMul / 100) * 100,
+                        sifravoy: Math.round(4000 * r.pMul / 100) * 100,
+                        dtf: Math.round(5500 * r.pMul / 100) * 100,
+                        gravirovka: Math.round(6000 * r.pMul / 100) * 100
+                    }
+                }));
                 db[key].push({
                     id: `${key.toUpperCase()}-00${i}`,
                     name: `${catName} Model ${i}`,
-                    basePrice: 4000 + (i * 1500) + (catIdx * 300),
+                    basePrice: sampleBase,
+                    tiers: sampleTiers,
                     image: 'https://via.placeholder.com/150?text=' + encodeURIComponent(catName + ' ' + i),
                     allowUv: true,
                     allowSifravoy: key !== 'naborlar',
@@ -1615,6 +1713,22 @@
 
         let hasSizes = hasSizesTypes.includes(key);
         document.getElementById('sizePricesBox').style.display = hasSizes ? 'block' : 'none';
+
+        // Miqdor oraliqlari jadvali: faqat suvenir turlarida.
+        // Naborlarda chop narxi tarkibdagi detallardan olinadi, shuning uchun u yerda faqat mahsulot narxi ustuni chiqadi.
+        currentPrintColumns = {
+            uv: isNaborType ? false : showUv,
+            sifravoy: isNaborType ? false : showSifra,
+            dtf: isNaborType ? false : showDtf,
+            gravirovka: isNaborType ? false : showGrav,
+            labels: {
+                uv: 'UF Pechat',
+                sifravoy: 'Sifravoy',
+                dtf: (printScheme && printScheme.dtf) || 'UF DTF',
+                gravirovka: (printScheme && printScheme.gravirovka) || 'Gravirovka'
+            }
+        };
+        document.getElementById('tiersBox').style.display = isSouvenir ? 'block' : 'none';
 
         cancelPenEdit();
         renderAdminPensTable();
@@ -1938,7 +2052,19 @@
                 </td>
                 <td><strong style="color:var(--text-muted); font-size:0.82rem;">${p.id}</strong></td>
                 <td style="font-weight:600; color:var(--text-main);">${p.name}</td>
-                <td style="font-weight:700; color:var(--primary);">${p.basePrice.toLocaleString()} so'm</td>
+                <td style="font-weight:700; color:var(--primary);">
+                    ${(() => {
+                        let tl = normalizeTierList(p.tiers);
+                        if (tl.length === 0) return `${(p.basePrice || 0).toLocaleString()} so'm`;
+                        let min = Math.min(...tl.map(t => t.basePrice > 0 ? t.basePrice : (p.basePrice || 0)));
+                        let max = Math.max(...tl.map(t => t.basePrice > 0 ? t.basePrice : (p.basePrice || 0)));
+                        return `
+                            <div>${min === max ? min.toLocaleString() : `${max.toLocaleString()} → ${min.toLocaleString()}`} so'm</div>
+                            <span class="badge" style="background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; margin-top:4px;">📊 ${tl.length} ta oraliq</span>
+                            <div style="font-weight:500; font-size:0.72rem; color:var(--text-muted); margin-top:4px;">${tl.map(t => tierLabel(t)).join(' · ')}</div>
+                        `;
+                    })()}
+                </td>
                 <td>
                     ${currentManagingProduct === 'naborlar' ? `
                     <div class="badge-container">
@@ -2173,6 +2299,280 @@
         renderDetailsChipsEditor();
     }
 
+    /* =========================================================================
+       MIQDOR ORALIQLARI (TIRAJ JADVALI)
+       Suvenir mahsulotlarida narx buyurtma miqdoriga qarab o'zgaradi.
+       Har bir model o'z jadvaliga ega: { from, to, basePrice, printPrices }
+       - to = 0 yoki bo'sh  -> cheksiz ("va undan yuqori")
+       - biror katak 0 bo'lsa -> modelning umumiy (jadvaldan tashqari) narxi ishlatiladi
+       Jadval bo'sh bo'lsa eski tartib (bitta qat'iy narx) saqlanadi.
+       ========================================================================= */
+
+    const TIER_PRINT_KEYS = ['uv', 'sifravoy', 'dtf', 'gravirovka'];
+
+    function normalizeTier(t) {
+        t = t || {};
+        let pp = t.printPrices || {};
+        let out = {
+            from: Math.max(1, parseInt(t.from) || 1),
+            to: Math.max(0, parseInt(t.to) || 0),
+            basePrice: parseFloat(t.basePrice) || 0,
+            printPrices: {}
+        };
+        TIER_PRINT_KEYS.forEach(k => { out.printPrices[k] = parseFloat(pp[k]) || 0; });
+        return out;
+    }
+
+    function normalizeTierList(list) {
+        if (!Array.isArray(list)) return [];
+        return list
+            .map(normalizeTier)
+            .filter(t => t.from >= 1)
+            .sort((a, b) => a.from - b.from);
+    }
+
+    function tierUpper(t) {
+        return (t.to && t.to > 0) ? t.to : Infinity;
+    }
+
+    function tierLabel(t) {
+        return (t.to && t.to > 0) ? `${t.from}–${t.to} dona` : `${t.from}+ dona`;
+    }
+
+    // Berilgan miqdorga mos oraliqni topamiz.
+    // Aniq mos kelmasa: miqdor eng kichik oraliqdan pastda bo'lsa birinchisi,
+    // eng kattasidan yuqorida bo'lsa oxirgisi ishlatiladi (narx hech qachon "yo'qolib qolmaydi").
+    function findTierForQty(tiers, qty) {
+        let list = normalizeTierList(tiers);
+        if (list.length === 0) return null;
+        let n = parseInt(qty) || 1;
+        for (let t of list) {
+            if (n >= t.from && n <= tierUpper(t)) return t;
+        }
+        if (n < list[0].from) return list[0];
+        return list[list.length - 1];
+    }
+
+    // Kalkulyator shu funksiyadan foydalanadi: modeldan + miqdordan -> amaldagi narxlar
+    function resolveSouvenirPrices(pen, qty) {
+        let baseFallback = (pen && parseFloat(pen.basePrice)) || 0;
+        let printFallback = (pen && pen.printPrices) || {};
+        let result = { basePrice: baseFallback, printPrices: { ...printFallback }, tier: null, tiers: [] };
+
+        let list = normalizeTierList(pen && pen.tiers);
+        result.tiers = list;
+        if (list.length === 0) return result;
+
+        let t = findTierForQty(list, qty);
+        if (!t) return result;
+
+        result.tier = t;
+        result.basePrice = t.basePrice > 0 ? t.basePrice : baseFallback;
+        TIER_PRINT_KEYS.forEach(k => {
+            result.printPrices[k] = t.printPrices[k] > 0 ? t.printPrices[k] : (parseFloat(printFallback[k]) || 0);
+        });
+        return result;
+    }
+
+    // Berilgan oraliq uchun bitta dona tannarxi (margin qo'shilmagan holda).
+    // Kalkulyator ham, jadval ko'rinishi ham AYNAN shu funksiyadan foydalanadi —
+    // shuning uchun jadvaldagi narx bilan hisoblangan narx hech qachon farq qilmaydi.
+    function souvenirUnitTotalForTier(pen, tier) {
+        if (!pen) return 0;
+        let isNaborlar = (activeProductType === 'naborlar');
+        let fallbackBase = parseFloat(pen.basePrice) || 0;
+        let basePrice = (tier && tier.basePrice > 0) ? tier.basePrice
+                      : (fallbackBase > 0 ? fallbackBase : (defaultPrices[activeProductType] || 1000));
+
+        let printCost = 0;
+        if (!isNaborlar) {
+            let pp = pen.printPrices || { uv: 5000, sifravoy: 4000 };
+            let tierPP = (tier && tier.printPrices) || {};
+            let basePrint = (tierPP[selectedPrintType] > 0) ? tierPP[selectedPrintType] : (pp[selectedPrintType] || 0);
+            let sizeExtra = 0;
+            if (hasSizesTypes.includes(activeProductType) && pen.sizes) {
+                sizeExtra = pen.sizes[selectedPrintSize] || 0;
+            }
+            printCost = (basePrint + sizeExtra) * (selectedSide === 2 ? 1.5 : 1);
+        }
+
+        let detailsPrintCost = 0;
+        if (isNaborlar && pen.details && pen.details.length > 0) {
+            detailsPrintCost = pen.details
+                .map(normalizeNaborDetail)
+                .reduce((sum, d) => sum + (d.printPrices[selectedNaborPrintType] || 0), 0);
+        }
+
+        let lentaCost = 0;
+        if (selectedLenta && pen.lentas) {
+            let l = pen.lentas.find(x => x.id === selectedLenta);
+            if (l) lentaCost = l.price || 0;
+        }
+
+        return basePrice + printCost + lentaCost + detailsPrintCost;
+    }
+
+    // Kalkulyatorda mijozga to'liq jadvalni ko'rsatamiz — qaysi oraliqda turgani ajratib beriladi
+    function renderTierPreview(pen, qty, marginPercent) {
+        const box = document.getElementById('tierPreviewBox');
+        if (!box) return;
+
+        let list = normalizeTierList(pen && pen.tiers);
+        if (!pen || list.length === 0) {
+            box.style.display = 'none';
+            box.innerHTML = '';
+            return;
+        }
+
+        let active = findTierForQty(list, qty);
+        let m = 1 + ((parseFloat(marginPercent) || 0) / 100);
+
+        box.style.display = 'block';
+        box.innerHTML = `
+            <div style="font-size:0.85rem; font-weight:700; color:var(--primary); margin-bottom:4px;">📊 Miqdor bo'yicha narx jadvali</div>
+            <div style="font-size:0.76rem; color:var(--text-muted);">Ko'proq olsangiz — dona narxi arzonlashadi.</div>
+            <table class="tier-preview-table">
+                <thead><tr><th>Miqdor</th><th style="text-align:right;">Dona narxi</th><th style="text-align:right;">Eng kam miqdorda jami</th></tr></thead>
+                <tbody>
+                    ${list.map(t => {
+                        let unit = Math.round(souvenirUnitTotalForTier(pen, t) * m);
+                        let isActive = active && t.from === active.from && t.to === active.to;
+                        return `
+                            <tr class="${isActive ? 'tier-active' : ''}">
+                                <td>${tierLabel(t)}${isActive ? ' ✓' : ''}</td>
+                                <td style="text-align:right;">${unit.toLocaleString()} so'm</td>
+                                <td style="text-align:right;">${(unit * t.from).toLocaleString()} so'm</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // --- Admin formasidagi jadval muharriri ---
+
+    function visibleTierPrintKeys() {
+        return TIER_PRINT_KEYS.filter(k => currentPrintColumns[k]);
+    }
+
+    function renderTierEditor() {
+        const head = document.getElementById('tierTableHeader');
+        const body = document.getElementById('tierTableBody');
+        if (!head || !body) return;
+
+        let keys = visibleTierPrintKeys();
+
+        head.innerHTML = `
+            <th style="width:90px;">Dan (dona)</th>
+            <th style="width:90px;">Gacha</th>
+            <th style="width:120px;">Mahsulot narxi</th>
+            ${keys.map(k => `<th style="width:110px;">${currentPrintColumns.labels[k]}</th>`).join('')}
+            <th style="width:90px;"></th>
+        `;
+
+        if (tierChipsState.length === 0) {
+            body.innerHTML = `<tr><td colspan="${keys.length + 4}" style="padding:14px 6px; color:var(--text-muted); font-size:0.82rem;">
+                Oraliq qo'shilmagan — model yuqoridagi bitta baza narx bilan hisoblanadi.
+            </td></tr>`;
+            renderTierWarnings();
+            return;
+        }
+
+        let sortedIdx = tierChipsState
+            .map((t, i) => ({ t, i }))
+            .sort((a, b) => (parseInt(a.t.from) || 0) - (parseInt(b.t.from) || 0));
+
+        body.innerHTML = sortedIdx.map(({ t, i }) => `
+            <tr data-tier-row="${i}">
+                <td><input type="number" min="1" value="${parseInt(t.from) || 1}" oninput="updateTier(${i}, 'from', this.value)"></td>
+                <td><input type="number" min="0" value="${parseInt(t.to) || 0}" placeholder="∞" oninput="updateTier(${i}, 'to', this.value)"></td>
+                <td><input type="number" min="0" value="${parseFloat(t.basePrice) || 0}" oninput="updateTier(${i}, 'basePrice', this.value)"></td>
+                ${keys.map(k => `<td><input type="number" min="0" value="${parseFloat(t.printPrices?.[k]) || 0}" oninput="updateTierPrint(${i}, '${k}', this.value)"></td>`).join('')}
+                <td><button type="button" class="tier-remove" onclick="removeTierRow(${i})">✕</button></td>
+            </tr>
+        `).join('');
+
+        renderTierWarnings();
+    }
+
+    // Bo'shliq va ustma-ust tushgan oraliqlarni admin ko'rib turishi uchun ogohlantiramiz
+    function tierValidationMessages(list) {
+        let msgs = [];
+        let sorted = normalizeTierList(list);
+        if (sorted.length === 0) return msgs;
+
+        if (sorted[0].from > 1) {
+            msgs.push(`1–${sorted[0].from - 1} dona uchun oraliq yo'q. Bu miqdorda eng birinchi oraliq narxi ishlatiladi.`);
+        }
+        for (let i = 0; i < sorted.length - 1; i++) {
+            let cur = sorted[i], next = sorted[i + 1];
+            let curTo = tierUpper(cur);
+            if (curTo === Infinity) {
+                msgs.push(`"${tierLabel(cur)}" cheksiz oraliq, undan keyingi qatorlar hech qachon ishlamaydi.`);
+                break;
+            }
+            if (next.from <= curTo) {
+                msgs.push(`"${tierLabel(cur)}" va "${tierLabel(next)}" ustma-ust tushyapti. ${next.from}–${curTo} miqdorida birinchisi ishlatiladi.`);
+            } else if (next.from > curTo + 1) {
+                msgs.push(`${curTo + 1}–${next.from - 1} dona uchun oraliq yo'q.`);
+            }
+        }
+        let last = sorted[sorted.length - 1];
+        if (tierUpper(last) !== Infinity) {
+            msgs.push(`${tierUpper(last)} donadan yuqori miqdor uchun oraliq yo'q — oxirgi oraliq narxi ishlatiladi. Buni "Gacha" ni 0 qilib yopishingiz mumkin.`);
+        }
+        return msgs;
+    }
+
+    function renderTierWarnings() {
+        const box = document.getElementById('tierWarningBox');
+        if (!box) return;
+        let msgs = tierValidationMessages(tierChipsState);
+        box.innerHTML = msgs.length === 0 ? '' :
+            `<div class="tier-warning">⚠️ ${msgs.map(m => `<div>• ${m}</div>`).join('')}</div>`;
+    }
+
+    function addTierRow() {
+        let last = normalizeTierList(tierChipsState).slice(-1)[0];
+        let nextFrom = last ? (tierUpper(last) === Infinity ? last.from + 1 : tierUpper(last) + 1) : 1;
+        tierChipsState.push({
+            from: nextFrom, to: 0,
+            basePrice: parseFloat(document.getElementById('newPenPrice')?.value) || 0,
+            printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
+        });
+        renderTierEditor();
+    }
+
+    function fillDefaultTiers() {
+        if (tierChipsState.length > 0 && !confirm("Mavjud oraliqlar o'chib, o'rniga namuna oraliqlar qo'yiladi. Davom etamizmi?")) return;
+        let base = parseFloat(document.getElementById('newPenPrice')?.value) || 0;
+        let ranges = [[1, 10], [11, 50], [51, 100], [101, 200], [201, 500], [501, 0]];
+        tierChipsState = ranges.map(([from, to]) => ({
+            from, to, basePrice: base,
+            printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
+        }));
+        renderTierEditor();
+        showToast("📊 Namuna oraliqlar qo'yildi — narxlarni to'ldiring!");
+    }
+
+    function updateTier(idx, field, value) {
+        if (!tierChipsState[idx]) return;
+        tierChipsState[idx][field] = (field === 'basePrice') ? (parseFloat(value) || 0) : (parseInt(value) || 0);
+        renderTierWarnings();
+    }
+
+    function updateTierPrint(idx, key, value) {
+        if (!tierChipsState[idx]) return;
+        if (!tierChipsState[idx].printPrices) tierChipsState[idx].printPrices = { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 };
+        tierChipsState[idx].printPrices[key] = parseFloat(value) || 0;
+    }
+
+    function removeTierRow(idx) {
+        tierChipsState.splice(idx, 1);
+        renderTierEditor();
+    }
+
     async function savePen() {
         if (!currentManagingProduct) return;
         if (!pensDatabase[currentManagingProduct]) pensDatabase[currentManagingProduct] = [];
@@ -2239,6 +2639,8 @@
             image = 'https://via.placeholder.com/150?text=Model';
         }
 
+        let tiers = normalizeTierList(tierChipsState);
+
         let penData = {
             id, name, basePrice: price, image,
             allowUv, allowSifravoy, allowDtf, allowGravirovka,
@@ -2246,7 +2648,8 @@
             sizes: { small: pSmall, medium: pMedium, large: pLarge },
             colors: colors,
             lentas: lentas,
-            details: naborDetails
+            details: naborDetails,
+            tiers: tiers
         };
 
         if (editIdx >= 0) {
@@ -2298,6 +2701,9 @@
         detailsChipsState = (pen.details || []).map(normalizeNaborDetail);
         renderDetailsChipsEditor();
 
+        tierChipsState = normalizeTierList(pen.tiers);
+        renderTierEditor();
+
         document.getElementById('penFormTitle').innerText = `✏️ Modelni Tahrirlash (${pen.id})`;
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
         document.getElementById('btnCancelEdit').style.display = "inline-flex";
@@ -2331,6 +2737,9 @@
 
         detailsChipsState = [];
         renderDetailsChipsEditor();
+
+        tierChipsState = [];
+        renderTierEditor();
 
         document.getElementById('penFormTitle').innerText = "➕ Yangi Model Qo'shish";
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
@@ -2395,6 +2804,7 @@
                         <div class="result-item"><span>Birlik narxi:</span> <strong id="resUnitPrice">0 so'm</strong></div>
                         <div class="result-item result-total"><span>Jami summa:</span> <span id="resTotalPrice">0 so'm</span></div>
                     </div>
+                    <div id="tierPreviewBox" style="display:none; margin-top:16px;"></div>
                     <div style="margin-top: 20px;">
                         <button class="btn" style="width: 100%;" onclick="copyResult()">📋 Natijani nusxalash</button>
                     </div>
@@ -4212,7 +4622,12 @@
                 previewImgUrl = selectedPen.image;
                 previewNameText = `${selectedPen.id} - ${selectedPen.name}`;
 
-                let itemPrice = selectedPen.basePrice > 0 ? selectedPen.basePrice : baseCost;
+                // Miqdor oraliqlari: buyurtma soniga mos narxni topamiz.
+                // Jadval bo'sh bo'lsa avvalgi qat'iy narx qaytadi.
+                let tierResult = resolveSouvenirPrices(selectedPen, qty);
+                let activeTier = tierResult.tier;
+
+                let itemPrice = tierResult.basePrice > 0 ? tierResult.basePrice : baseCost;
                 let isNaborlar = (activeProductType === 'naborlar');
 
                 let printCost = 0;
@@ -4221,7 +4636,7 @@
                 let sizeLabel = 'Standart';
 
                 if (!isNaborlar) {
-                    let printPrices = selectedPen.printPrices || { uv: 5000, sifravoy: 4000 };
+                    let printPrices = tierResult.printPrices || { uv: 5000, sifravoy: 4000 };
                     let basePrintCost = printPrices[selectedPrintType] || 0;
                     let calcPrintScheme = printTypeSchemes[activeProductType];
 
@@ -4267,10 +4682,17 @@
                     }
                 }
 
-                let totalItemSum = itemPrice + printCost + lentaCost + detailsPrintCost;
+                if (activeTier) {
+                    details += ` | Oraliq: ${tierLabel(activeTier)}`;
+                }
+                renderTierPreview(selectedPen, qty, marginPercent);
+
+                // Yagona manba: jadval ko'rinishi ham shu funksiyani chaqiradi
+                let totalItemSum = souvenirUnitTotalForTier(selectedPen, activeTier);
 
                 baseUnitPrice = totalItemSum;
             } else {
+                renderTierPreview(null, qty, marginPercent);
                 if(previewBox) previewBox.style.display = 'none';
                 let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
                 baseUnitPrice = baseCost * sideFactor;
@@ -4279,6 +4701,7 @@
         } 
         else {
             if(previewBox) previewBox.style.display = 'none';
+            renderTierPreview(null, qty, marginPercent);
             if (reklamaBanTypes.includes(activeProductType)) {
                 let w = parseFloat(document.getElementById('inpWidth')?.value) || 0;
                 let h = parseFloat(document.getElementById('inpHeight')?.value) || 0;
