@@ -1082,7 +1082,7 @@
                         <input type="text" id="newPenName" placeholder="Model Nomi">
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="basePriceGroup">
                         <label>Model Baza Narxi (so'm):</label>
                         <input type="number" id="newPenPrice" placeholder="50000">
                     </div>
@@ -1128,11 +1128,13 @@
                 </div>
 
                 <div id="tiersBox" class="price-size-box" style="display: none;">
-                    <div class="price-size-title">📊 Miqdor oraliqlari bo'yicha narxlar (tiraj jadvali):</div>
+                    <div class="price-size-title">📊 Narxlar jadvali — mahsulot va chop narxi miqdorga qarab:</div>
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
-                        Buyurtma miqdoriga qarab narx o'zgaradi. Masalan: 1–10 dona uchun bir narx, 11–50 dona uchun arzonroq narx.
-                        <strong>"Gacha" ustunini bo'sh yoki 0 qoldirsangiz — cheksiz</strong> (ya'ni "va undan yuqori") deb qabul qilinadi.<br>
-                        Agar birorta ham oraliq qo'shilmasa, yuqoridagi bitta baza narx va chop narxlari ishlatiladi (eski tartib).
+                        <strong>Bu modelning yagona narx manbai shu jadval.</strong> Buyurtma miqdoriga qarab narx o'zgaradi:
+                        masalan 1–10 dona uchun bir narx, 11–50 dona uchun arzonroq narx.<br>
+                        <strong>"Gacha" ustunini bo'sh yoki 0 qoldirsangiz — cheksiz</strong> (ya'ni "va undan yuqori") deb qabul qilinadi.
+                        Oxirgi qatorni shunday yopish tavsiya etiladi.<br>
+                        Saqlash uchun kamida bitta oraliq va undagi mahsulot narxi to'ldirilgan bo'lishi shart.
                     </p>
                     <div style="overflow-x:auto;">
                         <table class="tier-table">
@@ -1538,6 +1540,9 @@
             localStorage.setItem('erp_pens_db_v3', JSON.stringify(pensDatabase));
         }
 
+        // Eski modellarni miqdor oraliqlari jadvaliga ko'chiramiz (bir martalik)
+        migrateLegacySouvenirPrices();
+
         let savedPrices = localStorage.getItem('erp_default_prices');
         if (savedPrices) {
             defaultPrices = { ...defaultPrices, ...JSON.parse(savedPrices) };
@@ -1685,7 +1690,10 @@
         document.getElementById('colorsBox').style.display = isSouvenir ? 'block' : 'none';
         document.getElementById('lentaBox').style.display = (key === 'beyjik') ? 'block' : 'none';
         document.getElementById('detailsBox').style.display = (key === 'naborlar') ? 'block' : 'none';
-        document.getElementById('printPricesBox').style.display = (key === 'naborlar') ? 'none' : 'block';
+        // Suvenirlarda mahsulot narxi ham, chop narxlari ham faqat miqdor oraliqlari jadvalidan olinadi —
+        // shuning uchun bitta qat'iy narx maydonlari umuman ko'rsatilmaydi.
+        document.getElementById('printPricesBox').style.display = isSouvenir ? 'none' : 'block';
+        document.getElementById('basePriceGroup').style.display = isSouvenir ? 'none' : 'flex';
 
         let isNaborType = (key === 'naborlar');
         let printScheme = printTypeSchemes[key] || null;
@@ -2074,8 +2082,8 @@
                     </div>
                     ` : `
                     <div class="badge-container">
-                        ${p.allowUv ? `<span class="badge badge-uv">UF: ${(p.printPrices?.uv || 0).toLocaleString()}</span>` : ''}
-                        ${p.allowSifravoy ? `<span class="badge badge-sifravoy">Sifravoy: ${(p.printPrices?.sifravoy || 0).toLocaleString()}</span>` : ''}
+                        ${p.allowUv ? `<span class="badge badge-uv">UF: ${tierPriceRangeText(p, 'uv')}</span>` : ''}
+                        ${p.allowSifravoy ? `<span class="badge badge-sifravoy">Sifravoy: ${tierPriceRangeText(p, 'sifravoy')}</span>` : ''}
                     </div>
                     `}
                     ${(p.details && p.details.length > 0) ? `
@@ -2366,11 +2374,10 @@
         let t = findTierForQty(list, qty);
         if (!t) return result;
 
+        // Jadval mavjud bo'lsa — yagona manba o'sha. Eski qat'iy narxlarga qaytilmaydi.
         result.tier = t;
-        result.basePrice = t.basePrice > 0 ? t.basePrice : baseFallback;
-        TIER_PRINT_KEYS.forEach(k => {
-            result.printPrices[k] = t.printPrices[k] > 0 ? t.printPrices[k] : (parseFloat(printFallback[k]) || 0);
-        });
+        result.basePrice = t.basePrice;
+        TIER_PRINT_KEYS.forEach(k => { result.printPrices[k] = t.printPrices[k]; });
         return result;
     }
 
@@ -2381,14 +2388,15 @@
         if (!pen) return 0;
         let isNaborlar = (activeProductType === 'naborlar');
         let fallbackBase = parseFloat(pen.basePrice) || 0;
-        let basePrice = (tier && tier.basePrice > 0) ? tier.basePrice
+        // Oraliq berilgan bo'lsa — narx faqat undan olinadi.
+        // Oraliq yo'q (juda eski model) bo'lsagina eski qat'iy narxga qaytamiz.
+        let basePrice = tier ? tier.basePrice
                       : (fallbackBase > 0 ? fallbackBase : (defaultPrices[activeProductType] || 1000));
 
         let printCost = 0;
         if (!isNaborlar) {
             let pp = pen.printPrices || { uv: 5000, sifravoy: 4000 };
-            let tierPP = (tier && tier.printPrices) || {};
-            let basePrint = (tierPP[selectedPrintType] > 0) ? tierPP[selectedPrintType] : (pp[selectedPrintType] || 0);
+            let basePrint = tier ? (tier.printPrices[selectedPrintType] || 0) : (pp[selectedPrintType] || 0);
             let sizeExtra = 0;
             if (hasSizesTypes.includes(activeProductType) && pen.sizes) {
                 sizeExtra = pen.sizes[selectedPrintSize] || 0;
@@ -2450,6 +2458,15 @@
         `;
     }
 
+    // Admin ro'yxatida chop narxini "eng qimmatdan → eng arzongacha" ko'rinishida chiqaramiz
+    function tierPriceRangeText(pen, printKey) {
+        let list = normalizeTierList(pen && pen.tiers);
+        if (list.length === 0) return ((pen && pen.printPrices && pen.printPrices[printKey]) || 0).toLocaleString();
+        let vals = list.map(t => t.printPrices[printKey] || 0);
+        let min = Math.min(...vals), max = Math.max(...vals);
+        return min === max ? min.toLocaleString() : `${max.toLocaleString()} → ${min.toLocaleString()}`;
+    }
+
     // --- Admin formasidagi jadval muharriri ---
 
     function visibleTierPrintKeys() {
@@ -2472,8 +2489,9 @@
         `;
 
         if (tierChipsState.length === 0) {
-            body.innerHTML = `<tr><td colspan="${keys.length + 4}" style="padding:14px 6px; color:var(--text-muted); font-size:0.82rem;">
-                Oraliq qo'shilmagan — model yuqoridagi bitta baza narx bilan hisoblanadi.
+            body.innerHTML = `<tr><td colspan="${keys.length + 4}" style="padding:14px 6px; color:#b45309; font-size:0.82rem;">
+                Hali oraliq qo'shilmagan. Modelni saqlash uchun kamida bitta oraliq kerak —
+                "+ Oraliq qo'shish" yoki "⚡ Namuna oraliqlar" tugmasini bosing.
             </td></tr>`;
             renderTierWarnings();
             return;
@@ -2533,27 +2551,59 @@
             `<div class="tier-warning">⚠️ ${msgs.map(m => `<div>• ${m}</div>`).join('')}</div>`;
     }
 
+    // Yangi qator qo'shganda oxirgi qatordagi narxlarni nusxalaymiz —
+    // admin noldan emas, tayyor raqamdan boshlab tahrirlaydi.
     function addTierRow() {
-        let last = normalizeTierList(tierChipsState).slice(-1)[0];
+        let sorted = normalizeTierList(tierChipsState);
+        let last = sorted.slice(-1)[0];
         let nextFrom = last ? (tierUpper(last) === Infinity ? last.from + 1 : tierUpper(last) + 1) : 1;
         tierChipsState.push({
             from: nextFrom, to: 0,
-            basePrice: parseFloat(document.getElementById('newPenPrice')?.value) || 0,
-            printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
+            basePrice: last ? last.basePrice : 0,
+            printPrices: last ? { ...last.printPrices } : { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
         });
         renderTierEditor();
     }
 
     function fillDefaultTiers() {
         if (tierChipsState.length > 0 && !confirm("Mavjud oraliqlar o'chib, o'rniga namuna oraliqlar qo'yiladi. Davom etamizmi?")) return;
-        let base = parseFloat(document.getElementById('newPenPrice')?.value) || 0;
+        let first = normalizeTierList(tierChipsState)[0];
+        let base = first ? first.basePrice : 0;
+        let pp = first ? first.printPrices : { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 };
         let ranges = [[1, 10], [11, 50], [51, 100], [101, 200], [201, 500], [501, 0]];
         tierChipsState = ranges.map(([from, to]) => ({
-            from, to, basePrice: base,
-            printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
+            from, to, basePrice: base, printPrices: { ...pp }
         }));
         renderTierEditor();
         showToast("📊 Namuna oraliqlar qo'yildi — narxlarni to'ldiring!");
+    }
+
+    // Eski modellarda (oraliq jadvali paydo bo'lishidan oldin saqlangan) narx
+    // bitta qat'iy maydonda edi. Ularni bir martalik "1+ dona" oralig'iga ko'chiramiz,
+    // shunda hech qaysi model narxsiz qolib ketmaydi.
+    function migrateLegacySouvenirPrices() {
+        let changed = false;
+        souvenirKeys.forEach(key => {
+            let list = pensDatabase[key];
+            if (!Array.isArray(list)) return;
+            list.forEach(pen => {
+                if (!pen || normalizeTierList(pen.tiers).length > 0) return;
+                let pp = pen.printPrices || {};
+                pen.tiers = [{
+                    from: 1, to: 0,
+                    basePrice: parseFloat(pen.basePrice) || 0,
+                    printPrices: {
+                        uv: parseFloat(pp.uv) || 0,
+                        sifravoy: parseFloat(pp.sifravoy) || 0,
+                        dtf: parseFloat(pp.dtf) || 0,
+                        gravirovka: parseFloat(pp.gravirovka) || 0
+                    }
+                }];
+                changed = true;
+            });
+        });
+        if (changed) localStorage.setItem('erp_pens_db_v3', JSON.stringify(pensDatabase));
+        return changed;
     }
 
     function updateTier(idx, field, value) {
@@ -2628,6 +2678,22 @@
             return;
         }
 
+        // Suvenirlarda narx faqat oraliq jadvalidan olinadi — demak jadval bo'sh bo'lmasligi kerak
+        let isSouvenirSave = souvenirKeys.includes(currentManagingProduct);
+        let tiers = normalizeTierList(tierChipsState);
+
+        if (isSouvenirSave) {
+            if (tiers.length === 0) {
+                showToast("⚠️ Kamida bitta miqdor oralig'i qo'shing — narx shu jadvaldan olinadi!");
+                return;
+            }
+            let bosh = tiers.find(t => !(t.basePrice > 0));
+            if (bosh) {
+                showToast(`⚠️ "${tierLabel(bosh)}" oralig'ida mahsulot narxi kiritilmagan!`);
+                return;
+            }
+        }
+
         let image = '';
         let fileInput = document.getElementById('newPenFile');
 
@@ -2639,12 +2705,17 @@
             image = 'https://via.placeholder.com/150?text=Model';
         }
 
-        let tiers = normalizeTierList(tierChipsState);
+        // basePrice / printPrices maydonlari eski kod va hisobotlar uchun saqlanadi,
+        // lekin suvenirlarda ular birinchi oraliqdan avtomatik to'ldiriladi.
+        let legacyBase = isSouvenirSave ? tiers[0].basePrice : price;
+        let legacyPrint = isSouvenirSave
+            ? { ...tiers[0].printPrices }
+            : { uv: pUv, sifravoy: pSifravoy, dtf: pDtf, gravirovka: pGravirovka };
 
         let penData = {
-            id, name, basePrice: price, image,
+            id, name, basePrice: legacyBase, image,
             allowUv, allowSifravoy, allowDtf, allowGravirovka,
-            printPrices: { uv: pUv, sifravoy: pSifravoy, dtf: pDtf, gravirovka: pGravirovka },
+            printPrices: legacyPrint,
             sizes: { small: pSmall, medium: pMedium, large: pLarge },
             colors: colors,
             lentas: lentas,
