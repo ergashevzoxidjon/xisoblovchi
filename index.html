@@ -587,6 +587,33 @@
         .tier-preview-table th { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
         .tier-preview-table tr.tier-active td { background: #eef2ff; font-weight: 700; color: #4338ca; }
 
+        /* --- Textile: material / pechat o'lchami kartochkalari --- */
+        .tx-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+        .tx-item-head { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px; flex-wrap: wrap; }
+        .tx-item-head .form-group { flex: 1; min-width: 200px; }
+        .tx-item-actions { display: flex; gap: 8px; }
+        .tx-btn {
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            border-radius: 6px;
+            height: 34px;
+            padding: 0 12px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .tx-btn:hover { background: #eef2ff; color: #4338ca; }
+        .tx-btn.danger { border-color: #fecaca; background: #fef2f2; color: #dc2626; }
+        .tx-btn.danger:hover { background: #fee2e2; }
+        .tx-empty { color: var(--text-muted); font-size: 0.82rem; padding: 10px 2px; }
+
         .form-actions {
             display: flex;
             gap: 12px;
@@ -1067,6 +1094,33 @@
                 </div>
             </div>
 
+            <!-- TEXTILE ADMIN PANEL BLOKI -->
+            <div id="adminTextileBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🧵 Materiallar (mato turlari)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height:1.5;">
+                        Kiyimning o'zi qancha turishi shu yerda belgilanadi. Har bir materialning <strong>o'z tiraj jadvali</strong> bor —
+                        tiraj oshgani sari dona narxi tushadi. "Gacha" ustunini 0 qoldirsangiz — cheksiz.
+                    </p>
+                    <div id="textileMaterialsEditor"></div>
+                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="addTextileItem('materials')">+ Material qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🖨️ Pechat o'lchamlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height:1.5;">
+                        Pechat narxi o'lchamga qarab o'zgaradi. Istalgan nom bilan o'lcham qo'shishingiz mumkin
+                        (A4, A3, "10x10 sm", "Orqa to'liq"). Hisoblashda mijoz <strong>oldi va orqa</strong> tomon uchun alohida o'lcham tanlaydi.
+                    </p>
+                    <div id="textilePrintSizesEditor"></div>
+                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="addTextileItem('printSizes')">+ O'lcham qo'shish</button>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-success" onclick="saveTextileConfig()">💾 Textile sozlamalarini saqlash</button>
+                </div>
+            </div>
+
             <div class="add-pen-card" id="adminModelAddForm">
                 <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
                 <input type="hidden" id="editPenIndex" value="-1">
@@ -1301,6 +1355,7 @@
     };
 
     const souvenirKeys = allCategories.souvenir.map(item => item.key);
+    const textileKeys = allCategories.textile.map(item => item.key);
     const reklamaBanTypes = ['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'];
     const hasSizesTypes = []; // razmerlar (Kichik/O'rta/Katta) bo'yicha ustama qo'llaniladigan turlar (hozircha hech biri ishlatmaydi)
     const oneSidedOnlySouvenirs = ['plagetkalar', 'naborlar', 'statuetka', 'soat', 'kardxolder', 'zontik']; // faqat bir tomonlama pechat qilinadigan turlar (ikki tomonlama variant ko'rsatilmaydi)
@@ -1548,6 +1603,17 @@
             defaultPrices = { ...defaultPrices, ...JSON.parse(savedPrices) };
         }
 
+        // Textile bazasi: material va pechat o'lchamlari.
+        // defaultPrices yuklangandan KEYIN turishi shart — namuna narxlar shundan olinadi.
+        let savedTextile = localStorage.getItem('erp_textile_db');
+        textileDatabase = savedTextile ? JSON.parse(savedTextile) : {};
+        let missingTextile = textileKeys.filter(k => !textileDatabase[k] || !(textileDatabase[k].materials || []).length);
+        if (missingTextile.length > 0) {
+            let defTx = getDefaultTextileDb();
+            missingTextile.forEach(k => { textileDatabase[k] = defTx[k]; });
+            localStorage.setItem('erp_textile_db', JSON.stringify(textileDatabase));
+        }
+
         let savedReklamaExtra = localStorage.getItem('erp_reklama_extra_prices');
         if (savedReklamaExtra) {
             reklamaExtraPrices = { ...reklamaExtraPrices, ...JSON.parse(savedReklamaExtra) };
@@ -1655,16 +1721,22 @@
         let isOfset = (key === 'ofset_pechat');
         let isBloknot = (key === 'bloknot');
         let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot;
+        let isTextile = textileKeys.includes(key);
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
         document.getElementById('digitalAdminPanelBox').style.display = isDigital ? 'block' : 'none';
         document.getElementById('poligrafiyaSizeAdminBox').style.display = isPoligrafiya ? 'block' : 'none';
         document.getElementById('bloknotAdminBox').style.display = isBloknot ? 'block' : 'none';
+        document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
 
-        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot;
+        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isTextile;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
+        if (isTextile) {
+            loadTextileEditState(key);
+            return;
+        }
         if (isOfset) {
             renderAdminOfsetPapersMatrix();
             loadOfsetMachineSettingsToUI();
@@ -2450,6 +2522,300 @@
                                 <td>${tierLabel(t)}${isActive ? ' ✓' : ''}</td>
                                 <td style="text-align:right;">${unit.toLocaleString()} so'm</td>
                                 <td style="text-align:right;">${(unit * t.from).toLocaleString()} so'm</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    /* =========================================================================
+       TEXTILE: material + pechat o'lchami, ikkalasi ham tirajga bog'liq
+       Tuzilma:  textileDatabase[key] = { materials: [...], printSizes: [...] }
+       Har bir element: { id, name, tiers: [ {from, to, basePrice} ] }
+       Dona narxi = material(tiraj) + old tomon o'lchami(tiraj) + orqa tomon o'lchami(tiraj)
+       ========================================================================= */
+
+    let textileDatabase = {};
+    let textileEditState = { materials: [], printSizes: [] };
+
+    function txId(prefix) {
+        return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+    }
+
+    // Berilgan baza narxdan standart tiraj zinapoyasini yasaymiz
+    function txDefaultTiers(base) {
+        return [
+            { from: 1, to: 10, mul: 1.00 },
+            { from: 11, to: 50, mul: 0.92 },
+            { from: 51, to: 100, mul: 0.85 },
+            { from: 101, to: 200, mul: 0.79 },
+            { from: 201, to: 500, mul: 0.74 },
+            { from: 501, to: 0, mul: 0.70 }
+        ].map(r => ({
+            from: r.from, to: r.to,
+            basePrice: Math.round(base * r.mul / 500) * 500,
+            printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
+        }));
+    }
+
+    function getDefaultTextileDb() {
+        const db = {};
+        textileKeys.forEach(key => {
+            let base = defaultPrices[key] || 45000;
+            db[key] = {
+                materials: [
+                    { id: txId('MAT'), name: 'Paxta 100% (standart)', tiers: txDefaultTiers(base) },
+                    { id: txId('MAT'), name: 'Paxta/Polyester (peniye)', tiers: txDefaultTiers(base * 1.15) },
+                    { id: txId('MAT'), name: 'Polyester (sport)', tiers: txDefaultTiers(base * 0.9) }
+                ],
+                printSizes: [
+                    { id: txId('SIZ'), name: 'A5 (kichik)', tiers: txDefaultTiers(15000) },
+                    { id: txId('SIZ'), name: 'A4 (standart)', tiers: txDefaultTiers(25000) },
+                    { id: txId('SIZ'), name: 'A3 (katta)', tiers: txDefaultTiers(40000) }
+                ]
+            };
+        });
+        return db;
+    }
+
+    function normalizeTextileItem(it, prefix) {
+        it = it || {};
+        return {
+            id: it.id || txId(prefix),
+            name: (it.name || '').toString(),
+            tiers: normalizeTierList(it.tiers)
+        };
+    }
+
+    function getTextileConfig(key) {
+        let cfg = textileDatabase[key] || {};
+        return {
+            materials: (cfg.materials || []).map(m => normalizeTextileItem(m, 'MAT')),
+            printSizes: (cfg.printSizes || []).map(s => normalizeTextileItem(s, 'SIZ'))
+        };
+    }
+
+    // Element (material yoki o'lcham) uchun berilgan tirajdagi narxi
+    function textileItemPrice(item, qty) {
+        if (!item) return 0;
+        let t = findTierForQty(item.tiers, qty);
+        return t ? t.basePrice : 0;
+    }
+
+    // --- Admin muharriri ---
+
+    function loadTextileEditState(key) {
+        let cfg = getTextileConfig(key);
+        textileEditState = {
+            materials: JSON.parse(JSON.stringify(cfg.materials)),
+            printSizes: JSON.parse(JSON.stringify(cfg.printSizes))
+        };
+        renderTextileEditor('materials');
+        renderTextileEditor('printSizes');
+    }
+
+    function textileEditorContainer(kind) {
+        return document.getElementById(kind === 'materials' ? 'textileMaterialsEditor' : 'textilePrintSizesEditor');
+    }
+
+    function renderTextileEditor(kind) {
+        const box = textileEditorContainer(kind);
+        if (!box) return;
+        const list = textileEditState[kind] || [];
+        const nomi = kind === 'materials' ? 'Material nomi' : "O'lcham nomi";
+        const placeholder = kind === 'materials' ? 'Masalan: Paxta 100%' : 'Masalan: A4 yoki 10x10 sm';
+
+        if (list.length === 0) {
+            box.innerHTML = `<div class="tx-empty">Hali qo'shilmagan. Pastdagi tugmani bosing.</div>`;
+            return;
+        }
+
+        box.innerHTML = list.map((it, i) => `
+            <div class="tx-item">
+                <div class="tx-item-head">
+                    <div class="form-group">
+                        <label>${nomi}:</label>
+                        <input type="text" value="${(it.name || '').replace(/"/g, '&quot;')}" placeholder="${placeholder}"
+                               oninput="updateTextileItemName('${kind}', ${i}, this.value)">
+                    </div>
+                    <div class="tx-item-actions">
+                        <button type="button" class="tx-btn" onclick="addTextileTier('${kind}', ${i})">+ Oraliq</button>
+                        <button type="button" class="tx-btn" onclick="fillTextileDefaultTiers('${kind}', ${i})">⚡ Namuna oraliqlar</button>
+                        <button type="button" class="tx-btn danger" onclick="removeTextileItem('${kind}', ${i})">🗑️ O'chirish</button>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="tier-table">
+                        <thead><tr>
+                            <th style="width:90px;">Dan (dona)</th>
+                            <th style="width:90px;">Gacha</th>
+                            <th style="width:140px;">Narxi (so'm)</th>
+                            <th style="width:70px;"></th>
+                        </tr></thead>
+                        <tbody>
+                            ${(it.tiers || []).length === 0
+                                ? `<tr><td colspan="4" style="padding:10px 4px; color:#b45309; font-size:0.8rem;">Oraliq yo'q — narx 0 bo'lib qoladi. "+ Oraliq" tugmasini bosing.</td></tr>`
+                                : it.tiers.map((t, ti) => `
+                                    <tr>
+                                        <td><input type="number" min="1" value="${t.from}" oninput="updateTextileTier('${kind}', ${i}, ${ti}, 'from', this.value)"></td>
+                                        <td><input type="number" min="0" value="${t.to}" placeholder="∞" oninput="updateTextileTier('${kind}', ${i}, ${ti}, 'to', this.value)"></td>
+                                        <td><input type="number" min="0" value="${t.basePrice}" oninput="updateTextileTier('${kind}', ${i}, ${ti}, 'basePrice', this.value)"></td>
+                                        <td><button type="button" class="tier-remove" onclick="removeTextileTier('${kind}', ${i}, ${ti})">✕</button></td>
+                                    </tr>
+                                `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${(() => {
+                    let msgs = tierValidationMessages(it.tiers);
+                    return msgs.length === 0 ? '' : `<div class="tier-warning">⚠️ ${msgs.map(m => `<div>• ${m}</div>`).join('')}</div>`;
+                })()}
+            </div>
+        `).join('');
+    }
+
+    function addTextileItem(kind) {
+        let base = kind === 'materials' ? (defaultPrices[currentManagingProduct] || 45000) : 25000;
+        textileEditState[kind].push({
+            id: txId(kind === 'materials' ? 'MAT' : 'SIZ'),
+            name: '',
+            tiers: txDefaultTiers(base)
+        });
+        renderTextileEditor(kind);
+    }
+
+    function removeTextileItem(kind, idx) {
+        let it = textileEditState[kind][idx];
+        if (it && !confirm(`"${it.name || 'Nomsiz'}" o'chirilsinmi?`)) return;
+        textileEditState[kind].splice(idx, 1);
+        renderTextileEditor(kind);
+    }
+
+    function updateTextileItemName(kind, idx, value) {
+        if (!textileEditState[kind][idx]) return;
+        textileEditState[kind][idx].name = value;
+    }
+
+    function addTextileTier(kind, idx) {
+        let it = textileEditState[kind][idx];
+        if (!it) return;
+        let sorted = normalizeTierList(it.tiers);
+        let last = sorted.slice(-1)[0];
+        it.tiers = sorted;
+        it.tiers.push({
+            from: last ? (tierUpper(last) === Infinity ? last.from + 1 : tierUpper(last) + 1) : 1,
+            to: 0,
+            basePrice: last ? last.basePrice : 0,
+            printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
+        });
+        renderTextileEditor(kind);
+    }
+
+    function removeTextileTier(kind, idx, tIdx) {
+        let it = textileEditState[kind][idx];
+        if (!it) return;
+        it.tiers.splice(tIdx, 1);
+        renderTextileEditor(kind);
+    }
+
+    function updateTextileTier(kind, idx, tIdx, field, value) {
+        let it = textileEditState[kind][idx];
+        if (!it || !it.tiers[tIdx]) return;
+        it.tiers[tIdx][field] = (field === 'basePrice') ? (parseFloat(value) || 0) : (parseInt(value) || 0);
+        // Faqat ogohlantirishlarni yangilaymiz — butun jadvalni qayta chizsak, kursor sakraydi
+        renderTextileWarningsOnly(kind, idx);
+    }
+
+    function renderTextileWarningsOnly(kind, idx) {
+        const box = textileEditorContainer(kind);
+        if (!box) return;
+        const card = box.querySelectorAll('.tx-item')[idx];
+        if (!card) return;
+        let old = card.querySelector('.tier-warning');
+        let msgs = tierValidationMessages(textileEditState[kind][idx].tiers);
+        if (old) old.remove();
+        if (msgs.length > 0) {
+            let div = document.createElement('div');
+            div.className = 'tier-warning';
+            div.innerHTML = `⚠️ ${msgs.map(m => `<div>• ${m}</div>`).join('')}`;
+            card.appendChild(div);
+        }
+    }
+
+    function fillTextileDefaultTiers(kind, idx) {
+        let it = textileEditState[kind][idx];
+        if (!it) return;
+        if ((it.tiers || []).length > 0 && !confirm("Mavjud oraliqlar o'chib, o'rniga namuna oraliqlar qo'yiladi. Davom etamizmi?")) return;
+        let first = normalizeTierList(it.tiers)[0];
+        it.tiers = txDefaultTiers(first ? first.basePrice : (kind === 'materials' ? (defaultPrices[currentManagingProduct] || 45000) : 25000));
+        renderTextileEditor(kind);
+    }
+
+    function saveTextileConfig() {
+        if (!currentManagingProduct) return;
+
+        for (let kind of ['materials', 'printSizes']) {
+            for (let it of textileEditState[kind]) {
+                if (!it.name || !it.name.trim()) {
+                    showToast(kind === 'materials' ? "⚠️ Har bir materialning nomi bo'lishi kerak!" : "⚠️ Har bir o'lchamning nomi bo'lishi kerak!");
+                    return;
+                }
+                if (normalizeTierList(it.tiers).length === 0) {
+                    showToast(`⚠️ "${it.name}" uchun kamida bitta oraliq kiriting!`);
+                    return;
+                }
+            }
+        }
+        if (textileEditState.materials.length === 0) {
+            showToast("⚠️ Kamida bitta material qo'shing!");
+            return;
+        }
+
+        textileDatabase[currentManagingProduct] = {
+            materials: textileEditState.materials.map(m => normalizeTextileItem(m, 'MAT')),
+            printSizes: textileEditState.printSizes.map(s => normalizeTextileItem(s, 'SIZ'))
+        };
+        localStorage.setItem('erp_textile_db', JSON.stringify(textileDatabase));
+        loadTextileEditState(currentManagingProduct);
+        showToast("💾 Textile sozlamalari saqlandi!");
+    }
+
+    // --- Kalkulyator uchun jadval ko'rinishi ---
+    // Material va o'lchamlarning oraliq chegaralari har xil bo'lishi mumkin,
+    // shuning uchun barcha chegaralarni birlashtirib chiqaramiz.
+    function renderTextileTierPreview(mat, front, back, qty, marginPercent) {
+        const box = document.getElementById('tierPreviewBox');
+        if (!box) return;
+
+        let items = [mat, front, back].filter(Boolean);
+        if (items.length === 0) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+        let points = new Set();
+        items.forEach(it => normalizeTierList(it.tiers).forEach(t => points.add(t.from)));
+        let sorted = [...points].sort((a, b) => a - b);
+        if (sorted.length <= 1) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+        let m = 1 + ((parseFloat(marginPercent) || 0) / 100);
+        let n = parseInt(qty) || 1;
+
+        box.style.display = 'block';
+        box.innerHTML = `
+            <div style="font-size:0.85rem; font-weight:700; color:var(--primary); margin-bottom:4px;">📊 Miqdor bo'yicha narx jadvali</div>
+            <div style="font-size:0.76rem; color:var(--text-muted);">Material va pechat narxi birgalikda hisoblangan.</div>
+            <table class="tier-preview-table">
+                <thead><tr><th>Miqdor</th><th style="text-align:right;">Dona narxi</th><th style="text-align:right;">Eng kam miqdorda jami</th></tr></thead>
+                <tbody>
+                    ${sorted.map((from, i) => {
+                        let to = (i < sorted.length - 1) ? sorted[i + 1] - 1 : 0;
+                        let unit = Math.round(items.reduce((s, it) => s + textileItemPrice(it, from), 0) * m);
+                        let isActive = n >= from && (to === 0 || n <= to);
+                        return `
+                            <tr class="${isActive ? 'tier-active' : ''}">
+                                <td>${tierLabel({ from, to })}${isActive ? ' ✓' : ''}</td>
+                                <td style="text-align:right;">${unit.toLocaleString()} so'm</td>
+                                <td style="text-align:right;">${(unit * from).toLocaleString()} so'm</td>
                             </tr>
                         `;
                     }).join('')}
@@ -3266,28 +3632,41 @@
                     <div class="result-item"><span>Birlik narxi:</span> <strong id="resUnitPrice">0 so'm</strong></div>
                     <div class="result-item result-total"><span>Jami summa:</span> <span id="resTotalPrice">0 so'm</span></div>
                 </div>
+                <div id="tierPreviewBox" style="display:none; margin-top:16px;"></div>
                 <div style="margin-top: 20px;">
                     <button class="btn" style="width: 100%;" onclick="copyResult()">📋 Natijani nusxalash</button>
                 </div>
             </div>
         `;
 
-        if (['futbolka', 'kepka', 'svitshot', 'xudi', 'jiletka', 'shoper'].includes(type)) {
+        if (textileKeys.includes(type)) {
+            let txCfg = getTextileConfig(type);
+            let matOptions = txCfg.materials.map((m, i) =>
+                `<option value="${m.id}" ${i === 0 ? 'selected' : ''}>${m.name}</option>`).join('');
+            let sizeOptions = txCfg.printSizes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            // Odatda oldi tomonga pechat qilinadi — birinchi o'lcham standart tanlangan bo'ladi
+            let frontOptions = txCfg.printSizes.map((s, i) =>
+                `<option value="${s.id}" ${i === 0 ? 'selected' : ''}>${s.name}</option>`).join('');
+
             html = `
                 <div class="form-group" style="margin-bottom:12px;">
-                    <label>Pechat Formati:</label>
-                    <select id="inpPrintSize" onchange="calculate()">
-                        <option value="0">Pechatsiz (Faqat kiyim)</option>
-                        <option value="15000">A5 Formati (Kichik)</option>
-                        <option value="25000" selected>A4 Formati (Standart)</option>
-                        <option value="40000">A3 Formati (Katta)</option>
+                    <label>Material (mato turi):</label>
+                    <select id="inpTextileMaterial" onchange="calculate()">
+                        ${matOptions || '<option value="">Material qo\'shilmagan</option>'}
                     </select>
                 </div>
                 <div class="form-group" style="margin-bottom:12px;">
-                    <label>Pechat Tomoni:</label>
-                    <select id="inpSides" onchange="calculate()">
-                        <option value="1">1 tomonlama</option>
-                        <option value="1.8">2 tomonlama (Oldi-orqa)</option>
+                    <label>Old tomon pechati:</label>
+                    <select id="inpTextileFront" onchange="calculate()">
+                        <option value="">Pechatsiz</option>
+                        ${frontOptions}
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Orqa tomon pechati:</label>
+                    <select id="inpTextileBack" onchange="calculate()">
+                        <option value="" selected>Pechatsiz</option>
+                        ${sizeOptions}
                     </select>
                 </div>
                 <div class="form-group">
@@ -4815,11 +5194,30 @@
 
                 if (extraParts.length > 0) details += ` | ${extraParts.join(', ')}`;
             }
-            else if (['futbolka', 'kepka', 'svitshot', 'xudi', 'jiletka', 'shoper'].includes(activeProductType)) {
-                let printPrice = parseFloat(document.getElementById('inpPrintSize')?.value || 0);
-                let sideFactor = parseFloat(document.getElementById('inpSides')?.value || 1);
-                baseUnitPrice = baseCost + (printPrice * sideFactor);
-                details = "Textile tayyorlash + Pechat";
+            else if (textileKeys.includes(activeProductType)) {
+                let cfg = getTextileConfig(activeProductType);
+                let matId = document.getElementById('inpTextileMaterial')?.value || '';
+                let frontId = document.getElementById('inpTextileFront')?.value || '';
+                let backId = document.getElementById('inpTextileBack')?.value || '';
+
+                let mat = cfg.materials.find(m => m.id === matId) || cfg.materials[0] || null;
+                let front = cfg.printSizes.find(s => s.id === frontId) || null;
+                let back = cfg.printSizes.find(s => s.id === backId) || null;
+
+                let matCost = textileItemPrice(mat, qty);
+                let frontCost = textileItemPrice(front, qty);
+                let backCost = textileItemPrice(back, qty);
+
+                baseUnitPrice = matCost + frontCost + backCost;
+
+                let parts = [mat ? mat.name : 'Material tanlanmagan'];
+                parts.push(front ? `Oldi: ${front.name}` : 'Oldi: pechatsiz');
+                parts.push(back ? `Orqa: ${back.name}` : 'Orqa: pechatsiz');
+                let activeT = mat ? findTierForQty(mat.tiers, qty) : null;
+                if (activeT) parts.push(`Oraliq: ${tierLabel(activeT)}`);
+                details = parts.join(' | ');
+
+                renderTextileTierPreview(mat, front, back, qty, marginPercent);
             }
             else if (activeProductType === 'bloknot') {
                 let res = calculateBloknot(qty);
