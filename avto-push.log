@@ -740,3 +740,7 @@ System.Management.Automation.RemoteException
 Another git process seems to be running in this repository, or the lock file may be stale
 [04.09.2026 00:58:03] O'zgarish sezildi, 60 soniya kutilmoqda...
 [04.09.2026 00:59:04] O'zgarish topildi: 12 ta fayl yangilandi - 04.09.2026 00:59
+[04.09.2026 00:59:04] Commit qilindi.
+[04.09.2026 00:59:08] GitHub ga yuklandi.
+[04.09.2026 00:59:23] O'zgarish sezildi, 60 soniya kutilmoqda...
+[04.09.2026 01:00:24] O'zgarish topildi: avto-push.log yangilandi - 04.09.2026 01:00
