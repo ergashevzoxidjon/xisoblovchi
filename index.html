@@ -13,7 +13,10 @@
 <div class="container">
     <div class="header">
         <h1><svg class="regmark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="10.5" stroke="var(--ink)" stroke-width="2"/><line x1="13" y1="0" x2="13" y2="26" stroke="var(--ink)" stroke-width="1.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--ink)" stroke-width="1.4"/><circle cx="13" cy="13" r="3.4" fill="var(--magenta)"/></svg> Poligrafiya & Suvenir ERP <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0; text-transform: none;">v3.8</span></h1>
-        <button class="btn btn-secondary" onclick="openAdminModal()">⚙️ Admin Panel</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="btn btn-warning" id="quoteCartBtn" onclick="handleQuoteButtonClick()">🧾 Tijoriy taklif<span id="quoteCartBadge" class="quote-badge" style="display:none;">0</span></button>
+            <button class="btn btn-secondary" onclick="openAdminModal()">⚙️ Admin Panel</button>
+        </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
@@ -579,6 +582,35 @@
                 </table>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- TIJORIY TAKLIF EKRANI -->
+    <div id="quoteScreen" class="screen">
+        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <button class="btn btn-outline back-btn" style="margin-bottom:0;" onclick="showScreen('selectionScreen')">⬅️ Ortga qaytish</button>
+            <button class="btn btn-success" onclick="window.print()">⬇️ Yuklab olish (PDF)</button>
+        </div>
+        <div id="quoteOfferContent"></div>
+    </div>
+</div>
+
+<!-- TIJORIY TAKLIF SAVATCHASI -->
+<div id="quoteCartOverlay" class="quote-cart-overlay" onclick="closeQuoteCart()"></div>
+<div id="quoteCartPanel" class="quote-cart-panel">
+    <div class="quote-cart-header">
+        <h3>🧾 Tijoriy taklif savatchasi</h3>
+        <button class="quote-cart-close" onclick="closeQuoteCart()">✕</button>
+    </div>
+    <div id="quoteCartItems" class="quote-cart-items"></div>
+    <div class="quote-cart-footer">
+        <div class="quote-cart-total-row">
+            <span>Jami summa:</span>
+            <strong id="quoteCartGrandTotal">0 so'm</strong>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline" style="flex:1;" onclick="clearQuoteCart()">🗑️ Tozalash</button>
+            <button class="btn btn-success" id="quoteGenerateBtn" style="flex:2;" onclick="generateQuoteOffer()" disabled>🧾 Tijoriy taklif yaratish</button>
         </div>
     </div>
 </div>
