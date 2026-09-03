@@ -71,8 +71,10 @@
     let activeProductType = '';
     let currentManagingProduct = null;
     let currentCalcResult = {};
+    let quoteCart = [];
 
     function init() {
+        loadQuoteCart();
         let savedPens = localStorage.getItem('erp_pens_db_v3');
         pensDatabase = savedPens ? JSON.parse(savedPens) : getDefaultPensDatabase();
 
@@ -185,6 +187,185 @@
     function showScreen(screenId) {
         document.querySelectorAll('.screen, #selectionScreen').forEach(el => el.style.display = 'none');
         document.getElementById(screenId).style.display = 'block';
+    }
+
+    // ====================== TIJORIY TAKLIF (SAVATCHA) ======================
+    function loadQuoteCart() {
+        try {
+            let saved = localStorage.getItem('erp_quote_cart');
+            quoteCart = saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            quoteCart = [];
+        }
+        updateQuoteCartBadge();
+    }
+
+    function saveQuoteCart() {
+        try { localStorage.setItem('erp_quote_cart', JSON.stringify(quoteCart)); } catch (e) {}
+    }
+
+    function updateQuoteCartBadge() {
+        let badge = document.getElementById('quoteCartBadge');
+        if (!badge) return;
+        if (quoteCart.length > 0) {
+            badge.style.display = 'inline-flex';
+            badge.innerText = quoteCart.length;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function getProductDisplayName(type) {
+        for (let cat in allCategories) {
+            let found = allCategories[cat].find(p => p.key === type);
+            if (found) return { name: found.name, icon: found.icon };
+        }
+        return { name: (currentCalcResult && currentCalcResult.name) || type, icon: '📦' };
+    }
+
+    function handleQuoteButtonClick() {
+        let calcEl = document.getElementById('calcScreen');
+        let onCalcScreen = calcEl && calcEl.style.display !== 'none';
+        if (onCalcScreen && currentCalcResult && currentCalcResult.totalPrice > 0) {
+            addToQuoteCart();
+        }
+        openQuoteCart();
+    }
+
+    function addToQuoteCart() {
+        if (!currentCalcResult || !currentCalcResult.totalPrice) {
+            showToast("⚠️ Avval mahsulotni hisoblang!");
+            return;
+        }
+        let info = getProductDisplayName(activeProductType);
+        quoteCart.push({
+            cartId: 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+            type: activeProductType,
+            name: info.name,
+            icon: info.icon,
+            details: currentCalcResult.details,
+            qty: currentCalcResult.qty,
+            unitPrice: currentCalcResult.unitPrice,
+            totalPrice: currentCalcResult.totalPrice
+        });
+        saveQuoteCart();
+        updateQuoteCartBadge();
+        renderQuoteCartItems();
+        showToast("✅ Tijoriy taklifga qo'shildi: " + info.name);
+    }
+
+    function removeFromQuoteCart(cartId) {
+        quoteCart = quoteCart.filter(item => item.cartId !== cartId);
+        saveQuoteCart();
+        updateQuoteCartBadge();
+        renderQuoteCartItems();
+    }
+
+    function clearQuoteCart() {
+        if (quoteCart.length === 0) return;
+        if (!confirm("Savatchani butunlay tozalashni tasdiqlaysizmi?")) return;
+        quoteCart = [];
+        saveQuoteCart();
+        updateQuoteCartBadge();
+        renderQuoteCartItems();
+    }
+
+    function renderQuoteCartItems() {
+        let container = document.getElementById('quoteCartItems');
+        if (!container) return;
+
+        if (quoteCart.length === 0) {
+            container.innerHTML = `<div class="quote-cart-empty">Savatcha bo'sh.<br>Mahsulotni hisoblab, "🧾 Tijoriy taklif" tugmasini bosing.</div>`;
+        } else {
+            container.innerHTML = quoteCart.map(item => `
+                <div class="quote-cart-item">
+                    <div class="quote-cart-item-icon">${item.icon}</div>
+                    <div class="quote-cart-item-info">
+                        <div class="quote-cart-item-name">${item.name}</div>
+                        <div class="quote-cart-item-details">${item.details}</div>
+                        <div class="quote-cart-item-meta">${item.qty.toLocaleString()} dona × ${item.unitPrice.toLocaleString()} so'm</div>
+                    </div>
+                    <div class="quote-cart-item-total">${item.totalPrice.toLocaleString()} so'm</div>
+                    <button class="quote-cart-item-remove" onclick="removeFromQuoteCart('${item.cartId}')">✕</button>
+                </div>
+            `).join('');
+        }
+
+        let grandTotal = quoteCart.reduce((sum, item) => sum + item.totalPrice, 0);
+        let totalEl = document.getElementById('quoteCartGrandTotal');
+        if (totalEl) totalEl.innerText = grandTotal.toLocaleString() + " so'm";
+
+        let genBtn = document.getElementById('quoteGenerateBtn');
+        if (genBtn) genBtn.disabled = quoteCart.length === 0;
+    }
+
+    function openQuoteCart() {
+        renderQuoteCartItems();
+        let panel = document.getElementById('quoteCartPanel');
+        let overlay = document.getElementById('quoteCartOverlay');
+        if (panel) panel.classList.add('open');
+        if (overlay) overlay.classList.add('open');
+    }
+
+    function closeQuoteCart() {
+        let panel = document.getElementById('quoteCartPanel');
+        let overlay = document.getElementById('quoteCartOverlay');
+        if (panel) panel.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+    }
+
+    function generateQuoteOffer() {
+        if (quoteCart.length === 0) {
+            showToast("⚠️ Savatcha bo'sh!");
+            return;
+        }
+
+        let grandTotal = quoteCart.reduce((sum, item) => sum + item.totalPrice, 0);
+        let todayStr = new Date().toLocaleDateString('uz-UZ');
+
+        let rowsHtml = quoteCart.map((item, idx) => `
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${item.icon} ${item.name}<div class="quote-offer-details">${item.details}</div></td>
+                <td>${item.qty.toLocaleString()} dona</td>
+                <td>${item.unitPrice.toLocaleString()} so'm</td>
+                <td>${item.totalPrice.toLocaleString()} so'm</td>
+            </tr>
+        `).join('');
+
+        document.getElementById('quoteOfferContent').innerHTML = `
+            <div class="quote-offer-doc">
+                <div class="quote-offer-header">
+                    <div>
+                        <div class="quote-offer-brand">Poligrafiya & Suvenir ERP</div>
+                        <div class="quote-offer-sub">Tijoriy taklif</div>
+                    </div>
+                    <div class="quote-offer-date">${todayStr}</div>
+                </div>
+                <div class="quote-offer-client">
+                    <label>Mijoz nomi:</label>
+                    <input type="text" id="quoteClientName" placeholder="Kompaniya yoki mijoz nomini kiriting (ixtiyoriy)">
+                </div>
+                <table class="quote-offer-table">
+                    <thead>
+                        <tr><th>#</th><th>Mahsulot</th><th>Miqdor</th><th>Birlik narxi</th><th>Summa</th></tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                    <tfoot>
+                        <tr class="quote-offer-grand-total-row">
+                            <td colspan="4">Umumiy summa:</td>
+                            <td>${grandTotal.toLocaleString()} so'm</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="quote-offer-footer">
+                    Taklif amal qilish muddati: 7 kun. Narxlar bahoga qarab o'zgarishi mumkin.
+                </div>
+            </div>
+        `;
+
+        showScreen('quoteScreen');
+        closeQuoteCart();
     }
 
     function openAdminModal() {
