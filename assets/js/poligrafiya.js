@@ -790,9 +790,27 @@ function generateFormHtml_poligrafiya(type) {
     return html;
 }
 
+    // Adad chegirma koeffitsientini admin belgilagan pog'onalardan topadi
+    // (standart: 1000+ dona -15%, 5000+ dona -25% — Admin Panelda o'zgartiriladi)
+    function poligrafiyaQtyFactor(qty) {
+        let tiers = (poligrafiyaAdvancedConfig.qtyTiers || []).slice().sort((a, b) => a.from - b.from);
+        let f = 1;
+        for (const t of tiers) {
+            if (qty >= t.from) f = t.factor;
+        }
+        return f;
+    }
+
 function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
     let details = activeProductType.toUpperCase();
     let baseUnitPrice = 0;
+
+                // Kiritish tekshiruvi: manfiy/mantiqsiz miqdorni tozalaymiz
+                if (!Number.isFinite(qty) || qty < 1) {
+                    qty = 1;
+                    showToast("⚠️ Miqdor noto'g'ri kiritildi, 1 dona sifatida hisoblandi.");
+                }
+
                 let sideFactor = poligrafiyaSideTypes[activeProductType] ?? 1.6;
                 let gsmList = poligrafiyaGsmDatabase[activeProductType] || [];
                 let unitBase = baseCost;
@@ -802,12 +820,20 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                     unitBase = g.price;
                     gsmLabel = ` | ${g.gsm}gr`;
                 }
-                let rate = unitBase * sideFactor;
-                if (qty >= 5000) rate *= 0.75;
-                else if (qty >= 1000) rate *= 0.85;
+                let rate = unitBase * sideFactor * poligrafiyaQtyFactor(qty);
+
+                // Forma/sozlash xarajati — bir martalik, tirajga bo'linib qo'shiladi
+                // (kichik tirajda dona narxi sun'iy pasaymasligi uchun)
+                let setupFee = poligrafiyaAdvancedConfig.setupFee || 0;
+                let setupLabel = '';
+                if (setupFee > 0) {
+                    rate += setupFee / qty;
+                    setupLabel = ` | sozlash: ${setupFee.toLocaleString()} so'm (${qty} donaga bo'lingan)`;
+                }
+
                 baseUnitPrice = rate;
                 let sizeLabel = poligrafiyaSizeLabels[activeProductType];
-                details = (sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish") + gsmLabel;
+                details = (sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish") + gsmLabel + setupLabel;
 
     return { details, baseUnitPrice };
 }
