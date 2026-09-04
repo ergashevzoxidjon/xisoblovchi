@@ -29,6 +29,59 @@
         minOrderAmount: 0   // minimal buyurtma summasi (so'm) — jami narx shundan kam bo'lmaydi
     };
 
+    function renderPoligrafiyaAdvancedConfigUI() {
+        let tbody = document.getElementById('adminPoligrafiyaQtyTiersBody');
+        if (!tbody) return;
+        let tiers = poligrafiyaAdvancedConfig.qtyTiers || [];
+        tbody.innerHTML = tiers.map((t, idx) => `
+            <tr>
+                <td><input type="number" value="${t.from}" data-tier-field="from" data-idx="${idx}" style="width:100%;"></td>
+                <td><input type="number" step="0.01" value="${t.factor}" data-tier-field="factor" data-idx="${idx}" style="width:100%;"></td>
+                <td style="text-align:right;"><button class="btn btn-danger" style="padding: 6px 10px;" onclick="deletePoligrafiyaQtyTierRow(${idx})">✕</button></td>
+            </tr>
+        `).join('');
+        let setupInput = document.getElementById('poligrafiyaSetupFeeInput');
+        let minOrderInput = document.getElementById('poligrafiyaMinOrderInput');
+        if (setupInput) setupInput.value = poligrafiyaAdvancedConfig.setupFee || 0;
+        if (minOrderInput) minOrderInput.value = poligrafiyaAdvancedConfig.minOrderAmount || 0;
+    }
+
+    function addPoligrafiyaQtyTierRow() {
+        poligrafiyaAdvancedConfig.qtyTiers.push({ from: 0, factor: 1.0 });
+        renderPoligrafiyaAdvancedConfigUI();
+    }
+
+    function deletePoligrafiyaQtyTierRow(idx) {
+        poligrafiyaAdvancedConfig.qtyTiers.splice(idx, 1);
+        renderPoligrafiyaAdvancedConfigUI();
+    }
+
+    function savePoligrafiyaAdvancedConfig() {
+        let tbody = document.getElementById('adminPoligrafiyaQtyTiersBody');
+        let newTiers = [];
+        tbody.querySelectorAll('tr').forEach(row => {
+            let fromInput = row.querySelector('[data-tier-field="from"]');
+            let factorInput = row.querySelector('[data-tier-field="factor"]');
+            let from = parseFloat(fromInput.value);
+            let factor = parseFloat(factorInput.value);
+            if (Number.isFinite(from) && Number.isFinite(factor) && from >= 0 && factor > 0) {
+                newTiers.push({ from, factor });
+            }
+        });
+        if (newTiers.length === 0) newTiers.push({ from: 1, factor: 1.0 });
+        poligrafiyaAdvancedConfig.qtyTiers = newTiers;
+
+        let setupFee = parseFloat(document.getElementById('poligrafiyaSetupFeeInput').value) || 0;
+        let minOrderAmount = parseFloat(document.getElementById('poligrafiyaMinOrderInput').value) || 0;
+        poligrafiyaAdvancedConfig.setupFee = setupFee < 0 ? 0 : setupFee;
+        poligrafiyaAdvancedConfig.minOrderAmount = minOrderAmount < 0 ? 0 : minOrderAmount;
+
+        localStorage.setItem('erp_poligrafiya_advanced_config', JSON.stringify(poligrafiyaAdvancedConfig));
+        if (typeof logAudit === 'function') logAudit('Aqlli narxlash sozlamalari o\'zgartirildi', `Pog'onalar: ${newTiers.length} ta, sozlash: ${setupFee.toLocaleString()} so'm, min. buyurtma: ${minOrderAmount.toLocaleString()} so'm`);
+        renderPoligrafiyaAdvancedConfigUI();
+        showToast('✅ Aqlli narxlash sozlamalari saqlandi!');
+    }
+
     // ====================== BLOKNOT SOZLAMALARI ======================
     // Barcha qiymatlar Admin Panel > Bloknot bo'limidan o'zgartiriladi.
     let bloknotConfig = {
