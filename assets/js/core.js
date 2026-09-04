@@ -214,6 +214,141 @@
         document.getElementById(screenId).style.display = 'block';
     }
 
+    // ====================== FOYDALANUVCHILAR VA ROLLAR ======================
+    function getDefaultUsersDb() {
+        return [
+            { id: 'u_admin', name: 'Administrator', pin: '1234', role: 'admin' }
+        ];
+    }
+
+    function requireLogin(allowedRoles, onSuccess) {
+        // Agar shu sessiyada allaqachon mos rol bilan kirilgan bo'lsa, qayta so'ramaymiz
+        if (currentUser && allowedRoles.includes(currentUser.role)) {
+            onSuccess(currentUser);
+            return;
+        }
+        let pin = prompt("Kirish PIN kodini kiriting:", "");
+        if (pin === null) return;
+        let user = usersDb.find(u => u.pin === pin);
+        if (!user) {
+            showToast("⚠️ Noto'g'ri PIN kod!");
+            return;
+        }
+        if (!allowedRoles.includes(user.role)) {
+            showToast("⚠️ Sizda bu bo'limga kirish huquqi yo'q!");
+            return;
+        }
+        currentUser = user;
+        updateCurrentUserBadge();
+        onSuccess(user);
+    }
+
+    function logoutUser() {
+        currentUser = null;
+        updateCurrentUserBadge();
+        showToast("Tizimdan chiqildi.");
+        showScreen('selectionScreen');
+    }
+
+    function updateCurrentUserBadge() {
+        let el = document.getElementById('currentUserBadge');
+        if (!el) return;
+        if (currentUser) {
+            el.style.display = 'inline-flex';
+            el.innerText = `👤 ${currentUser.name} (${currentUser.role === 'admin' ? 'Admin' : 'Menejer'}) ✕`;
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function renderUsersTable() {
+        let tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = usersDb.map((u, idx) => `
+            <tr>
+                <td><input type="text" class="usr-name" value="${u.name}" style="width:100%;"></td>
+                <td><input type="text" class="usr-pin" value="${u.pin}" style="width:100%;" maxlength="12"></td>
+                <td>
+                    <select class="usr-role" style="width:100%; height:36px; border-radius:6px; border:1.5px solid var(--border); padding:0 8px;">
+                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        <option value="menejer" ${u.role === 'menejer' ? 'selected' : ''}>Menejer</option>
+                    </select>
+                </td>
+                <td style="text-align:right;"><button class="btn btn-danger" onclick="deleteUser(${idx})">🗑️</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function addUserRow() {
+        usersDb.push({ id: 'u_' + Date.now(), name: 'Yangi foydalanuvchi', pin: '0000', role: 'menejer' });
+        renderUsersTable();
+    }
+
+    function deleteUser(idx) {
+        if (usersDb.length <= 1) {
+            showToast("⚠️ Kamida bitta foydalanuvchi qolishi kerak!");
+            return;
+        }
+        if (!confirm("Foydalanuvchini o'chirmoqchimisiz?")) return;
+        usersDb.splice(idx, 1);
+        renderUsersTable();
+    }
+
+    function saveUsers() {
+        let names = document.querySelectorAll('.usr-name');
+        let pins = document.querySelectorAll('.usr-pin');
+        let roles = document.querySelectorAll('.usr-role');
+        let updated = [];
+        names.forEach((el, i) => {
+            updated.push({
+                id: usersDb[i]?.id || ('u_' + Date.now() + i),
+                name: (el.value || '').trim() || 'Foydalanuvchi',
+                pin: (pins[i]?.value || '').trim() || '0000',
+                role: roles[i]?.value || 'menejer'
+            });
+        });
+        if (!updated.some(u => u.role === 'admin')) {
+            showToast("⚠️ Kamida bitta admin bo'lishi kerak!");
+            return;
+        }
+        usersDb = updated;
+        localStorage.setItem('erp_users_db', JSON.stringify(usersDb));
+        logAudit('Foydalanuvchilar yangilandi', `${usersDb.length} ta foydalanuvchi`);
+        renderUsersTable();
+        showToast("💾 Foydalanuvchilar saqlandi!");
+    }
+
+    // ====================== O'ZGARISHLAR TARIXI (AUDIT LOG) ======================
+    function logAudit(action, details) {
+        auditLog.unshift({
+            id: 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            timestamp: new Date().toISOString(),
+            user: currentUser ? currentUser.name : 'Noma\'lum',
+            action,
+            details: details || ''
+        });
+        if (auditLog.length > 500) auditLog = auditLog.slice(0, 500);
+        try { localStorage.setItem('erp_audit_log', JSON.stringify(auditLog)); } catch (e) {}
+        renderAuditLogTable();
+    }
+
+    function renderAuditLogTable() {
+        let tbody = document.getElementById('auditLogTableBody');
+        if (!tbody) return;
+        if (auditLog.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">Hozircha o'zgarish tarixi yo'q.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = auditLog.slice(0, 200).map(a => `
+            <tr>
+                <td style="font-family:var(--font-mono); font-size:0.78rem; white-space:nowrap;">${new Date(a.timestamp).toLocaleString('uz-UZ')}</td>
+                <td>${a.user}</td>
+                <td>${a.action}</td>
+                <td style="color:var(--text-muted); font-size:0.82rem;">${a.details}</td>
+            </tr>
+        `).join('');
+    }
+
     // ====================== TIJORIY TAKLIF (SAVATCHA) ======================
     function loadQuoteCart() {
         try {
@@ -394,13 +529,17 @@
     }
 
     function openAdminModal() {
-        let password = prompt("Admin kirish parolini kiriting:", "");
-        if (password === "1234") {
+        requireLogin(['admin'], () => {
             closeProductManager();
             showScreen('adminScreen');
-        } else if (password !== null) {
-            showToast("⚠️ Xato parol!");
-        }
+        });
+    }
+
+    function openReportsScreen() {
+        requireLogin(['admin', 'menejer'], () => {
+            showScreen('reportsScreen');
+            renderReportsScreen();
+        });
     }
 
     function renderAdminCategoryGrid() {
@@ -720,6 +859,16 @@ function calculate() {
         else {
             let r = calculateResult_poligrafiya(activeProductType, qty, baseCost);
             details = r.details; baseUnitPrice = r.baseUnitPrice;
+
+            // Minimal buyurtma summasi — jami narx (marja qo'shilgandan keyin) shundan kam bo'lmasin
+            let minAmt = poligrafiyaAdvancedConfig.minOrderAmount || 0;
+            if (minAmt > 0 && qty > 0) {
+                let taxminiyJami = Math.round(baseUnitPrice * (1 + marginPercent / 100)) * qty;
+                if (taxminiyJami < minAmt) {
+                    baseUnitPrice = (minAmt / qty) / (1 + marginPercent / 100);
+                    details += ` | (minimal buyurtma qiymati: ${minAmt.toLocaleString()} so'm qo'llanildi)`;
+                }
+            }
         }
     }
 

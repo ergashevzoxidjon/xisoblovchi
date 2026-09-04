@@ -15,6 +15,20 @@
         paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6
     };
 
+    // ====================== POLIGRAFIYA: AQLLI NARXLASH SOZLAMALARI ======================
+    // Adad chegirma pog'onalari, forma/sozlash xarajati va minimal buyurtma summasi —
+    // Admin Panel > Poligrafiya > "Aqlli narxlash" bo'limidan tahrirlanadi.
+    // Bloknotga tegishli emas — bloknotning o'z alohida hisob-kitob tizimi bor.
+    let poligrafiyaAdvancedConfig = {
+        qtyTiers: [
+            { from: 1,    factor: 1.0  },
+            { from: 1000, factor: 0.85 },
+            { from: 5000, factor: 0.75 }
+        ],
+        setupFee: 0,        // bir martalik forma/sozlash xarajati (so'm), tirajga bo'linib qo'shiladi
+        minOrderAmount: 0   // minimal buyurtma summasi (so'm) — jami narx shundan kam bo'lmaydi
+    };
+
     // ====================== BLOKNOT SOZLAMALARI ======================
     // Barcha qiymatlar Admin Panel > Bloknot bo'limidan o'zgartiriladi.
     let bloknotConfig = {
