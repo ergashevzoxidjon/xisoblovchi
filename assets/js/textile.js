@@ -393,6 +393,7 @@
             printRate: { tiers: normalizeTierList(textileEditState.printRate.tiers) }
         };
         localStorage.setItem('erp_textile_db', JSON.stringify(textileDatabase));
+        if (typeof logAudit === 'function') logAudit("Textile narxlari o'zgartirildi", `Mahsulot: ${currentManagingProduct}`);
         loadTextileEditState(currentManagingProduct);
         showToast("💾 Textile sozlamalari saqlandi!");
     }

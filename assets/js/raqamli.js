@@ -63,6 +63,7 @@
             }
         }
         localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
+        if (typeof logAudit === 'function') logAudit("Raqamli pechat qog'ozlari o'zgartirildi", `${digitalPapersDatabase.length} ta qog'oz turi yangilandi`);
         showToast("💾 Barcha o'zgarishlar muvaffaqiyatli saqlandi!");
         renderAdminDigitalPaperTable();
     }

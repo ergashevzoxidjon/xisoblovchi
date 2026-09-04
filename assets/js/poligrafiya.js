@@ -218,6 +218,7 @@
 
         poligrafiyaGsmDatabase[currentManagingProduct] = updated;
         localStorage.setItem('erp_poligrafiya_gsm_db', JSON.stringify(poligrafiyaGsmDatabase));
+        if (typeof logAudit === 'function') logAudit("Poligrafiya grammajlari o'zgartirildi", `Mahsulot: ${currentManagingProduct}, ${updated.length} ta grammaj`);
         renderAdminPoligrafiyaGsmTable();
         showToast("💾 Grammajlar saqlandi!");
     }
@@ -722,6 +723,7 @@
         if (std && std.label) poligrafiyaSizeLabels.bloknot = std.label;
 
         localStorage.setItem('erp_bloknot_config', JSON.stringify(bloknotConfig));
+        if (typeof logAudit === 'function') logAudit("Bloknot sozlamalari o'zgartirildi", "O'lchamlar, narxlar yoki qo'shimcha sozlamalar yangilandi");
         renderAdminBloknotTables();
         showToast("💾 Bloknot sozlamalari saqlandi!");
     }

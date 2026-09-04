@@ -127,6 +127,7 @@
         };
         localStorage.setItem('erp_ofset_machine_settings', JSON.stringify(ofsetMachineSettings));
 
+        if (typeof logAudit === 'function') logAudit("Ofset pechat narxlari o'zgartirildi", `${ofsetRawPapers.length} ta qog'oz turi va mashina sozlamalari yangilandi`);
         renderAdminOfsetPapersMatrix();
         loadOfsetMachineSettingsToUI();
         showToast("💾 Barcha ofset o'zgarishlar saqlandi!");
