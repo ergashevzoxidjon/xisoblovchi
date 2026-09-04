@@ -608,6 +608,7 @@
         }
         if (isPoligrafiya) {
             renderAdminPoligrafiyaGsmTable();
+            renderPoligrafiyaAdvancedConfigUI();
             return;
         }
 

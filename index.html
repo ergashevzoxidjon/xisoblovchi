@@ -254,6 +254,41 @@
                         <button class="btn btn-success" onclick="saveAllPoligrafiyaGsm()">💾 Barcha grammajlarni saqlash</button>
                     </div>
                 </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">🧠 Aqlli Narxlash (barcha poligrafiya mahsulotlari uchun umumiy)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Bu sozlamalar bloknotdan tashqari barcha poligrafiya mahsulotlariga birdek qo'llanadi.
+                    </p>
+                    <div style="font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Adad (tiraj) chegirma pog'onalari</div>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 160px;">Dan (dona)</th>
+                                    <th style="width: 160px;">Koeffitsient (masalan 0.85 = -15%)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPoligrafiyaQtyTiersBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5; margin-bottom: 16px;" onclick="addPoligrafiyaQtyTierRow()">+ Yangi pog'ona qo'shish</button>
+
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>Forma/sozlash xarajati (so'm, bir martalik):</label>
+                            <input type="number" id="poligrafiyaSetupFeeInput" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Minimal buyurtma summasi (so'm):</label>
+                            <input type="number" id="poligrafiyaMinOrderInput" value="0">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="savePoligrafiyaAdvancedConfig()">💾 Aqlli narxlash sozlamalarini saqlash</button>
+                </div>
             </div>
 
             <!-- BLOKNOT ADMIN PANEL BLOKI -->
