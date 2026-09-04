@@ -527,6 +527,182 @@
 
         showScreen('quoteScreen');
         closeQuoteCart();
+        saveCurrentQuoteToArchive();
+    }
+
+    // ====================== BUYURTMALAR / TAKLIFLAR ARXIVI ======================
+    function saveCurrentQuoteToArchive() {
+        if (quoteCart.length === 0) return;
+        let grandTotal = quoteCart.reduce((sum, item) => sum + item.totalPrice, 0);
+        let record = {
+            id: 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            date: new Date().toISOString(),
+            client: 'Nomsiz mijoz',
+            items: quoteCart.map(i => ({ type: i.type, name: i.name, icon: i.icon, details: i.details, qty: i.qty, unitPrice: i.unitPrice, totalPrice: i.totalPrice })),
+            grandTotal,
+            status: 'yuborilgan',
+            createdBy: currentUser ? currentUser.name : 'Noma\'lum'
+        };
+        quoteArchive.unshift(record);
+        if (quoteArchive.length > 1000) quoteArchive = quoteArchive.slice(0, 1000);
+        activeQuoteArchiveId = record.id;
+        localStorage.setItem('erp_quote_archive', JSON.stringify(quoteArchive));
+        if (typeof logAudit === 'function') logAudit('Tijoriy taklif yaratildi', `${record.items.length} ta mahsulot, ${grandTotal.toLocaleString()} so'm`);
+    }
+
+    function updateActiveQuoteClientName(value) {
+        if (!activeQuoteArchiveId) return;
+        let rec = quoteArchive.find(q => q.id === activeQuoteArchiveId);
+        if (!rec) return;
+        rec.client = (value || '').trim() || 'Nomsiz mijoz';
+        localStorage.setItem('erp_quote_archive', JSON.stringify(quoteArchive));
+    }
+
+    function updateQuoteArchiveStatus(id, status) {
+        let rec = quoteArchive.find(q => q.id === id);
+        if (!rec) return;
+        rec.status = status;
+        localStorage.setItem('erp_quote_archive', JSON.stringify(quoteArchive));
+        if (typeof logAudit === 'function') logAudit("Taklif holati o'zgartirildi", `${rec.client}: ${quoteStatusLabel(status)}`);
+        showToast('✅ Holat yangilandi!');
+    }
+
+    function quoteStatusLabel(status) {
+        return status === 'qabul_qilingan' ? 'Qabul qilingan' : (status === 'bekor_qilingan' ? 'Bekor qilingan' : 'Yuborilgan');
+    }
+
+    function viewArchivedQuote(id) {
+        let rec = quoteArchive.find(q => q.id === id);
+        if (!rec) return;
+        let rowsHtml = rec.items.map((item, idx) => `
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${item.icon || ''} ${item.name}<div class="quote-offer-details">${item.details}</div></td>
+                <td>${item.qty.toLocaleString()} dona</td>
+                <td>${item.unitPrice.toLocaleString()} so'm</td>
+                <td>${item.totalPrice.toLocaleString()} so'm</td>
+            </tr>
+        `).join('');
+        document.getElementById('quoteOfferContent').innerHTML = `
+            <div class="quote-offer-doc">
+                <div class="quote-offer-header">
+                    <div>
+                        <div class="quote-offer-brand">Poligrafiya & Suvenir ERP</div>
+                        <div class="quote-offer-sub">Tijoriy taklif (arxivdan) — ${quoteStatusLabel(rec.status)}</div>
+                    </div>
+                    <div class="quote-offer-date">${new Date(rec.date).toLocaleDateString('uz-UZ')}</div>
+                </div>
+                <div class="quote-offer-client">
+                    <label>Mijoz nomi:</label>
+                    <input type="text" value="${rec.client}" disabled>
+                </div>
+                <table class="quote-offer-table">
+                    <thead>
+                        <tr><th>#</th><th>Mahsulot</th><th>Miqdor</th><th>Birlik narxi</th><th>Summa</th></tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                    <tfoot>
+                        <tr class="quote-offer-grand-total-row">
+                            <td colspan="4">Umumiy summa:</td>
+                            <td>${rec.grandTotal.toLocaleString()} so'm</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="quote-offer-footer">
+                    Taklif amal qilish muddati: 7 kun. Narxlar bahoga qarab o'zgarishi mumkin.
+                </div>
+            </div>
+        `;
+        activeQuoteArchiveId = null;
+        showScreen('quoteScreen');
+    }
+
+    function renderQuoteArchiveTable() {
+        let tbody = document.getElementById('quoteArchiveTableBody');
+        if (!tbody) return;
+        if (quoteArchive.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">Hozircha arxivlangan takliflar yo'q.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = quoteArchive.map(q => `
+            <tr>
+                <td>${new Date(q.date).toLocaleDateString('uz-UZ')}</td>
+                <td>${q.client}</td>
+                <td>${q.items.length} ta</td>
+                <td>${q.grandTotal.toLocaleString()} so'm</td>
+                <td>
+                    <select onchange="updateQuoteArchiveStatus('${q.id}', this.value)" style="width:100%; height:32px; border-radius:6px; border:1.5px solid var(--border); padding:0 6px; font-size:0.8rem;">
+                        <option value="yuborilgan" ${q.status === 'yuborilgan' ? 'selected' : ''}>Yuborilgan</option>
+                        <option value="qabul_qilingan" ${q.status === 'qabul_qilingan' ? 'selected' : ''}>Qabul qilingan</option>
+                        <option value="bekor_qilingan" ${q.status === 'bekor_qilingan' ? 'selected' : ''}>Bekor qilingan</option>
+                    </select>
+                </td>
+                <td style="text-align:right;"><button class="btn" style="background:#4f46e5; padding:6px 10px;" onclick="viewArchivedQuote('${q.id}')">👁 Ko'rish</button></td>
+            </tr>
+        `).join('');
+    }
+
+    // ====================== STATISTIK BOSHQARUV PANELI ======================
+    function renderAnalyticsTab() {
+        let container = document.getElementById('analyticsContent');
+        if (!container) return;
+
+        if (quoteArchive.length === 0) {
+            container.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:30px;">Hisobot uchun hali ma'lumot yo'q — kamida bitta tijoriy taklif yarating.</p>`;
+            return;
+        }
+
+        let totalOrders = quoteArchive.length;
+        let totalRevenue = quoteArchive.reduce((s, q) => s + q.grandTotal, 0);
+        let avgOrderValue = Math.round(totalRevenue / totalOrders);
+
+        let productCounts = {};
+        quoteArchive.forEach(q => {
+            (q.items || []).forEach(i => {
+                productCounts[i.name] = (productCounts[i.name] || 0) + 1;
+            });
+        });
+        let topProducts = Object.entries(productCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        let maxCount = topProducts.length ? topProducts[0][1] : 1;
+
+        let monthlyRevenue = {};
+        quoteArchive.forEach(q => {
+            let d = new Date(q.date);
+            let key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            monthlyRevenue[key] = (monthlyRevenue[key] || 0) + q.grandTotal;
+        });
+        let months = Object.keys(monthlyRevenue).sort().slice(-6);
+        let maxMonthRevenue = Math.max(...months.map(m => monthlyRevenue[m]), 1);
+
+        container.innerHTML = `
+            <div class="analytics-summary-row">
+                <div class="analytics-card"><div class="analytics-card-label">Jami takliflar</div><div class="analytics-card-value">${totalOrders}</div></div>
+                <div class="analytics-card"><div class="analytics-card-label">Jami summa</div><div class="analytics-card-value">${totalRevenue.toLocaleString()} so'm</div></div>
+                <div class="analytics-card"><div class="analytics-card-label">O'rtacha buyurtma</div><div class="analytics-card-value">${avgOrderValue.toLocaleString()} so'm</div></div>
+            </div>
+
+            <div class="analytics-section-title">🏆 Eng ko'p buyurtma qilingan mahsulotlar</div>
+            <div class="analytics-bars">
+                ${topProducts.map(([name, count]) => `
+                    <div class="analytics-bar-row">
+                        <span class="analytics-bar-label">${name}</span>
+                        <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${(count / maxCount * 100).toFixed(0)}%;"></div></div>
+                        <span class="analytics-bar-value">${count}</span>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="analytics-section-title">📅 Oylik aylanma (so'nggi ${months.length} oy)</div>
+            <div class="analytics-bars">
+                ${months.map(m => `
+                    <div class="analytics-bar-row">
+                        <span class="analytics-bar-label">${m}</span>
+                        <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${(monthlyRevenue[m] / maxMonthRevenue * 100).toFixed(0)}%;"></div></div>
+                        <span class="analytics-bar-value">${monthlyRevenue[m].toLocaleString()} so'm</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }
 
     function openAdminModal() {
@@ -541,6 +717,34 @@
             showScreen('reportsScreen');
             renderReportsScreen();
         });
+    }
+
+    function renderReportsScreen() {
+        let isAdmin = currentUser && currentUser.role === 'admin';
+        let usersTabBtn = document.getElementById('reportsTabBtn_users');
+        if (usersTabBtn) usersTabBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+        switchReportsTab('statistika');
+    }
+
+    function switchReportsTab(tab) {
+        let tabs = ['statistika', 'arxiv', 'audit', 'users'];
+        tabs.forEach(t => {
+            let panel = document.getElementById('reportsTab_' + t);
+            let btn = document.getElementById('reportsTabBtn_' + t);
+            if (panel) panel.style.display = (t === tab) ? 'block' : 'none';
+            if (btn) btn.classList.toggle('active', t === tab);
+        });
+        if (tab === 'statistika') renderAnalyticsTab();
+        else if (tab === 'arxiv') renderQuoteArchiveTable();
+        else if (tab === 'audit') renderAuditLogTable();
+        else if (tab === 'users') {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showToast("⚠️ Bu bo'lim faqat admin uchun!");
+                switchReportsTab('statistika');
+                return;
+            }
+            renderUsersTable();
+        }
     }
 
     function renderAdminCategoryGrid() {

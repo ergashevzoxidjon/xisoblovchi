@@ -630,6 +630,71 @@
         </div>
         <div id="quoteOfferContent"></div>
     </div>
+
+    <!-- HISOBOTLAR EKRANI -->
+    <div id="reportsScreen" class="screen">
+        <button class="btn btn-outline back-btn" onclick="showScreen('selectionScreen')">⬅️ Asosiy ekranga qaytish</button>
+        <h2 style="margin-bottom: 20px; color: var(--text-main);">📊 Hisobotlar</h2>
+
+        <div class="reports-tabs">
+            <button id="reportsTabBtn_statistika" class="reports-tab-btn active" onclick="switchReportsTab('statistika')">📈 Statistika</button>
+            <button id="reportsTabBtn_arxiv" class="reports-tab-btn" onclick="switchReportsTab('arxiv')">🗂️ Buyurtmalar tarixi</button>
+            <button id="reportsTabBtn_audit" class="reports-tab-btn" onclick="switchReportsTab('audit')">📝 O'zgarishlar tarixi</button>
+            <button id="reportsTabBtn_users" class="reports-tab-btn" onclick="switchReportsTab('users')" style="display:none;">👥 Foydalanuvchilar</button>
+        </div>
+
+        <div id="reportsTab_statistika" class="reports-tab-panel">
+            <div id="analyticsContent"></div>
+        </div>
+
+        <div id="reportsTab_arxiv" class="reports-tab-panel" style="display:none;">
+            <div class="table-card">
+                <div class="table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Sana</th><th>Mijoz</th><th>Mahsulotlar</th><th>Summa</th><th style="width:170px;">Holati</th><th style="width:110px; text-align:right;">Amal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quoteArchiveTableBody"></tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportsTab_audit" class="reports-tab-panel" style="display:none;">
+            <div class="table-card">
+                <div class="table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th style="width:150px;">Vaqt</th><th style="width:120px;">Foydalanuvchi</th><th>Amal</th><th>Tafsilot</th></tr>
+                    </thead>
+                    <tbody id="auditLogTableBody"></tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportsTab_users" class="reports-tab-panel" style="display:none;">
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                PIN kodlar shu brauzerda saqlanadi — bu haqiqiy server autentifikatsiyasi emas, faqat ichki bo'limlarni ajratish uchun.
+            </p>
+            <div class="table-card" style="margin-bottom: 16px;">
+                <div class="table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Ism</th><th style="width:140px;">PIN kod</th><th style="width:140px;">Rol</th><th style="width:70px; text-align:right;">Amal</th></tr>
+                    </thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <button class="btn" style="background: #4f46e5;" onclick="addUserRow()">+ Yangi foydalanuvchi</button>
+                <button class="btn btn-success" onclick="saveUsers()">💾 Foydalanuvchilarni saqlash</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- TIJORIY TAKLIF SAVATCHASI -->
