@@ -808,3 +808,39 @@
             .no-print { display: none !important; }
             .quote-offer-client input { border: none; padding: 0; }
         }
+
+        /* ====================== TARIXIY NARX TAVSIYASI ====================== */
+        .price-suggestion-box {
+            margin-top: 16px; padding: 12px 14px; background: #eef7ff;
+            border: 1.5px dashed var(--primary); border-radius: 8px;
+        }
+        .price-suggestion-title { font-size: 0.76rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+        .price-suggestion-range { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.82rem; color: var(--text-main); font-family: var(--font-mono); }
+        .price-suggestion-hint { margin-top: 8px; font-size: 0.78rem; color: #b45309; font-weight: 600; }
+
+        /* ====================== HISOBOTLAR EKRANI: TABLAR ====================== */
+        .reports-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .reports-tab-btn {
+            background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px;
+            padding: 9px 16px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; transition: all 0.15s ease;
+        }
+        .reports-tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .reports-tab-btn.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+        .reports-tab-panel { }
+
+        /* ====================== STATISTIK BOSHQARUV PANELI ====================== */
+        .analytics-summary-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 26px; }
+        .analytics-card {
+            flex: 1; min-width: 180px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px;
+        }
+        .analytics-card-label { font-size: 0.74rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
+        .analytics-card-value { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+        .analytics-section-title { font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 22px 0 12px; }
+        .analytics-bars { display: flex; flex-direction: column; gap: 10px; }
+        .analytics-bar-row { display: flex; align-items: center; gap: 10px; }
+        .analytics-bar-label { flex: 0 0 160px; font-size: 0.8rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .analytics-bar-track { flex: 1; height: 16px; background: #f1f5f9; border-radius: 8px; overflow: hidden; }
+        .analytics-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--magenta)); border-radius: 8px; }
+        .analytics-bar-value { flex: 0 0 auto; font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
