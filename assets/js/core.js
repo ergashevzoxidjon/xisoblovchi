@@ -72,6 +72,10 @@
     let currentManagingProduct = null;
     let currentCalcResult = {};
     let quoteCart = [];
+    let usersDb = [];
+    let currentUser = null;
+    let auditLog = [];
+    let quoteArchive = [];
 
     function init() {
         loadQuoteCart();
@@ -173,6 +177,27 @@
                 console.warn('Bloknot sozlamalarini o\'qishda xato:', e);
             }
         }
+
+        try {
+            let savedUsers = localStorage.getItem('erp_users_db');
+            usersDb = savedUsers ? JSON.parse(savedUsers) : getDefaultUsersDb();
+            if (!Array.isArray(usersDb) || usersDb.length === 0) usersDb = getDefaultUsersDb();
+        } catch (e) { usersDb = getDefaultUsersDb(); }
+
+        try {
+            let savedAudit = localStorage.getItem('erp_audit_log');
+            auditLog = savedAudit ? JSON.parse(savedAudit) : [];
+        } catch (e) { auditLog = []; }
+
+        try {
+            let savedArchive = localStorage.getItem('erp_quote_archive');
+            quoteArchive = savedArchive ? JSON.parse(savedArchive) : [];
+        } catch (e) { quoteArchive = []; }
+
+        try {
+            let savedPolAdv = localStorage.getItem('erp_poligrafiya_advanced_config');
+            if (savedPolAdv) poligrafiyaAdvancedConfig = { ...poligrafiyaAdvancedConfig, ...JSON.parse(savedPolAdv) };
+        } catch (e) {}
 
         renderAdminCategoryGrid();
     }
