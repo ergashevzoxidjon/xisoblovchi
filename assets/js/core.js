@@ -76,6 +76,7 @@
     let currentUser = null;
     let auditLog = [];
     let quoteArchive = [];
+    let activeQuoteArchiveId = null;
 
     function init() {
         loadQuoteCart();
@@ -504,7 +505,7 @@
                 </div>
                 <div class="quote-offer-client">
                     <label>Mijoz nomi:</label>
-                    <input type="text" id="quoteClientName" placeholder="Kompaniya yoki mijoz nomini kiriting (ixtiyoriy)">
+                    <input type="text" id="quoteClientName" placeholder="Kompaniya yoki mijoz nomini kiriting (ixtiyoriy)" oninput="updateActiveQuoteClientName(this.value)">
                 </div>
                 <table class="quote-offer-table">
                     <thead>
@@ -779,6 +780,7 @@ function generateForm(type) {
                     <div class="result-item"><span>Birlik narxi:</span> <strong id="resUnitPrice">0 so'm</strong></div>
                     <div class="result-item result-total"><span>Jami summa:</span> <span id="resTotalPrice">0 so'm</span></div>
                 </div>
+                <div id="priceSuggestionBox" style="display:none;"></div>
                 <div id="tierPreviewBox" style="display:none; margin-top:16px;"></div>
                 <div style="margin-top: 20px;">
                     <button class="btn" style="width: 100%;" onclick="copyResult()">📋 Natijani nusxalash</button>
@@ -895,6 +897,47 @@ function calculate() {
     document.getElementById('resTotalPrice').innerText = totalPrice.toLocaleString() + " so'm";
 
     currentCalcResult = { details, qty, unitPrice, totalPrice, name: previewNameText, imageUrl: previewImgUrl };
+    if (typeof renderPriceSuggestion === 'function') renderPriceSuggestion(activeProductType, unitPrice);
+}
+
+// ====================== STATISTIK NARX TAVSIYASI ======================
+// Avvalgi tijoriy takliflar arxividagi shu mahsulot turi bo'yicha
+// min/o'rtacha/maks birlik narxlarini ko'rsatadi — haqiqiy AI emas, oddiy statistika.
+function renderPriceSuggestion(type, unitPrice) {
+    let box = document.getElementById('priceSuggestionBox');
+    if (!box) return;
+
+    let history = (typeof quoteArchive !== 'undefined' ? quoteArchive : [])
+        .flatMap(q => (q.items || []).filter(i => i.type === type))
+        .map(i => i.unitPrice)
+        .filter(p => typeof p === 'number' && p > 0);
+
+    if (history.length < 2) {
+        box.style.display = 'none';
+        box.innerHTML = '';
+        return;
+    }
+
+    let min = Math.min(...history);
+    let max = Math.max(...history);
+    let avg = Math.round(history.reduce((s, p) => s + p, 0) / history.length);
+
+    let hint = '';
+    if (unitPrice < min) hint = "⚠️ Joriy narx tarixiy minimaldan past.";
+    else if (unitPrice > max) hint = "⚠️ Joriy narx tarixiy maksimaldan yuqori.";
+
+    box.style.display = 'block';
+    box.innerHTML = `
+        <div class="price-suggestion-box">
+            <div class="price-suggestion-title">📊 Tarixiy narx tavsiyasi (${history.length} ta oldingi buyurtma asosida)</div>
+            <div class="price-suggestion-range">
+                <span>Min: <strong>${min.toLocaleString()} so'm</strong></span>
+                <span>O'rtacha: <strong>${avg.toLocaleString()} so'm</strong></span>
+                <span>Maks: <strong>${max.toLocaleString()} so'm</strong></span>
+            </div>
+            ${hint ? `<div class="price-suggestion-hint">${hint}</div>` : ''}
+        </div>
+    `;
 }
 
 init();
