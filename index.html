@@ -14,7 +14,9 @@
     <div class="header">
         <h1><svg class="regmark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="10.5" stroke="var(--ink)" stroke-width="2"/><line x1="13" y1="0" x2="13" y2="26" stroke="var(--ink)" stroke-width="1.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--ink)" stroke-width="1.4"/><circle cx="13" cy="13" r="3.4" fill="var(--magenta)"/></svg> Poligrafiya & Suvenir ERP <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0; text-transform: none;">v3.8</span></h1>
         <div style="display:flex; align-items:center; gap:10px;">
+            <span id="currentUserBadge" onclick="logoutUser()" style="display:none; cursor:pointer; font-size:0.78rem; font-weight:600; color:var(--text-muted); background:var(--bg-soft, #f1f5f9); padding:6px 12px; border-radius:8px; white-space:nowrap;" title="Chiqish uchun bosing"></span>
             <button class="btn btn-warning" id="quoteCartBtn" onclick="handleQuoteButtonClick()">🧾 Tijoriy taklif<span id="quoteCartBadge" class="quote-badge" style="display:none;">0</span></button>
+            <button class="btn btn-secondary" onclick="openReportsScreen()">📊 Hisobotlar</button>
             <button class="btn btn-secondary" onclick="openAdminModal()">⚙️ Admin Panel</button>
         </div>
     </div>

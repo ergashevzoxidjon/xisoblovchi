@@ -682,6 +682,7 @@
         if (newPrice !== null && !isNaN(parseFloat(newPrice))) {
             defaultPrices[currentManagingProduct] = parseFloat(newPrice);
             localStorage.setItem('erp_default_prices', JSON.stringify(defaultPrices));
+            if (typeof logAudit === 'function') logAudit("Baza narxi o'zgartirildi", `${currentManagingProduct}: ${oldPrice.toLocaleString()} → ${parseFloat(newPrice).toLocaleString()} so'm`);
             renderAdminPensTable();
             showToast("✅ Baza narxi yangilandi!");
         }

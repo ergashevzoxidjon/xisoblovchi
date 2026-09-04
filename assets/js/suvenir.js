@@ -782,9 +782,11 @@
         if (editIdx >= 0) {
             pensDatabase[currentManagingProduct][editIdx] = penData;
             showToast("✏️ Model yangilandi!");
+            if (typeof logAudit === 'function') logAudit("Suvenir modeli tahrirlandi", `${currentManagingProduct} / ${name} (${id})`);
         } else {
             pensDatabase[currentManagingProduct].push(penData);
             showToast("✅ Model qo'shildi!");
+            if (typeof logAudit === 'function') logAudit("Suvenir modeli qo'shildi", `${currentManagingProduct} / ${name} (${id})`);
         }
 
         localStorage.setItem('erp_pens_db_v3', JSON.stringify(pensDatabase));
@@ -875,8 +877,10 @@
 
     function deletePen(index) {
         if (confirm("Rostdan ham o'chirmoqchimisiz?")) {
+            let removed = pensDatabase[currentManagingProduct][index];
             pensDatabase[currentManagingProduct].splice(index, 1);
             localStorage.setItem('erp_pens_db_v3', JSON.stringify(pensDatabase));
+            if (typeof logAudit === 'function') logAudit("Suvenir modeli o'chirildi", `${currentManagingProduct} / ${removed ? removed.name : ''} (${removed ? removed.id : ''})`);
             renderAdminPensTable();
             showToast("🗑️ Model o'chirildi.");
         }

@@ -46,6 +46,7 @@
         if (newPrice !== null && !isNaN(parseFloat(newPrice))) {
             reklamaExtraPrices[field] = parseFloat(newPrice);
             localStorage.setItem('erp_reklama_extra_prices', JSON.stringify(reklamaExtraPrices));
+            if (typeof logAudit === 'function') logAudit("Reklama qo'shimcha narxi o'zgartirildi", `${labels[field]}: ${oldPrice.toLocaleString()} → ${parseFloat(newPrice).toLocaleString()} so'm`);
             renderAdminPensTable();
             showToast("✅ Narx yangilandi!");
         }
