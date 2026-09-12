@@ -1,11 +1,13 @@
     const ofsetAvailablePaperTypes = ["Karton", "Melovka", "Dizayn qog'ozi"];
 
+    // "sra3" (320x450mm) — kichik-format mahsulotlar (Flayer va h.k.) uchun alohida kesilgan
+    // varoq narxi. 0 bo'lsa, o'sha qog'oz SRA3 hisob-kitobida hisobga olinmaydi.
     let ofsetRawPapers = [
-        { name: "Ofset", gsm: 80, prices: { "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true },
-        { name: "Melovka", gsm: 80, prices: { "620x880": 90000, "620x940": 95000, "700x1000": 110000 } },
-        { name: "Melovka", gsm: 115, prices: { "620x880": 115000, "620x940": 120000, "700x1000": 140000 } },
-        { name: "Karton", gsm: 250, prices: { "620x880": 240000, "620x940": 255000, "700x1000": 280000 } },
-        { name: "Dizayn qog'ozi", gsm: 200, prices: { "620x880": 300000, "620x940": 320000, "700x1000": 350000 } }
+        { name: "Ofset", gsm: 80, prices: { "sra3": 22000, "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true },
+        { name: "Melovka", gsm: 80, prices: { "sra3": 24000, "620x880": 90000, "620x940": 95000, "700x1000": 110000 } },
+        { name: "Melovka", gsm: 115, prices: { "sra3": 30000, "620x880": 115000, "620x940": 120000, "700x1000": 140000 } },
+        { name: "Karton", gsm: 250, prices: { "sra3": 63000, "620x880": 240000, "620x940": 255000, "700x1000": 280000 } },
+        { name: "Dizayn qog'ozi", gsm: 200, prices: { "sra3": 79000, "620x880": 300000, "620x940": 320000, "700x1000": 350000 } }
     ];
 
     let ofsetMachineSettings = {
@@ -46,6 +48,7 @@
             <tr>
                 <td>${nameFieldHtml}</td>
                 <td><input type="number" id="ofset_mtx_gsm_${index}" value="${item.gsm}" ${isOffset ? 'readonly style="background:#f1f5f9;"' : ''}></td>
+                <td><input type="number" id="ofset_mtx_psra3_${index}" value="${item.prices['sra3'] || 0}"></td>
                 <td><input type="number" id="ofset_mtx_p880_${index}" value="${item.prices['620x880'] || 0}"></td>
                 <td><input type="number" id="ofset_mtx_p940_${index}" value="${item.prices['620x940'] || 0}" ${isOffset ? 'disabled style="background:#f1f5f9;"' : ''}></td>
                 <td><input type="number" id="ofset_mtx_p1000_${index}" value="${item.prices['700x1000'] || 0}" ${isOffset ? 'disabled style="background:#f1f5f9;"' : ''}></td>
@@ -60,7 +63,7 @@
     }
 
     function addOfsetPaperRow() {
-        ofsetRawPapers.push({ name: "Melovka", gsm: 200, prices: { "620x880": 200000, "620x940": 210000, "700x1000": 230000 } });
+        ofsetRawPapers.push({ name: "Melovka", gsm: 200, prices: { "sra3": 55000, "620x880": 200000, "620x940": 210000, "700x1000": 230000 } });
         renderAdminOfsetPapersMatrix();
     }
 
@@ -85,10 +88,12 @@
         let offsetIndex = ofsetRawPapers.findIndex(p => p.name === "Ofset");
         if (offsetItem) {
             let p880Input = document.getElementById(`ofset_mtx_p880_${offsetIndex}`);
+            let psra3Input = document.getElementById(`ofset_mtx_psra3_${offsetIndex}`);
             if (p880Input) offsetItem.prices["620x880"] = parseFloat(p880Input.value) || 0;
+            if (psra3Input) offsetItem.prices["sra3"] = parseFloat(psra3Input.value) || 0;
             updated.push(offsetItem);
         } else {
-            updated.push({ name: "Ofset", gsm: 80, prices: { "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true });
+            updated.push({ name: "Ofset", gsm: 80, prices: { "sra3": 22000, "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true });
         }
 
         for (let index = 0; index < ofsetRawPapers.length; index++) {
@@ -96,6 +101,7 @@
             if (!nameField || nameField.value === "Ofset") continue;
 
             let gsmInput = document.getElementById(`ofset_mtx_gsm_${index}`);
+            let psra3Input = document.getElementById(`ofset_mtx_psra3_${index}`);
             let p880Input = document.getElementById(`ofset_mtx_p880_${index}`);
             let p940Input = document.getElementById(`ofset_mtx_p940_${index}`);
             let p1000Input = document.getElementById(`ofset_mtx_p1000_${index}`);
@@ -104,6 +110,7 @@
                 name: nameField.value || "Melovka",
                 gsm: parseInt(gsmInput.value) || 80,
                 prices: {
+                    "sra3": parseFloat(psra3Input.value) || 0,
                     "620x880": parseFloat(p880Input.value) || 0,
                     "620x940": parseFloat(p940Input.value) || 0,
                     "700x1000": parseFloat(p1000Input.value) || 0
@@ -139,6 +146,7 @@
         tbody.innerHTML = ofsetRawPapers.map(item => `
             <tr>
                 <td style="font-weight:600;">${item.name} ${item.gsm}g</td>
+                <td>${(item.prices['sra3'] || 0).toLocaleString()} so'm</td>
                 <td>${(item.prices['620x880'] || 0).toLocaleString()} so'm</td>
                 <td>${(item.prices['620x940'] || 0).toLocaleString()} so'm</td>
                 <td>${(item.prices['700x1000'] || 0).toLocaleString()} so'm</td>
@@ -253,7 +261,12 @@
     }
 
     function getOfsetWorkingSheets(machName) {
-        if (machName === 'A3') {
+        if (machName === 'SRA3') {
+            // Kichik-format, allaqachon kesilgan tayyor varoq — katta bazaviy varoqdan bo'linmaydi.
+            return [
+                { w: 320, h: 450, rawKey: "sra3", divisor: 1 }
+            ];
+        } else if (machName === 'A3') {
             return [
                 { w: 297, h: 420, rawKey: "620x880", divisor: 4 },
                 { w: 310, h: 440, rawKey: "620x880", divisor: 4 },
@@ -304,7 +317,9 @@
         let isOffsetType = (paperType === "Ofset");
         let workingSheets = getOfsetWorkingSheets(machName);
 
-        let platePrices = { 'A3': ofsetMachineSettings.plateA3, 'A2': ofsetMachineSettings.plateA2, 'A1': ofsetMachineSettings.plateA1 };
+        // SRA3 alohida forma/bosma narxiga ega emas — o'lchami A3ga yaqin bo'lgani uchun
+        // A3 mashinasining forma/bosma sozlamalaridan foydalanadi.
+        let platePrices = { 'SRA3': ofsetMachineSettings.plateA3, 'A3': ofsetMachineSettings.plateA3, 'A2': ofsetMachineSettings.plateA2, 'A1': ofsetMachineSettings.plateA1 };
 
         for (let paperObj of availablePapersForSelection) {
             for (let ws of workingSheets) {
@@ -321,12 +336,18 @@
                 let totalItemsPerFullBase = itemsPerSheet * ws.divisor;
 
                 let baseSheets = Math.ceil(tiraj / totalItemsPerFullBase);
-                let reserve = (side === 2) ? 200 : 100;
-                let totalBaseSheets = baseSheets + reserve;
+                // Zaxira (mashina sozlash/kalibrlash uchun ketadigan qog'oz) — doimiy DONA sonini
+                // ifodalaydi (masalan 100-200 dona), sahifa emas. 1 varoqqa ko'p mahsulot
+                // sig'adigan mayda mahsulotlarda (masalan flayer) bu ozgina qo'shimcha varoq
+                // bo'ladi; 1 varoqqa 1 mahsulot sig'adigan yirik mahsulotlarda (masalan A1 banner)
+                // eski hisobga teng qoladi.
+                let reserveItems = (side === 2) ? 200 : 100;
+                let reserveSheets = Math.ceil(reserveItems / totalItemsPerFullBase);
+                let totalBaseSheets = baseSheets + reserveSheets;
                 let totalPaperCost = totalBaseSheets * price;
 
                 let basePrintCost = 0, stepPrintCost = 0;
-                if (machName === 'A3') { basePrintCost = ofsetMachineSettings.printA3Base; stepPrintCost = ofsetMachineSettings.printA3Step; }
+                if (machName === 'SRA3' || machName === 'A3') { basePrintCost = ofsetMachineSettings.printA3Base; stepPrintCost = ofsetMachineSettings.printA3Step; }
                 else if (machName === 'A2') { basePrintCost = ofsetMachineSettings.printA2Base; stepPrintCost = ofsetMachineSettings.printA2Step; }
                 else if (machName === 'A1') { basePrintCost = ofsetMachineSettings.printA1Base; stepPrintCost = ofsetMachineSettings.printA1Step; }
 
@@ -500,6 +521,7 @@ function generateForm_ofset(type, form, rightCol) {
                             <thead>
                                 <tr>
                                     <th>Qog'oz turi / Grammi</th>
+                                    <th style="width: 150px;">SRA3 320x450</th>
                                     <th style="width: 150px;">620x880</th>
                                     <th style="width: 150px;">620x940</th>
                                     <th style="width: 150px;">700x1000</th>

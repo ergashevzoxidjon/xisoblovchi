@@ -3,6 +3,9 @@
         futbolka: 45000, kepka: 25000, svitshot: 75000, xudi: 95000, jiletka: 85000, shoper: 20000,
         ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000,
         baner: 35000, orakal: 45000, setka_orakal: 50000, tumanka: 40000, xolst: 85000,
+        // Roll Up/Pauk/PopUp/PromoStoyka narxi o'lcham variantidan (reklamaStendSizeDatabase) to'g'ridan-to'g'ri
+        // olinadi — bu yerdagi qiymatlar faqat ehtiyot uchun (variant topilmasa ishlatiladi).
+        rollup: 350000, pauk: 250000, popup: 1200000, promostoyka: 400000,
         ofset_pechat: 150, sifravoy_pechat: 800
     };
 
@@ -24,7 +27,11 @@
             { key: 'svitshot', name: 'Svitshot', icon: '👔' },
             { key: 'xudi', name: 'Xudi', icon: '🧥' },
             { key: 'jiletka', name: 'Jiletka', icon: '🥼' },
-            { key: 'shoper', name: 'Shoper', icon: '👜' }
+            { key: 'shoper', name: 'Shoper', icon: '👜' },
+            // Bayroqlar: Tekstil bo'limida ko'rsatiladi, lekin material/rang-tiraj dvigatelidan
+            // TUBDAN farqli o'z alohida hisoblash mexanizmiga ega (qarang: textile.js "BAYROQLAR"
+            // bo'limi) — shuning uchun quyida har joyda `key !== 'bayroqlar'` bilan ajratib olinadi.
+            { key: 'bayroqlar', name: 'Bayroqlar', icon: '🚩' }
         ],
         souvenir: [
             { key: 'ruchka', name: 'Ruchka', icon: '🖊️' },
@@ -48,7 +55,11 @@
             { key: 'orakal', name: 'Orakal', icon: '🌆' },
             { key: 'setka_orakal', name: 'Setka Orakal', icon: '🏁' },
             { key: 'tumanka', name: 'Tumanka', icon: '🌫️' },
-            { key: 'xolst', name: 'Xolst', icon: '🎨' }
+            { key: 'xolst', name: 'Xolst', icon: '🎨' },
+            { key: 'rollup', name: 'Roll Up', icon: '📜' },
+            { key: 'pauk', name: 'Pauk', icon: '🕷️' },
+            { key: 'popup', name: 'PopUp', icon: '⛺' },
+            { key: 'promostoyka', name: 'PromoStoyka', icon: '📣' }
         ],
         ofset: [
             { key: 'ofset_pechat', name: 'Ofset pechat kalkulyatori', icon: '🖨️' }
@@ -61,6 +72,10 @@
     const souvenirKeys = allCategories.souvenir.map(item => item.key);
     const textileKeys = allCategories.textile.map(item => item.key);
     const reklamaBanTypes = ['baner', 'orakal', 'setka_orakal', 'tumanka', 'xolst'];
+    // Roll Up/Pauk/PopUp/PromoStoyka — o'lchami bo'yicha maydonga (kv.m) emas, balki har bir tayyor
+    // o'lcham-variant uchun ADMIN BELGILAGAN QAT'IY NARXGA ega mahsulotlar (reklamaBanTypes'dan farqli
+    // arxitektura — batafsili reklama.js da). Material (Glyans/Matoviy) tanlovi narxga ta'sir qilmaydi.
+    const reklamaStendTypes = ['rollup', 'pauk', 'popup', 'promostoyka'];
     const hasSizesTypes = []; // razmerlar (Kichik/O'rta/Katta) bo'yicha ustama qo'llaniladigan turlar (hozircha hech biri ishlatmaydi)
     const oneSidedOnlySouvenirs = ['plagetkalar', 'naborlar', 'statuetka', 'soat', 'kardxolder', 'zontik']; // faqat bir tomonlama pechat qilinadigan turlar (ikki tomonlama variant ko'rsatilmaydi)
     // Standart "UF Pechat / Sifravoy Pechat" juftligi o'rniga boshqacha chop turlari to'plamidan foydalanadigan suvenir turlari.
@@ -109,6 +124,7 @@
         let txChanged = false;
         let defTx = null;
         textileKeys.forEach(k => {
+            if (k === 'bayroqlar') return; // o'z alohida bazasi bor, quyida alohida yuklanadi
             let cur = textileDatabase[k];
             if (!cur || !(cur.materials || []).length) {
                 defTx = defTx || getDefaultTextileDb();
@@ -135,6 +151,42 @@
         let savedReklamaExtra = localStorage.getItem('erp_reklama_extra_prices');
         if (savedReklamaExtra) {
             reklamaExtraPrices = { ...reklamaExtraPrices, ...JSON.parse(savedReklamaExtra) };
+        }
+
+        let savedReklamaStendSizes = localStorage.getItem('erp_reklama_stend_sizes');
+        if (savedReklamaStendSizes) {
+            try {
+                reklamaStendSizeDatabase = { ...reklamaStendSizeDatabase, ...JSON.parse(savedReklamaStendSizes) };
+            } catch (e) {}
+        }
+
+        let savedReklamaStendQtyTiers = localStorage.getItem('erp_reklama_stend_qty_tiers');
+        if (savedReklamaStendQtyTiers) {
+            try {
+                reklamaStendQtyTiers = { ...reklamaStendQtyTiers, ...JSON.parse(savedReklamaStendQtyTiers) };
+            } catch (e) {}
+        }
+
+        let savedKlisheFees = localStorage.getItem('erp_klishe_prices');
+        if (savedKlisheFees) {
+            try {
+                klisheOneTimePrices = { ...klisheOneTimePrices, ...JSON.parse(savedKlisheFees) };
+            } catch (e) {}
+        }
+
+        let savedBayroqDb = localStorage.getItem('erp_bayroq_db');
+        if (savedBayroqDb) {
+            try {
+                let parsed = JSON.parse(savedBayroqDb);
+                if (Array.isArray(parsed)) bayroqDatabase = parsed;
+            } catch (e) {}
+        }
+        let savedBayroqFee = localStorage.getItem('erp_bayroq_delivery_fee');
+        if (savedBayroqFee !== null) {
+            try {
+                let parsedFee = JSON.parse(savedBayroqFee);
+                if (typeof parsedFee === 'number') bayroqDeliveryFee = parsedFee;
+            } catch (e) {}
         }
 
         let savedDigitalPapers = localStorage.getItem('erp_digital_papers_db');
@@ -184,6 +236,7 @@
             usersDb = savedUsers ? JSON.parse(savedUsers) : getDefaultUsersDb();
             if (!Array.isArray(usersDb) || usersDb.length === 0) usersDb = getDefaultUsersDb();
         } catch (e) { usersDb = getDefaultUsersDb(); }
+        migrateLegacyDefaultUserNames();
 
         try {
             let savedAudit = localStorage.getItem('erp_audit_log');
@@ -201,6 +254,72 @@
         } catch (e) {}
 
         renderAdminCategoryGrid();
+
+        // Kirish darvozasi: shu brauzer TAB sessiyasida allaqachon kirilgan bo'lsa (sahifa yangilansa ham)
+        // qayta so'ramaymiz; aks holda tizim login ekranida qoladi (index.html da standart holat shu).
+        try {
+            let savedUserId = sessionStorage.getItem('erp_current_user_id');
+            if (savedUserId) {
+                let user = usersDb.find(u => u.id === savedUserId);
+                if (user) {
+                    completeLoginGate(user);
+                    return;
+                }
+            }
+        } catch (e) {}
+    }
+
+    // ====================== KIRISH DARVOZASI (LOGIN GATE) ======================
+    // Butun tizim shu ekran ortida — foydalanuvchi ismi va PIN kodi (parol) to'g'ri kelmaguncha
+    // #appContainer ko'rsatilmaydi. Bu index.html dagi mavjud sahifa dizaynini o'zgartirmaydi,
+    // faqat oldiga bitta kirish bosqichini qo'shadi.
+    function attemptLoginGate() {
+        let nameInput = document.getElementById('loginNameInput');
+        let pinInput = document.getElementById('loginPinInput');
+        let errEl = document.getElementById('loginErrorMsg');
+        let name = (nameInput?.value || '').trim();
+        let pin = (pinInput?.value || '').trim();
+
+        function showErr(msg) {
+            if (errEl) { errEl.innerText = msg; errEl.style.display = 'block'; }
+        }
+
+        if (!name || !pin) {
+            showErr('⚠️ Foydalanuvchi nomi va PIN kodni kiriting.');
+            return;
+        }
+
+        let user = usersDb.find(u => u.name.trim().toLowerCase() === name.toLowerCase() && u.pin === pin);
+        if (!user) {
+            showErr('⚠️ Foydalanuvchi nomi yoki PIN kod noto\'g\'ri.');
+            if (pinInput) { pinInput.value = ''; pinInput.focus(); }
+            return;
+        }
+
+        if (errEl) errEl.style.display = 'none';
+        try { sessionStorage.setItem('erp_current_user_id', user.id); } catch (e) {}
+        // logAudit o'zi currentUser'ni "kim qildi" sifatida yozadi — shuning uchun avval
+        // completeLoginGate orqali currentUser'ni o'rnatamiz, keyin audit yozuvini qo'shamiz.
+        completeLoginGate(user);
+        if (typeof logAudit === 'function') logAudit('Tizimga kirildi', `${user.role === 'admin' ? 'Admin' : 'Menejer'}`);
+    }
+
+    // Login muvaffaqiyatli bo'lgach (yoki sessiyadan tiklangach) darvozani yopib, asosiy ilovani ko'rsatadi.
+    // Rolga qarab boshlang'ich ekran ham farqlanadi: admin — to'g'ridan-to'g'ri Admin Panelga,
+    // menejer — hisoblash (mahsulotlar) ekraniga tushadi.
+    function completeLoginGate(user) {
+        currentUser = user;
+        let gate = document.getElementById('loginGateScreen');
+        let app = document.getElementById('appContainer');
+        if (gate) gate.style.display = 'none';
+        if (app) app.style.display = 'block';
+        updateCurrentUserBadge();
+
+        if (user.role === 'admin') {
+            openAdminModal();
+        } else {
+            showScreen('selectionScreen');
+        }
     }
 
     function showToast(text) {
@@ -210,16 +329,67 @@
         setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
     }
 
+    // Ekranlar orasida "bitta qadam orqaga" tugmasi ishlashi uchun eng oxirgi va undan oldingi
+    // ekranni kuzatib boramiz. Chuqur (ko'p bosqichli) tarix emas — bu ilovada ekranlar deyarli
+    // hammasi to'g'ridan-to'g'ri "asosiy" holatlardan (kalkulyator, admin, hisobotlar, taklif)
+    // ochilgani uchun bitta qadam yetarli.
+    let currentScreenId = 'selectionScreen';
+    let previousScreenId = 'selectionScreen';
+
     function showScreen(screenId) {
+        if (screenId !== currentScreenId) {
+            previousScreenId = currentScreenId;
+            currentScreenId = screenId;
+        }
         document.querySelectorAll('.screen, #selectionScreen').forEach(el => el.style.display = 'none');
         document.getElementById(screenId).style.display = 'block';
+    }
+
+    // Yagona "⬅️ Orqaga" tugmasi — bir qadam oldingi ekranga qaytaradi.
+    function goBackScreen() {
+        showScreen(previousScreenId || 'selectionScreen');
+    }
+
+    // Sarlavha (logotip) bosilganda — foydalanuvchi login/parol bilan kirgach qaysi ekranga
+    // tushgan bo'lsa, aynan o'sha ekranga qaytaradi: admin — Admin Panel, menejer — kalkulyator
+    // (mahsulotlar) ro'yxati.
+    function goToLoginLandingScreen() {
+        if (!currentUser) return;
+        if (currentUser.role === 'admin') {
+            openAdminModal();
+        } else {
+            showScreen('selectionScreen');
+        }
     }
 
     // ====================== FOYDALANUVCHILAR VA ROLLAR ======================
     function getDefaultUsersDb() {
         return [
-            { id: 'u_admin', name: 'Administrator', pin: '1234', role: 'admin' }
+            { id: 'u_admin', name: 'admin', pin: '1234', role: 'admin' },
+            { id: 'u_menejer', name: 'menejer', pin: '1234', role: 'menejer' }
         ];
+    }
+
+    // Eski (avvalroq saqlangan) bazalarda hali "Administrator"/"menejer1" nomlari qolgan bo'lishi mumkin —
+    // bir martalik migratsiya bilan yangi standart login nomlariga ("admin"/"menejer") o'tkazamiz.
+    // Faqat aniq eski standart qiymatlarga mos kelgan yozuvlarga tegamiz — foydalanuvchi qo'lda
+    // o'zgartirgan ismlar yoki PIN kodlar bunga tegmaydi.
+    function migrateLegacyDefaultUserNames() {
+        let changed = false;
+        usersDb.forEach(u => {
+            if (u.id === 'u_admin' && u.name === 'Administrator') {
+                u.name = 'admin';
+                changed = true;
+            }
+            if (u.role === 'menejer' && u.name === 'menejer1' && u.pin === '123456') {
+                u.name = 'menejer';
+                u.pin = '1234';
+                changed = true;
+            }
+        });
+        if (changed) {
+            try { localStorage.setItem('erp_users_db', JSON.stringify(usersDb)); } catch (e) {}
+        }
     }
 
     function requireLogin(allowedRoles, onSuccess) {
@@ -245,10 +415,25 @@
     }
 
     function logoutUser() {
+        if (typeof logAudit === 'function' && currentUser) logAudit('Tizimdan chiqildi', currentUser.name);
         currentUser = null;
+        try { sessionStorage.removeItem('erp_current_user_id'); } catch (e) {}
         updateCurrentUserBadge();
-        showToast("Tizimdan chiqildi.");
         showScreen('selectionScreen');
+
+        // Ilovani yashirib, kirish darvozasini qayta ko'rsatamiz — chiqishdan keyin
+        // tizimning qolgan qismi yana login talab qiladi.
+        let gate = document.getElementById('loginGateScreen');
+        let app = document.getElementById('appContainer');
+        if (app) app.style.display = 'none';
+        if (gate) gate.style.display = 'flex';
+        let nameInput = document.getElementById('loginNameInput');
+        let pinInput = document.getElementById('loginPinInput');
+        let errEl = document.getElementById('loginErrorMsg');
+        if (nameInput) nameInput.value = '';
+        if (pinInput) pinInput.value = '';
+        if (errEl) errEl.style.display = 'none';
+        if (nameInput) nameInput.focus();
     }
 
     function updateCurrentUserBadge() {
@@ -747,29 +932,76 @@
         }
     }
 
+    // Har bir toifa uchun bosma sanoatining o'zi kabi CMYK ranglaridan foydalanamiz (Cyan/Magenta/
+    // Yellow/Ink) — ilovaning umumiy vizual tiliga (logotip, --primary/--magenta/--yellow/--ink)
+    // mos, shu bilan birga har bir bo'limni bir-biridan tezda ajratib olishga yordam beradi.
+    // Har bir bo'lim o'z rangiga ega — bo'limlar bir-biridan yaqqol ajralib turishi uchun
+    // barcha 6 tasi HAR XIL aksentga ega (ikkitasi bir xil rangda takrorlanmaydi).
+    const adminCatMeta = {
+        poligrafiya: { title: 'Poligrafiya mahsulotlari', icon: '🖨️', accent: 'cyan' },
+        textile:     { title: 'Tekstil mahsulotlari',     icon: '👕', accent: 'magenta' },
+        souvenir:    { title: 'Suvenir mahsulotlari',     icon: '🎁', accent: 'yellow' },
+        reklama:     { title: 'Reklama mahsulotlari',     icon: '🖼️', accent: 'ink' },
+        ofset:       { title: 'Ofset pechat',             icon: '⚙️', accent: 'green' },
+        sifravoy:    { title: 'Sifravoy pechat',          icon: '⚡', accent: 'violet' }
+    };
+
     function renderAdminCategoryGrid() {
         let container = document.getElementById('adminCategoryGridContainer');
-        
-        const renderSection = (title, items) => `
-            <div class="section-title">${title}</div>
-            <div class="product-grid">
-                ${items.map(item => `
-                    <div class="product-card" onclick="openProductManager('${item.key}', '${item.name}')">
-                        <div class="icon">${item.icon}</div>
-                        <h3>${item.name}</h3>
-                    </div>
-                `).join('')}
+
+        const renderSection = (catKey, items) => {
+            let meta = adminCatMeta[catKey];
+            return `
+            <div class="admin-cat-section admin-cat-accent-${meta.accent}" data-cat-section="${catKey}">
+                <div class="admin-cat-section-head">
+                    <span class="admin-cat-section-badge">${meta.icon}</span>
+                    <span class="admin-cat-section-title">${meta.title}</span>
+                    <span class="admin-cat-section-count">${items.length} ta</span>
+                </div>
+                <div class="admin-cat-grid">
+                    ${items.map(item => `
+                        <div class="admin-cat-card" data-cat-name="${item.name.toLowerCase()}" onclick="openProductManager('${item.key}', '${item.name}')">
+                            <span class="admin-cat-icon-badge">${item.icon}</span>
+                            <span class="admin-cat-name">${item.name}</span>
+                            <span class="admin-cat-go">→</span>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `;
+        };
 
-        container.innerHTML = `
-            ${renderSection('1. POLIGRAFIYA MAHSULOTLARI BAZASI', allCategories.poligrafiya)}
-            ${renderSection('2. TEXTILE MAHSULOTLARI BAZASI', allCategories.textile)}
-            ${renderSection('3. SUVENIR MAHSULOTLARI BAZASI', allCategories.souvenir)}
-            ${renderSection('4. REKLAMA MAHSULOTLARI BAZASI', allCategories.reklama)}
-            ${renderSection('5. OFSET PECHAT BAZASI', allCategories.ofset)}
-            ${renderSection('6. SIFRAVOY PECHAT BAZASI', allCategories.sifravoy)}
-        `;
+        container.innerHTML = Object.keys(adminCatMeta).map(catKey => renderSection(catKey, allCategories[catKey])).join('');
+
+        let totalItems = Object.values(allCategories).reduce((sum, arr) => sum + arr.length, 0);
+        let summaryEl = document.getElementById('adminCatSummary');
+        if (summaryEl) summaryEl.innerText = `${totalItems} ta mahsulot turi · ${Object.keys(adminCatMeta).length} ta bo'lim`;
+
+        let searchInput = document.getElementById('adminCategorySearchInput');
+        if (searchInput) searchInput.value = '';
+        let emptyState = document.getElementById('adminCatEmptyState');
+        if (emptyState) emptyState.style.display = 'none';
+    }
+
+    // Admin Panel bosh ekranidagi qidiruv — mahsulot nomi bo'yicha kartalarni filtrlaydi,
+    // hech qaysi mahsuloti mos kelmagan bo'limni butunlay yashiradi.
+    function filterAdminCategoryGrid() {
+        let input = (document.getElementById('adminCategorySearchInput')?.value || '').toLowerCase().trim();
+        let sections = document.querySelectorAll('#adminCategoryGridContainer .admin-cat-section');
+        let anyVisible = false;
+        sections.forEach(section => {
+            let cards = section.querySelectorAll('.admin-cat-card');
+            let sectionHasMatch = false;
+            cards.forEach(card => {
+                let matches = !input || card.dataset.catName.includes(input);
+                card.style.display = matches ? 'flex' : 'none';
+                if (matches) sectionHasMatch = true;
+            });
+            section.style.display = sectionHasMatch ? 'block' : 'none';
+            if (sectionHasMatch) anyVisible = true;
+        });
+        let emptyState = document.getElementById('adminCatEmptyState');
+        if (emptyState) emptyState.style.display = anyVisible ? 'none' : 'block';
     }
 
     function openProductManager(key, name) {
@@ -782,18 +1014,33 @@
         let isOfset = (key === 'ofset_pechat');
         let isBloknot = (key === 'bloknot');
         let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot;
-        let isTextile = textileKeys.includes(key);
+        let isBayroq = (key === 'bayroqlar');
+        let isTextile = textileKeys.includes(key) && !isBayroq;
+        let isReklamaStend = reklamaStendTypes.includes(key);
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
         document.getElementById('digitalAdminPanelBox').style.display = isDigital ? 'block' : 'none';
         document.getElementById('poligrafiyaSizeAdminBox').style.display = isPoligrafiya ? 'block' : 'none';
         document.getElementById('bloknotAdminBox').style.display = isBloknot ? 'block' : 'none';
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
+        document.getElementById('reklamaStendAdminBox').style.display = isReklamaStend ? 'block' : 'none';
+        document.getElementById('bayroqAdminBox').style.display = isBayroq ? 'block' : 'none';
 
-        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isTextile;
+        // Tisneniya uchun bir martalik Klishe narxi — hozircha faqat Yejidnevnikda
+        let hasKlisheFee = klisheFeeProductTypes.includes(key);
+        document.getElementById('klisheFeeAdminBox').style.display = hasKlisheFee ? 'block' : 'none';
+        if (hasKlisheFee) {
+            document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
+        }
+
+        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isTextile || isReklamaStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
+        if (isBayroq) {
+            renderBayroqAdmin();
+            return;
+        }
         if (isTextile) {
             loadTextileEditState(key);
             return;
@@ -807,11 +1054,17 @@
             renderAdminDigitalPaperTable();
             return;
         }
+        if (isReklamaStend) {
+            renderReklamaStendTierRangesEditor(key);
+            renderAdminReklamaStendSizeTable(key);
+            return;
+        }
         if (isBloknot) {
             renderAdminBloknotTables();
             return;
         }
         if (isPoligrafiya) {
+            updateFlayerAdminCardsVisibility(key);
             renderAdminPoligrafiyaGsmTable();
             renderPoligrafiyaAdvancedConfigUI();
             return;
@@ -874,6 +1127,28 @@
 
         cancelPenEdit();
         renderAdminPensTable();
+    }
+
+    // Flayer aqlli marshrutlash orqali hisoblanadi — qog'oz narxi to'g'ridan-to'g'ri Ofset/Raqamli
+    // bazalaridan olinadi, shuning uchun admin paneldagi alohida gsm-narx jadvali flayer uchun
+    // ko'rsatilmaydi (chalg'ituvchi va endi ishlatilmaydi); o'rniga tushuntiruvchi eslatma chiqadi.
+    // Ham admin panel ochilganda, ham "Aqlli narxlash" sozlamalari saqlanganda (routing yoqish/
+    // o'chirish) chaqiriladi — shuning uchun ikkalasida ham darhol yangilanadi.
+    function updateFlayerAdminCardsVisibility(key) {
+        let isFlayerRouted = (key === 'flayer') && poligrafiyaAdvancedConfig.ofsetRoutingEnabled !== false;
+        let gsmPriceCard = document.getElementById('poligrafiyaGsmPriceCard');
+        if (gsmPriceCard) gsmPriceCard.style.display = isFlayerRouted ? 'none' : 'block';
+        let routingNote = document.getElementById('flayerRoutingNote');
+        if (routingNote) {
+            if (isFlayerRouted) {
+                routingNote.style.display = 'block';
+                let threshold = (poligrafiyaAdvancedConfig.ofsetRoutingThreshold || 1000).toLocaleString();
+                routingNote.innerHTML = `🧠 <strong>Aqlli marshrutlash yoqilgan.</strong> Qog'oz narxi bu yerda emas, balki Ofset va Raqamli pechat bo'limlaridagi bazalardan avtomatik olinadi. Tiraj <strong>${threshold} donadan kam</strong> bo'lsa — Raqamli pechat, <strong>teng yoki ko'p</strong> bo'lsa — Ofset pechat orqali hisoblanadi. Narxlarni o'zgartirish uchun tegishli bo'limning admin panelidan foydalaning.`;
+            } else {
+                routingNote.style.display = 'none';
+                routingNote.innerHTML = '';
+            }
+        }
     }
 
     function closeProductManager() {
@@ -992,8 +1267,14 @@ function generateForm(type) {
             </div>
         `;
 
-    if (textileKeys.includes(type)) {
+    if (type === 'bayroqlar') {
+        html = generateFormHtml_bayroq();
+    }
+    else if (textileKeys.includes(type)) {
         html = generateFormHtml_textile(type);
+    }
+    else if (reklamaStendTypes.includes(type)) {
+        html = generateFormHtml_reklamaStend(type);
     }
     else if (reklamaBanTypes.includes(type)) {
         html = generateFormHtml_reklama(type);
@@ -1007,7 +1288,10 @@ function generateForm(type) {
 
     form.innerHTML = html;
 
-    if (textileKeys.includes(type)) {
+    if (type === 'bayroqlar') {
+        renderBayroqPicker();
+    }
+    else if (textileKeys.includes(type)) {
         renderTextilePickers(type);
     }
 
@@ -1016,9 +1300,18 @@ function generateForm(type) {
         return;
     }
 
+    if (reklamaStendTypes.includes(type)) {
+        renderReklamaStendSizeOptions(type);
+        return;
+    }
+
     let gsmListForRender = poligrafiyaGsmDatabase[type] || [];
     if (gsmListForRender.length > 0 && document.getElementById('poligrafiyaGsmGroup')) {
         renderPoligrafiyaGsmOptions(gsmListForRender);
+    }
+
+    if (type === 'flayer' && document.getElementById('flayerPaperPickerBox')) {
+        renderFlayerPaperPicker();
     }
 }
 
@@ -1051,7 +1344,15 @@ function calculate() {
     else {
         if(previewBox) previewBox.style.display = 'none';
         renderTierPreview(null, qty, marginPercent);
-        if (reklamaBanTypes.includes(activeProductType)) {
+        if (activeProductType === 'bayroqlar') {
+            let r = calculateResult_bayroq(qty);
+            details = r.details; baseUnitPrice = r.baseUnitPrice;
+        }
+        else if (reklamaStendTypes.includes(activeProductType)) {
+            let r = calculateResult_reklamaStend(activeProductType, qty);
+            details = r.details; baseUnitPrice = r.baseUnitPrice;
+        }
+        else if (reklamaBanTypes.includes(activeProductType)) {
             let r = calculateResult_reklama(activeProductType, qty, baseCost);
             details = r.details; baseUnitPrice = r.baseUnitPrice;
         }
@@ -1092,6 +1393,15 @@ function calculate() {
         let chkUstanovka = document.getElementById('chkUstanovka');
         if (chkUstanovka && chkUstanovka.checked) {
             totalPrice += Math.round((reklamaExtraPrices.ustanovka || 0) * (1 + marginPercent / 100));
+        }
+    }
+
+    // Tisneniya tanlansa — bir martalik Klishe narxi jami summaga qo'shiladi (dona soniga bog'liq emas)
+    if (klisheFeeProductTypes.includes(activeProductType) && selectedPrintType === 'gravirovka') {
+        let klishePrice = klisheOneTimePrices[activeProductType] || 0;
+        if (klishePrice > 0) {
+            totalPrice += Math.round(klishePrice * (1 + marginPercent / 100));
+            details += ` | Klishe (bir martalik): ${klishePrice.toLocaleString()} so'm qo'shildi`;
         }
     }
 

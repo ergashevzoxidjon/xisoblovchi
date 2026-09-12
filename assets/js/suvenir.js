@@ -1,9 +1,36 @@
     const printTypeSchemes = {
-        statuetka: { uv: 'UF Pechat', dtf: 'UF DTF', gravirovka: 'Gravirovka' },
+        // UF Pechat / UF DTF Pechat / Gravirovka — har birining narxi alohida, Sifravoy pechat yo'q.
+        // Bu sxema quyidagi suvenir turlarida bir xil ishlaydi: Ruchka, Termos, Brelok, Bakal,
+        // Suv idishlar, Powerbanklar, Fleshka, Statuetka, Kardxolder.
+        statuetka: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
         zontik: { dtf: 'DTF', gravirovka: 'Vinil pechat' },
-        fleshka: { uv: 'UF Pechat', dtf: 'UF DTF', gravirovka: 'Gravirovka' },
-        kardxolder: { uv: 'UF Pechat', dtf: 'UF DTF' }
+        fleshka: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        kardxolder: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        ruchka: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        termos: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        brelok: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        bakal: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        suv_idishlar: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        powerbanklar: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        // Yejidnevnikda uchinchi chop turi "Tisneniya" nomi bilan (ichki kalit sifatida umumiy
+        // "gravirovka" ishlatiladi — narxi va bir martalik Klishe to'lovi mustaqil hisoblanadi)
+        yejidnevnik: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Tisneniya' }
     };
+
+    // Tisneniya (gravirovka) tanlanganda bir martalik "Klishe" (qolip) narxi qo'shiladigan turlar.
+    // Bu narx buyurtma miqdoriga bog'liq emas — bir marta, butun buyurtma uchun qo'shiladi.
+    let klisheFeeProductTypes = ['yejidnevnik'];
+    let klisheOneTimePrices = { yejidnevnik: 150000 };
+
+    function saveKlisheFee() {
+        let input = document.getElementById('klisheFeeInput');
+        if (!input || !currentManagingProduct) return;
+        let price = parseFloat(input.value) || 0;
+        klisheOneTimePrices[currentManagingProduct] = price;
+        localStorage.setItem('erp_klishe_prices', JSON.stringify(klisheOneTimePrices));
+        if (typeof logAudit === 'function') logAudit("Klishe narxi o'zgartirildi", `${currentManagingProduct}: ${price.toLocaleString()} so'm`);
+        showToast("💾 Klishe narxi saqlandi!");
+    }
     // Har bir reklama turi uchun qaysi qo'shimcha xizmatlar tegishli ekanligi
     let pensDatabase = {};
     let selectedPen = null;
@@ -102,10 +129,19 @@
 
     function renderAdminPensTable() {
         let tbody = document.getElementById('adminPensTable');
+        let tableWrap = document.getElementById('adminPensTableWrap');
+        let cardGrid = document.getElementById('adminPensCardGrid');
+        let searchWrap = document.getElementById('modelListSearchWrap');
+        let countEl = document.getElementById('modelListCount');
+        let searchInput = document.getElementById('adminPensSearchInput');
         let isSouvenir = souvenirKeys.includes(currentManagingProduct);
         let currentList = pensDatabase[currentManagingProduct] || [];
 
         if (!isSouvenir) {
+            if (tableWrap) tableWrap.style.display = 'block';
+            if (cardGrid) { cardGrid.style.display = 'none'; cardGrid.innerHTML = ''; }
+            if (searchWrap) searchWrap.style.display = 'none';
+            if (countEl) countEl.textContent = '';
             let basePrice = defaultPrices[currentManagingProduct] || 0;
             let rows = `
                 <tr>
@@ -149,63 +185,144 @@
             return;
         }
 
+        // Suvenir turlari uchun jadval o'rniga kartochka ko'rinishi ishlatiladi — rasm,
+        // narx va chop turlari bir qarashda ko'rinadi, ustunlarga siqilmaydi.
+        if (tableWrap) tableWrap.style.display = 'none';
+        if (cardGrid) cardGrid.style.display = 'grid';
+
         if (currentList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding:20px;">Hozircha ushbu mahsulot bazasiga hech qanday model qo'shilmagan.</td></tr>`;
+            if (searchWrap) searchWrap.style.display = 'none';
+            if (countEl) countEl.textContent = '';
+            if (cardGrid) cardGrid.innerHTML = `<div class="model-grid-empty">📭 Hozircha ushbu mahsulot bazasiga hech qanday model qo'shilmagan.<br>Yuqoridagi formadan birinchi modelni qo'shing.</div>`;
             return;
         }
 
-        tbody.innerHTML = currentList.map((p, idx) => `
-            <tr>
-                <td>
-                    <div class="thumb-box">
-                        <img src="${p.image}" onerror="this.src='https://via.placeholder.com/50?text=No+Img'">
+        if (searchWrap) searchWrap.style.display = 'flex';
+        if (countEl) countEl.textContent = `${currentList.length} ta model`;
+        if (searchInput) searchInput.value = '';
+
+        cardGrid.innerHTML = currentList.map((p, idx) => {
+            let tl = normalizeTierList(p.tiers);
+            let priceHtml;
+            if (tl.length === 0) {
+                priceHtml = `<div class="model-card-price">${(p.basePrice || 0).toLocaleString()} so'm</div>`;
+            } else {
+                let min = Math.min(...tl.map(t => t.basePrice > 0 ? t.basePrice : (p.basePrice || 0)));
+                let max = Math.max(...tl.map(t => t.basePrice > 0 ? t.basePrice : (p.basePrice || 0)));
+                priceHtml = `
+                    <div class="model-card-price-row">
+                        <div class="model-card-price">${min === max ? min.toLocaleString() : `${max.toLocaleString()} → ${min.toLocaleString()}`} so'm</div>
+                        <span class="model-tier-badge">📊 ${tl.length} ta oraliq</span>
                     </div>
-                </td>
-                <td><strong style="color:var(--text-muted); font-size:0.82rem;">${p.id}</strong></td>
-                <td style="font-weight:600; color:var(--text-main);">${p.name}</td>
-                <td style="font-weight:700; color:var(--primary);">
-                    ${(() => {
-                        let tl = normalizeTierList(p.tiers);
-                        if (tl.length === 0) return `${(p.basePrice || 0).toLocaleString()} so'm`;
-                        let min = Math.min(...tl.map(t => t.basePrice > 0 ? t.basePrice : (p.basePrice || 0)));
-                        let max = Math.max(...tl.map(t => t.basePrice > 0 ? t.basePrice : (p.basePrice || 0)));
-                        return `
-                            <div>${min === max ? min.toLocaleString() : `${max.toLocaleString()} → ${min.toLocaleString()}`} so'm</div>
-                            <span class="badge" style="background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; margin-top:4px;">📊 ${tl.length} ta oraliq</span>
-                            <div style="font-weight:500; font-size:0.72rem; color:var(--text-muted); margin-top:4px;">${tl.map(t => tierLabel(t)).join(' · ')}</div>
-                        `;
-                    })()}
-                </td>
-                <td>
-                    ${currentManagingProduct === 'naborlar' ? `
+                    <div class="model-tier-chips">${tl.map(t => `<span class="model-tier-chip">${tierLabel(t)}</span>`).join('')}</div>
+                `;
+            }
+
+            let printBadgesHtml;
+            if (currentManagingProduct === 'naborlar') {
+                printBadgesHtml = `
                     <div class="badge-container">
                         ${p.allowUv !== false ? `<span class="badge badge-uv">UF Pechat</span>` : ''}
                         ${p.allowDtf !== false ? `<span class="badge badge-uv">UF DTF</span>` : ''}
                         ${p.allowGravirovka !== false ? `<span class="badge badge-uv">Gravirovka</span>` : ''}
                     </div>
-                    ` : `
-                    <div class="badge-container">
-                        ${p.allowUv ? `<span class="badge badge-uv">UF: ${tierPriceRangeText(p, 'uv')}</span>` : ''}
-                        ${p.allowSifravoy ? `<span class="badge badge-sifravoy">Sifravoy: ${tierPriceRangeText(p, 'sifravoy')}</span>` : ''}
-                    </div>
-                    `}
-                    ${(p.details && p.details.length > 0) ? `
-                        <div class="detail-tag-list" style="margin-top:6px;">
-                            ${p.details.map(d => {
-                                let dd = normalizeNaborDetail(d);
-                                return `<span class="detail-tag" title="UF Pechat: ${dd.printPrices.uv.toLocaleString()} | UF DTF: ${dd.printPrices.dtf.toLocaleString()} | Gravirovka: ${dd.printPrices.laser.toLocaleString()}">${dd.name}</span>`;
-                            }).join('')}
+                `;
+            } else {
+                // Har bir chop turining narxi mahsulotning o'z sxemasiga (printTypeSchemes) qarab
+                // to'g'ri belgi (badge) va nom bilan chiqadi — masalan Ruchkada endi Sifravoy o'rniga
+                // UF DTF Pechat va Gravirovka, har birining narxi alohida ko'rsatiladi.
+                let scheme = printTypeSchemes[currentManagingProduct];
+                let badgeParts = [];
+                if (scheme) {
+                    if (scheme.uv && p.allowUv) badgeParts.push(`<span class="badge badge-uv">${scheme.uv}: ${tierPriceRangeText(p, 'uv')}</span>`);
+                    if (scheme.dtf && p.allowDtf) badgeParts.push(`<span class="badge badge-dtf">${scheme.dtf}: ${tierPriceRangeText(p, 'dtf')}</span>`);
+                    if (scheme.gravirovka && p.allowGravirovka) badgeParts.push(`<span class="badge badge-grav">${scheme.gravirovka}: ${tierPriceRangeText(p, 'gravirovka')}</span>`);
+                } else {
+                    if (p.allowUv) badgeParts.push(`<span class="badge badge-uv">UF: ${tierPriceRangeText(p, 'uv')}</span>`);
+                    if (p.allowSifravoy) badgeParts.push(`<span class="badge badge-sifravoy">Sifravoy: ${tierPriceRangeText(p, 'sifravoy')}</span>`);
+                }
+                printBadgesHtml = `<div class="badge-container">${badgeParts.join('')}</div>`;
+            }
+
+            let colorDotsHtml = (p.colors && p.colors.length > 0) ? `
+                <div class="model-color-dots">
+                    ${p.colors.slice(0, 8).map(c => `<span class="model-color-dot" style="background:${c.hex || '#94a3b8'};" title="${(c.name || '').replace(/"/g, '&quot;')}"></span>`).join('')}
+                    ${p.colors.length > 8 ? `<span class="model-color-more">+${p.colors.length - 8}</span>` : ''}
+                </div>
+            ` : '';
+
+            let detailsHtml = (p.details && p.details.length > 0) ? `
+                <div class="detail-tag-list" style="margin-top:6px;">
+                    ${p.details.map(d => {
+                        let dd = normalizeNaborDetail(d);
+                        return `<span class="detail-tag" title="UF Pechat: ${dd.printPrices.uv.toLocaleString()} | UF DTF: ${dd.printPrices.dtf.toLocaleString()} | Gravirovka: ${dd.printPrices.laser.toLocaleString()}">${dd.name}</span>`;
+                    }).join('')}
+                </div>
+            ` : '';
+
+            let searchKey = `${p.id || ''} ${p.name || ''}`.toLowerCase().replace(/"/g, '&quot;');
+
+            return `
+                <div class="model-card" data-search="${searchKey}">
+                    <div class="model-card-top">
+                        <div class="model-card-thumb">
+                            <img src="${p.image}" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
                         </div>
-                    ` : ''}
-                </td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn btn-warning" title="Tahrirlash" onclick="editPen(${idx})">✏️</button>
-                        <button class="btn btn-danger" title="O'chirish" onclick="deletePen(${idx})">🗑️</button>
+                        <div class="model-card-head">
+                            <div class="model-card-name" title="${(p.name || '').replace(/"/g, '&quot;')}">${p.name}</div>
+                            <div class="model-card-id">${p.id}</div>
+                        </div>
+                        <div class="action-btns model-card-actions">
+                            <button class="btn btn-warning" title="Tahrirlash" onclick="editPen(${idx})">✏️</button>
+                            <button class="btn btn-danger" title="O'chirish" onclick="deletePen(${idx})">🗑️</button>
+                        </div>
                     </div>
-                </td>
-            </tr>
-        `).join('');
+                    <div class="model-card-body">
+                        ${priceHtml}
+                        ${printBadgesHtml}
+                        ${colorDotsHtml}
+                        ${detailsHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Model ro'yxatini ID/nomi bo'yicha tez qidirish (faqat kartochka ko'rinishida ishlaydi)
+    function filterAdminPensCards() {
+        let input = document.getElementById('adminPensSearchInput');
+        let cardGrid = document.getElementById('adminPensCardGrid');
+        if (!input || !cardGrid) return;
+        let q = input.value.trim().toLowerCase();
+        let cards = cardGrid.querySelectorAll('.model-card');
+        let visibleCount = 0;
+        cards.forEach(card => {
+            let match = !q || (card.dataset.search || '').includes(q);
+            card.style.display = match ? '' : 'none';
+            if (match) visibleCount++;
+        });
+        let emptyEl = cardGrid.querySelector('.model-grid-search-empty');
+        if (visibleCount === 0 && cards.length > 0) {
+            if (!emptyEl) {
+                emptyEl = document.createElement('div');
+                emptyEl.className = 'model-grid-empty model-grid-search-empty';
+                emptyEl.textContent = "🔍 Qidiruvga mos model topilmadi.";
+                cardGrid.appendChild(emptyEl);
+            }
+        } else if (emptyEl) {
+            emptyEl.remove();
+        }
+    }
+
+    // Fayl tanlanganida rasm ko'rinishini (preview) darhol ko'rsatadi
+    async function previewPenImage(inputEl) {
+        const img = document.getElementById('newPenImagePreview');
+        const placeholder = document.getElementById('newPenImagePreviewPlaceholder');
+        if (!img || !inputEl.files || !inputEl.files[0]) return;
+        let dataUrl = await convertBase64(inputEl.files[0]);
+        img.src = dataUrl;
+        img.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
     }
 
     function convertBase64(file) {
@@ -626,7 +743,7 @@
         let first = normalizeTierList(tierChipsState)[0];
         let base = first ? first.basePrice : 0;
         let pp = first ? first.printPrices : { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 };
-        let ranges = [[1, 10], [11, 50], [51, 100], [101, 200], [201, 500], [501, 0]];
+        let ranges = [[1, 3], [4, 10], [11, 20], [21, 50], [51, 100], [101, 0]];
         tierChipsState = ranges.map(([from, to]) => ({
             from, to, basePrice: base, printPrices: { ...pp }
         }));
@@ -836,6 +953,13 @@
         document.getElementById('penFormTitle').innerText = `✏️ Modelni Tahrirlash (${pen.id})`;
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
         document.getElementById('btnCancelEdit').style.display = "inline-flex";
+
+        let previewImg = document.getElementById('newPenImagePreview');
+        let placeholder = document.getElementById('newPenImagePreviewPlaceholder');
+        if (previewImg) {
+            if (pen.image) { previewImg.src = pen.image; previewImg.style.display = 'block'; if (placeholder) placeholder.style.display = 'none'; }
+            else { previewImg.style.display = 'none'; if (placeholder) placeholder.style.display = 'block'; }
+        }
     }
 
     function cancelPenEdit() {
@@ -873,6 +997,11 @@
         document.getElementById('penFormTitle').innerText = "➕ Yangi Model Qo'shish";
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
         document.getElementById('btnCancelEdit').style.display = "none";
+
+        let previewImg = document.getElementById('newPenImagePreview');
+        let placeholder = document.getElementById('newPenImagePreviewPlaceholder');
+        if (previewImg) { previewImg.style.display = 'none'; previewImg.src = ''; }
+        if (placeholder) placeholder.style.display = 'block';
     }
 
     function deletePen(index) {

@@ -26,8 +26,19 @@
             { from: 5000, factor: 0.75 }
         ],
         setupFee: 0,        // bir martalik forma/sozlash xarajati (so'm), tirajga bo'linib qo'shiladi
-        minOrderAmount: 0   // minimal buyurtma summasi (so'm) — jami narx shundan kam bo'lmaydi
+        minOrderAmount: 0,  // minimal buyurtma summasi (so'm) — jami narx shundan kam bo'lmaydi
+        ofsetRoutingEnabled: true,  // Flayer uchun aqlli marshrutlash (ofset/raqamli modullari orqali hisoblash) yoqilganmi
+        ofsetRoutingThreshold: 1000 // shu sondan kam bo'lsa — Raqamli pechat, ko'p/teng bo'lsa — Ofset pechat orqali hisoblanadi
     };
+
+    // Flayer uchun foydalanuvchi tanlaydigan chop etish tomoni (aqlli marshrutlash pilotida ishlatiladi)
+    let flayerPrintSides = 1;
+
+    // Flayer aqlli marshrutlash: foydalanuvchi tanlagan qog'oz (haqiqiy Ofset/Raqamli bazalaridan bevosita,
+    // alohida gsm-narx jadvalisiz). Ofset uchun turi+grammaj, Raqamli uchun bazadagi qog'oz indeksi.
+    let flayerSelectedOfsetPaperType = 'Ofset';
+    let flayerSelectedOfsetGsm = 80;
+    let flayerSelectedDigitalPaperIndex = 0;
 
     function renderPoligrafiyaAdvancedConfigUI() {
         let tbody = document.getElementById('adminPoligrafiyaQtyTiersBody');
@@ -44,6 +55,11 @@
         let minOrderInput = document.getElementById('poligrafiyaMinOrderInput');
         if (setupInput) setupInput.value = poligrafiyaAdvancedConfig.setupFee || 0;
         if (minOrderInput) minOrderInput.value = poligrafiyaAdvancedConfig.minOrderAmount || 0;
+
+        let routingEnabledInput = document.getElementById('poligrafiyaOfsetRoutingEnabledInput');
+        let routingThresholdInput = document.getElementById('poligrafiyaOfsetRoutingThresholdInput');
+        if (routingEnabledInput) routingEnabledInput.checked = poligrafiyaAdvancedConfig.ofsetRoutingEnabled !== false;
+        if (routingThresholdInput) routingThresholdInput.value = poligrafiyaAdvancedConfig.ofsetRoutingThreshold || 1000;
     }
 
     function addPoligrafiyaQtyTierRow() {
@@ -76,9 +92,16 @@
         poligrafiyaAdvancedConfig.setupFee = setupFee < 0 ? 0 : setupFee;
         poligrafiyaAdvancedConfig.minOrderAmount = minOrderAmount < 0 ? 0 : minOrderAmount;
 
+        let routingEnabledInput = document.getElementById('poligrafiyaOfsetRoutingEnabledInput');
+        let routingThresholdInput = document.getElementById('poligrafiyaOfsetRoutingThresholdInput');
+        let routingThreshold = parseFloat(routingThresholdInput?.value) || 1000;
+        poligrafiyaAdvancedConfig.ofsetRoutingEnabled = routingEnabledInput ? !!routingEnabledInput.checked : true;
+        poligrafiyaAdvancedConfig.ofsetRoutingThreshold = routingThreshold < 1 ? 1000 : routingThreshold;
+
         localStorage.setItem('erp_poligrafiya_advanced_config', JSON.stringify(poligrafiyaAdvancedConfig));
-        if (typeof logAudit === 'function') logAudit('Aqlli narxlash sozlamalari o\'zgartirildi', `Pog'onalar: ${newTiers.length} ta, sozlash: ${setupFee.toLocaleString()} so'm, min. buyurtma: ${minOrderAmount.toLocaleString()} so'm`);
+        if (typeof logAudit === 'function') logAudit('Aqlli narxlash sozlamalari o\'zgartirildi', `Pog'onalar: ${newTiers.length} ta, sozlash: ${setupFee.toLocaleString()} so'm, min. buyurtma: ${minOrderAmount.toLocaleString()} so'm, ofset chegarasi: ${poligrafiyaAdvancedConfig.ofsetRoutingThreshold.toLocaleString()} dona (${poligrafiyaAdvancedConfig.ofsetRoutingEnabled ? 'yoqilgan' : "o'chirilgan"})`);
         renderPoligrafiyaAdvancedConfigUI();
+        if (typeof updateFlayerAdminCardsVisibility === 'function') updateFlayerAdminCardsVisibility(currentManagingProduct);
         showToast('✅ Aqlli narxlash sozlamalari saqlandi!');
     }
 
@@ -811,19 +834,54 @@
 function generateFormHtml_poligrafiya(type) {
     let html = '';
             let sizeLabel = poligrafiyaSizeLabels[type] || '';
-            let gsmList = poligrafiyaGsmDatabase[type] || [];
+
+            // Flayer uchun aqlli marshrutlash yoqilgan bo'lsa, tomonni foydalanuvchi o'zi tanlaydi
+            // (bu tanlov ofset/raqamli hisoblash moduliga ichki ravishda uzatiladi) va qog'oz
+            // to'g'ridan-to'g'ri haqiqiy Ofset/Raqamli bazalaridan tanlanadi — eski alohida
+            // gsm-narx jadvali (poligrafiyaGsmDatabase) flayer uchun umuman ishlatilmaydi.
+            let useSmartRouting = (type === 'flayer') && poligrafiyaAdvancedConfig.ofsetRoutingEnabled !== false;
+
             let gsmHtml = '';
-            if (gsmList.length > 0) {
-                let defaultIdx = gsmList.findIndex(g => g.isDefault);
-                selectedPoligrafiyaGsmIndex = defaultIdx >= 0 ? defaultIdx : 0;
-                gsmHtml = `
-                    <div class="step-title">Qog'oz grammaji:</div>
-                    <div class="options-group" id="poligrafiyaGsmGroup"></div>
-                `;
+            if (!useSmartRouting) {
+                let gsmList = poligrafiyaGsmDatabase[type] || [];
+                if (gsmList.length > 0) {
+                    let defaultIdx = gsmList.findIndex(g => g.isDefault);
+                    selectedPoligrafiyaGsmIndex = defaultIdx >= 0 ? defaultIdx : 0;
+                    gsmHtml = `
+                        <div class="step-title">Qog'oz grammaji:</div>
+                        <div class="options-group" id="poligrafiyaGsmGroup"></div>
+                    `;
+                }
             }
 
             let sideTypeVal = poligrafiyaSideTypes[type] ?? 1.6;
             let sideTypeLabel = sideTypeVal === 1 ? "Bir tomonlama (4+0)" : "Ikki tomonlama (4+4)";
+
+            let sideBlockHtml;
+            let paperPickerHtml = '';
+            let qtyOninput = 'calculate()';
+            if (useSmartRouting) {
+                flayerPrintSides = 1;
+                sideBlockHtml = `
+                    <div class="step-title">Chop etish tomoni:</div>
+                    <div class="options-group" id="flayerPrintSideGroup" style="display:flex;">
+                        <button class="opt-btn active" onclick="setFlayerPrintSide(1, this)" style="flex:1;">Bir tomonlama</button>
+                        <button class="opt-btn" onclick="setFlayerPrintSide(2, this)" style="flex:1;">Ikki tomonlama</button>
+                    </div>
+                `;
+                paperPickerHtml = `
+                    <div id="flayerEngineBadge" style="margin-bottom:10px;"></div>
+                    <div id="flayerPaperPickerBox"></div>
+                `;
+                qtyOninput = 'onFlayerQtyChange()';
+            } else {
+                sideBlockHtml = `
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>Bosma turi:</label>
+                        <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sideTypeLabel}</div>
+                    </div>
+                `;
+            }
 
             html = `
                 ${sizeLabel ? `
@@ -832,14 +890,12 @@ function generateFormHtml_poligrafiya(type) {
                     <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sizeLabel}</div>
                 </div>` : ''}
                 ${gsmHtml}
-                <div class="form-group" style="margin-bottom:12px;">
-                    <label>Bosma turi:</label>
-                    <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sideTypeLabel}</div>
-                </div>
+                ${sideBlockHtml}
                 <div class="form-group">
                     <label>Adad (dona):</label>
-                    <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
+                    <input type="number" id="inpQuantity" value="1000" min="1" oninput="${qtyOninput}">
                 </div>
+                ${paperPickerHtml}
             `;
 
     return html;
@@ -856,6 +912,165 @@ function generateFormHtml_poligrafiya(type) {
         return f;
     }
 
+    function setFlayerPrintSide(sides, btnEl) {
+        flayerPrintSides = sides;
+        document.querySelectorAll('#flayerPrintSideGroup button').forEach(b => b.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+        calculate();
+    }
+
+    // ====================== FLAYER: AQLLI MARSHRUTLASH (OFSET/RAQAMLI MODULLARI ORQALI) ======================
+    // "97x210mm" kabi yorliqni {w,h} mm ga aylantiradi
+    function parseSizeLabelToMM(label) {
+        if (!label) return null;
+        let m = /(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/i.exec(label);
+        if (!m) return null;
+        return { w: parseFloat(m[1]), h: parseFloat(m[2]) };
+    }
+
+    // SRA3/A3/A2/A1 ofset mashinalari orasidan eng arzonini tanlaydi (ofset.js dagi calculateOfsetForMachine funksiyasidan foydalanadi)
+    // SRA3 (320x450mm) — kichik-formatli mahsulotlar (flayer va h.k.) uchun eng samarali varoq o'lchami.
+    function calculateOfsetAutoBestFor(w, h, qty, side, paperType, gsm) {
+        let candidates = ['SRA3', 'A3', 'A2', 'A1']
+            .map(m => calculateOfsetForMachine(m, w, h, qty, side, paperType, gsm))
+            .filter(Boolean);
+        if (candidates.length === 0) return null;
+        candidates.sort((a, b) => a.perPieceCostRaw - b.perPieceCostRaw);
+        return candidates[0];
+    }
+
+    // Tirajga qarab qaysi hisoblash moduli ishlatilishini aniqlaydi (admin belgilagan chegaraga asosan)
+    function flayerActiveEngine(qty) {
+        let threshold = poligrafiyaAdvancedConfig.ofsetRoutingThreshold || 1000;
+        return (qty >= threshold) ? 'ofset' : 'raqamli';
+    }
+
+    // Flayer uchun qog'oz tanlash paneli — joriy adad va tanlangan mashinaga qarab Ofset (turi+grammaj)
+    // yoki Raqamli (bazadagi qog'oz nomi) chiplarini chizadi. Bu haqiqiy Ofset/Raqamli bo'limidagi
+    // xuddi shu bazalardan bevosita tanlaydi — alohida flayer-uchun gsm-narx jadvali ishlatilmaydi.
+    function renderFlayerPaperPicker() {
+        let box = document.getElementById('flayerPaperPickerBox');
+        let badge = document.getElementById('flayerEngineBadge');
+        if (!box) return;
+        let qtyEl = document.getElementById('inpQuantity');
+        let qty = qtyEl ? (parseInt(qtyEl.value) || 0) : 0;
+        let engine = flayerActiveEngine(qty);
+
+        if (badge) {
+            badge.innerHTML = engine === 'ofset'
+                ? `<span class="engine-badge engine-badge-ofset">🖨️ Ofset pechat</span>`
+                : `<span class="engine-badge engine-badge-raqamli">⚡ Raqamli pechat</span>`;
+        }
+
+        if (engine === 'ofset') {
+            if (!ofsetRawPapers.some(p => p.name === flayerSelectedOfsetPaperType)) {
+                flayerSelectedOfsetPaperType = ofsetRawPapers.length > 0 ? ofsetRawPapers[0].name : 'Ofset';
+            }
+            let typeOptions = ["Ofset", ...new Set(ofsetRawPapers.filter(p => p.name !== "Ofset").map(p => p.name))];
+            let gsmOptions = ofsetRawPapers.filter(p => p.name === flayerSelectedOfsetPaperType);
+            if (!gsmOptions.some(p => p.gsm === flayerSelectedOfsetGsm)) {
+                flayerSelectedOfsetGsm = gsmOptions.length > 0 ? gsmOptions[0].gsm : 80;
+            }
+            box.innerHTML = `
+                <div class="step-title">Qog'oz turi:</div>
+                <div class="options-group">
+                    ${typeOptions.map(t => `<button class="opt-btn ${t === flayerSelectedOfsetPaperType ? 'active' : ''}" onclick="setFlayerOfsetPaperType('${t}')">${t}</button>`).join('')}
+                </div>
+                <div class="step-title">Qog'oz grammaji:</div>
+                <div class="options-group">
+                    ${gsmOptions.map(p => `<button class="opt-btn ${p.gsm === flayerSelectedOfsetGsm ? 'active' : ''}" onclick="setFlayerOfsetGsm(${p.gsm})">${p.gsm}gr</button>`).join('')}
+                </div>
+            `;
+        } else {
+            if (!digitalPapersDatabase[flayerSelectedDigitalPaperIndex]) {
+                flayerSelectedDigitalPaperIndex = 0;
+            }
+            box.innerHTML = `
+                <div class="step-title">Qog'oz turi:</div>
+                <div class="options-group">
+                    ${digitalPapersDatabase.map((p, idx) => `<button class="opt-btn ${idx === flayerSelectedDigitalPaperIndex ? 'active' : ''}" onclick="setFlayerDigitalPaper(${idx})">${p.name}</button>`).join('')}
+                </div>
+            `;
+        }
+    }
+
+    function setFlayerOfsetPaperType(typeName) {
+        flayerSelectedOfsetPaperType = typeName;
+        let filtered = ofsetRawPapers.filter(p => p.name === typeName);
+        if (filtered.length > 0) flayerSelectedOfsetGsm = filtered[0].gsm;
+        renderFlayerPaperPicker();
+        calculate();
+    }
+
+    function setFlayerOfsetGsm(gsm) {
+        flayerSelectedOfsetGsm = gsm;
+        renderFlayerPaperPicker();
+        calculate();
+    }
+
+    function setFlayerDigitalPaper(index) {
+        flayerSelectedDigitalPaperIndex = index;
+        renderFlayerPaperPicker();
+        calculate();
+    }
+
+    // Adad o'zgarganda qayta hisoblashdan tashqari — dvigatel (ofset/raqamli) almashishi mumkin,
+    // shuning uchun qog'oz tanlash panelini ham qayta chizamiz.
+    function onFlayerQtyChange() {
+        renderFlayerPaperPicker();
+        calculate();
+    }
+
+    // Raqamli pechat uchun 1 varoqqa nechta mahsulot sig'ishini va kerakli varoq sonini hisoblaydi
+    // (raqamli.js dagi calculate_raqamli() ichidagi hisob mantig'ining qayta ishlatiladigan versiyasi)
+    function calculateDigitalForPaper(paperObj, x, y, qty, side) {
+        let pW = paperObj.p_eni || 310;
+        let pH = paperObj.p_boyi || 440;
+        const gap = 2;
+
+        let cols1 = Math.floor((pW + gap) / (x + gap));
+        let rows1 = Math.floor((pH + gap) / (y + gap));
+        let count1 = cols1 * rows1;
+
+        let cols2 = Math.floor((pW + gap) / (y + gap));
+        let rows2 = Math.floor((pH + gap) / (x + gap));
+        let count2 = cols2 * rows2;
+
+        let perSheet = count1, isRotated = false;
+        if (count2 > count1) { perSheet = count2; isRotated = true; }
+        if (perSheet <= 0) return null;
+
+        let sheetsNeeded = Math.ceil(qty / perSheet);
+        let unitPaperPrice = (side === 1) ? paperObj.price1 : paperObj.price2;
+        let totalPaperCost = sheetsNeeded * unitPaperPrice;
+
+        return { perSheet, sheetsNeeded, totalPaperCost, isRotated };
+    }
+
+    // Flayer narxini, tirajga qarab, haqiqiy Ofset yoki Raqamli pechat moduli orqali hisoblaydi.
+    // Qog'oz to'g'ridan-to'g'ri foydalanuvchi tanlagan Ofset/Raqamli bazasidan olinadi — alohida
+    // gsm-narx jadvali ishlatilmaydi. Mos qog'oz topilmasa yoki o'lcham sig'masa — null qaytaradi,
+    // chaqiruvchi eski oddiy formulaga qaytadi.
+    function calculateFlayerViaOfsetOrDigital(qty, sides) {
+        let sizeMM = parseSizeLabelToMM(poligrafiyaSizeLabels.flayer);
+        if (!sizeMM) return null;
+        let engine = flayerActiveEngine(qty);
+
+        if (engine === 'ofset') {
+            let best = calculateOfsetAutoBestFor(sizeMM.w, sizeMM.h, qty, sides, flayerSelectedOfsetPaperType, flayerSelectedOfsetGsm);
+            if (!best) return null;
+            let details = `Poligrafiya chop etish (${poligrafiyaSizeLabels.flayer}) | ${flayerSelectedOfsetPaperType} ${flayerSelectedOfsetGsm}gr | ${sides === 1 ? 'Bir tomonlama' : 'Ikki tomonlama'} (Ofset)`;
+            return { details, baseUnitPrice: best.perPieceCostRaw };
+        } else {
+            let paper = digitalPapersDatabase[flayerSelectedDigitalPaperIndex] || digitalPapersDatabase[0];
+            if (!paper) return null;
+            let res = calculateDigitalForPaper(paper, sizeMM.w, sizeMM.h, qty, sides);
+            if (!res) return null;
+            let details = `Poligrafiya chop etish (${poligrafiyaSizeLabels.flayer}) | ${paper.name} | ${sides === 1 ? 'Bir tomonlama' : 'Ikki tomonlama'} (Raqamli)`;
+            return { details, baseUnitPrice: res.totalPaperCost / qty };
+        }
+    }
+
 function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
     let details = activeProductType.toUpperCase();
     let baseUnitPrice = 0;
@@ -867,13 +1082,24 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                 }
 
                 let sideFactor = poligrafiyaSideTypes[activeProductType] ?? 1.6;
-                let gsmList = poligrafiyaGsmDatabase[activeProductType] || [];
+
+                // Flayer uchun aqlli marshrutlash: yoqilgan bo'lsa, avval haqiqiy Ofset/Raqamli
+                // pechat modulidan hisoblab ko'ramiz; mos qog'oz/o'lcham topilmasa pastdagi
+                // oddiy formulaga (fallback) o'tamiz. Flayerda alohida gsm-narx jadvali yo'q.
+                if (activeProductType === 'flayer' && poligrafiyaAdvancedConfig.ofsetRoutingEnabled !== false) {
+                    let routed = calculateFlayerViaOfsetOrDigital(qty, flayerPrintSides);
+                    if (routed) return routed;
+                }
+
                 let unitBase = baseCost;
                 let gsmLabel = '';
-                if (gsmList.length > 0) {
-                    let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList[0];
-                    unitBase = g.price;
-                    gsmLabel = ` | ${g.gsm}gr`;
+                if (activeProductType !== 'flayer') {
+                    let gsmList = poligrafiyaGsmDatabase[activeProductType] || [];
+                    if (gsmList.length > 0) {
+                        let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList[0];
+                        unitBase = g.price;
+                        gsmLabel = ` | ${g.gsm}gr`;
+                    }
                 }
                 let rate = unitBase * sideFactor * poligrafiyaQtyFactor(qty);
 

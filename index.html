@@ -10,14 +10,37 @@
 </head>
 <body>
 
-<div class="container">
+<!-- KIRISH DARVOZASI: tizimning qolgan qismi shundan keyingina ko'rinadi -->
+<div id="loginGateScreen" style="position:fixed; inset:0; z-index:9999; background:var(--bg-main); display:flex; align-items:center; justify-content:center; padding:20px;">
+    <div style="width:100%; max-width:380px; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:32px 28px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+            <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="10.5" stroke="var(--ink)" stroke-width="2"/><line x1="13" y1="0" x2="13" y2="26" stroke="var(--ink)" stroke-width="1.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--ink)" stroke-width="1.4"/><circle cx="13" cy="13" r="3.4" fill="var(--magenta)"/></svg>
+            <h1 style="font-family: var(--font-display); font-size: 1.25rem; margin:0;">Poligrafiya & Suvenir ERP</h1>
+        </div>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 22px;">Davom etish uchun tizimga kiring.</p>
+
+        <div class="form-group" style="margin-bottom:14px;">
+            <label>Foydalanuvchi nomi</label>
+            <input type="text" id="loginNameInput" placeholder="Masalan: Administrator" autocomplete="username" onkeydown="if(event.key==='Enter'){ document.getElementById('loginPinInput').focus(); }">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+            <label>PIN kod (parol)</label>
+            <input type="password" id="loginPinInput" placeholder="••••" inputmode="numeric" autocomplete="current-password" onkeydown="if(event.key==='Enter'){ attemptLoginGate(); }">
+        </div>
+        <div id="loginErrorMsg" style="display:none; color:var(--magenta); font-size:0.82rem; font-weight:600; margin-bottom:12px;"></div>
+
+        <button class="btn" style="width:100%;" onclick="attemptLoginGate()">Kirish</button>
+    </div>
+</div>
+
+<div class="container" id="appContainer" style="display:none;">
     <div class="header">
-        <h1><svg class="regmark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="10.5" stroke="var(--ink)" stroke-width="2"/><line x1="13" y1="0" x2="13" y2="26" stroke="var(--ink)" stroke-width="1.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--ink)" stroke-width="1.4"/><circle cx="13" cy="13" r="3.4" fill="var(--magenta)"/></svg> Poligrafiya & Suvenir ERP <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0; text-transform: none;">v3.8</span></h1>
+        <h1 onclick="goToLoginLandingScreen()" style="cursor:pointer;" title="Bosh sahifaga qaytish"><svg class="regmark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="10.5" stroke="var(--ink)" stroke-width="2"/><line x1="13" y1="0" x2="13" y2="26" stroke="var(--ink)" stroke-width="1.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--ink)" stroke-width="1.4"/><circle cx="13" cy="13" r="3.4" fill="var(--magenta)"/></svg> Poligrafiya & Suvenir ERP <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0; text-transform: none;">v3.8</span></h1>
         <div style="display:flex; align-items:center; gap:10px;">
+            <button class="btn btn-outline" id="globalBackBtn" onclick="goBackScreen()">⬅️ Orqaga</button>
             <span id="currentUserBadge" onclick="logoutUser()" style="display:none; cursor:pointer; font-size:0.78rem; font-weight:600; color:var(--text-muted); background:var(--bg-soft, #f1f5f9); padding:6px 12px; border-radius:8px; white-space:nowrap;" title="Chiqish uchun bosing"></span>
             <button class="btn btn-warning" id="quoteCartBtn" onclick="handleQuoteButtonClick()">🧾 Tijoriy taklif<span id="quoteCartBadge" class="quote-badge" style="display:none;">0</span></button>
             <button class="btn btn-secondary" onclick="openReportsScreen()">📊 Hisobotlar</button>
-            <button class="btn btn-secondary" onclick="openAdminModal()">⚙️ Admin Panel</button>
         </div>
     </div>
 
@@ -48,6 +71,7 @@
             <div class="product-card" onclick="openCalc('xudi', 'Xudi')"><div class="icon">🧥</div><h3>Xudi</h3></div>
             <div class="product-card" onclick="openCalc('jiletka', 'Jiletka')"><div class="icon">🥼</div><h3>Jiletka</h3></div>
             <div class="product-card" onclick="openCalc('shoper', 'Shoper')"><div class="icon">👜</div><h3>Shoper</h3></div>
+            <div class="product-card" onclick="openCalc('bayroqlar', 'Bayroqlar')"><div class="icon">🚩</div><h3>Bayroqlar</h3></div>
         </div>
 
         <div class="section-title">3. SUVENIR MAHSULOTLARI</div>
@@ -76,6 +100,10 @@
             <div class="product-card" onclick="openCalc('setka_orakal', 'Setka Orakal')"><div class="icon">🏁</div><h3>Setka Orakal</h3></div>
             <div class="product-card" onclick="openCalc('tumanka', 'Tumanka')"><div class="icon">🌫️</div><h3>Tumanka</h3></div>
             <div class="product-card" onclick="openCalc('xolst', 'Xolst')"><div class="icon">🎨</div><h3>Xolst</h3></div>
+            <div class="product-card" onclick="openCalc('rollup', 'Roll Up')"><div class="icon">📜</div><h3>Roll Up</h3></div>
+            <div class="product-card" onclick="openCalc('pauk', 'Pauk')"><div class="icon">🕷️</div><h3>Pauk</h3></div>
+            <div class="product-card" onclick="openCalc('popup', 'PopUp')"><div class="icon">⛺</div><h3>PopUp</h3></div>
+            <div class="product-card" onclick="openCalc('promostoyka', 'PromoStoyka')"><div class="icon">📣</div><h3>PromoStoyka</h3></div>
         </div>
 
         <div class="section-title">5. OFSET PECHAT</div>
@@ -91,7 +119,6 @@
 
     <!-- KALKULYATOR EKRANI -->
     <div id="calcScreen" class="screen">
-        <button class="btn btn-outline back-btn" onclick="showScreen('selectionScreen')">⬅️ Ortga qaytish</button>
         <h2 id="currentProductName" style="margin-bottom: 20px; color: var(--primary);"></h2>
         
         <div class="calc-grid">
@@ -105,14 +132,18 @@
 
     <!-- ADMIN PANEL EKRANI -->
     <div id="adminScreen" class="screen">
-        <button class="btn btn-outline back-btn" onclick="showScreen('selectionScreen')">⬅️ Asosiy ekranga qaytish</button>
         <h2 style="margin-bottom: 20px; color: var(--text-main);">⚙️ Admin Panel — Baza va Narxlarni Boshqarish</h2>
 
         <div id="adminCategorySelection">
-            <p style="margin-bottom: 20px; color: var(--text-muted); font-size: 0.95rem;">
-                Bazasini tahrirlash yoki model/narx qo'shmoqchi bo'lgan <strong>Mahsulotni</strong> tanlang:
-            </p>
+            <div class="admin-cat-intro">
+                <p>Bazasini tahrirlash yoki model/narx qo'shmoqchi bo'lgan <strong>Mahsulotni</strong> tanlang.</p>
+                <span class="admin-cat-summary" id="adminCatSummary"></span>
+            </div>
+            <div class="search-box admin-cat-search">
+                <input type="text" id="adminCategorySearchInput" placeholder="Mahsulot yoki bo'lim nomini qidiring..." oninput="filterAdminCategoryGrid()">
+            </div>
             <div id="adminCategoryGridContainer"></div>
+            <div id="adminCatEmptyState" class="admin-cat-empty" style="display:none;">🔍 Hech narsa topilmadi. Qidiruvni tekshiring.</div>
         </div>
 
         <div id="adminSpecificProductManager" style="display: none;">
@@ -123,7 +154,7 @@
             <div id="ofsetAdminPanelBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">📄 Xom Ashyo (Qog'oz) Narxlar Matrixi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Qog'oz turi, grammaji va uchta standart bosma bichim (620x880 / 620x940 / 700x1000) bo'yicha narxlar. "Ofset" qatori standart va o'chirilmaydi.</p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Qog'oz turi, grammaji va bosma bichimlari bo'yicha narxlar. "Ofset" qatori standart va o'chirilmaydi. <b>SRA3 (320x450mm)</b> ustuni — kichik-format mahsulotlar (masalan Flayer) uchun ishlatiladigan alohida, kesilgan varoq; narx kiritilmasa (0), o'sha qog'oz SRA3 uchun hisobga olinmaydi.</p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
                         <table class="admin-table">
@@ -131,6 +162,7 @@
                                 <tr>
                                     <th style="width: 150px;">Qog'oz turi</th>
                                     <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
                                     <th style="width: 130px;">620x880 (so'm)</th>
                                     <th style="width: 130px;">620x940 (so'm)</th>
                                     <th style="width: 130px;">700x1000 (so'm)</th>
@@ -233,7 +265,7 @@
 
             <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
             <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
-                <div class="add-pen-card">
+                <div class="add-pen-card" id="poligrafiyaGsmPriceCard">
                     <div class="add-pen-card-title">⚖️ Qog'oz Grammaji va Narxlari</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Ushbu mahsulot uchun qog'oz grammajlarini (masalan 115gr, 130gr) va har biriga mos birlik narxini kiriting. "Standart" ustunida mijoz ekranida avtomatik tanlanadigan grammajni belgilang.</p>
                     <div class="table-card" style="margin-bottom: 16px;">
@@ -262,6 +294,7 @@
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
                         Bu sozlamalar bloknotdan tashqari barcha poligrafiya mahsulotlariga birdek qo'llanadi.
                     </p>
+                    <div id="flayerRoutingNote" style="display:none; background:#eef7ff; border:1.5px solid var(--primary); border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:0.8rem; color:var(--text-main);"></div>
                     <div style="font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">Adad (tiraj) chegirma pog'onalari</div>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
@@ -289,7 +322,60 @@
                             <input type="number" id="poligrafiyaMinOrderInput" value="0">
                         </div>
                     </div>
-                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="savePoligrafiyaAdvancedConfig()">💾 Aqlli narxlash sozlamalarini saqlash</button>
+
+                    <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
+                        <div style="font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">🖨️ Aqlli marshrutlash (hozircha faqat Flayer uchun)</div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Yoqilgan bo'lsa, Flayer hisoblanganda tizim ichki tarzda haqiqiy Ofset yoki Raqamli pechat hisoblash modulidan foydalanadi — foydalanuvchiga bu ko'rsatilmaydi, faqat aniqroq narx chiqadi. Mos qog'oz topilmasa yoki o'lcham sig'masa, avtomatik oddiy formulaga qaytadi.
+                        </p>
+                        <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px; cursor:pointer; font-size:0.85rem; font-weight:600;">
+                            <input type="checkbox" id="poligrafiyaOfsetRoutingEnabledInput" checked style="width:17px; height:17px; accent-color:var(--primary); margin:0;">
+                            Yoqilgan
+                        </label>
+                        <div class="form-group">
+                            <label>Chegara (dona) — shundan kam: Raqamli, teng/ko'p: Ofset:</label>
+                            <input type="number" id="poligrafiyaOfsetRoutingThresholdInput" value="1000" min="1">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" style="width: 100%; margin-top: 16px;" onclick="savePoligrafiyaAdvancedConfig()">💾 Aqlli narxlash sozlamalarini saqlash</button>
+                </div>
+            </div>
+
+            <!-- REKLAMA STEND (Roll Up / Pauk / PopUp / PromoStoyka) ADMIN PANEL BLOKI -->
+            <div id="reklamaStendAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📊 Miqdor bo'yicha narx oraliqlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height:1.5;">
+                        Buyurtma miqdoriga qarab har xil narx belgilash uchun oraliqlarni shu yerda sozlang — masalan
+                        <strong>1-3 dona</strong> uchun bir narx, <strong>4-10 dona</strong> uchun arzonroq narx va h.k.
+                        Pastdagi jadvalda har bir o'lcham uchun shu oraliqlarga mos narxlarni kiritasiz.
+                        <strong>"Gacha"ni bo'sh yoki 0 qoldirsangiz</strong> — cheksiz (ya'ni "va undan yuqori") deb qabul qilinadi.
+                    </p>
+                    <div id="reklamaStendTierRangesEditor" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;"></div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem;" onclick="addReklamaStendTierRange()">+ Oraliq qo'shish</button>
+                        <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem;" onclick="fillDefaultReklamaStendTierRanges()">⚡ Namuna oraliqlar (1-3, 4-10, 11-20, 21-50, 51-100, 101+)</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📐 O'lchamlar va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Har bir o'lcham qatoriga, yuqoridagi oraliqlarning har biriga mos narxni kiriting. <strong>Bazaviy narx</strong> — hech qanday oraliq sozlanmagan yoki mos kelmasa ishlatiladigan zaxira narx. "Standart" ustunida mijoz ekranida avtomatik tanlanadigan o'lchamni belgilang. Material (Glyans/Matoviy) tanlovi narxga ta'sir qilmaydi.</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr id="adminReklamaStendTierHeaderRow"></tr>
+                            </thead>
+                            <tbody id="adminReklamaStendSizeTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" style="background: #4f46e5;" onclick="addReklamaStendSizeRow()">+ Yangi o'lcham qo'shish</button>
+                        <button class="btn btn-success" onclick="saveAllReklamaStendSizes()">💾 Barcha o'lchamlar va narxlarni saqlash</button>
+                    </div>
                 </div>
             </div>
 
@@ -454,8 +540,9 @@
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">🎨 Ranglar</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height:1.5;">
-                        Mijoz tanlaydigan mato ranglari. Har birining <strong>ustamasi</strong> bor va u ham tirajga bog'liq —
-                        masalan qora matoga pechat qimmatroq tushadi. Oddiy ranglar uchun ustamani <strong>0</strong> qoldiring.
+                        Mijoz tanlaydigan mato ranglari. Har birining <strong>doimiy ustamasi</strong> bor (so'mda) —
+                        buyurtma miqdoridan qat'iy nazar bir xil qo'shiladi. Masalan qora rang uchun ustama qo'ying,
+                        oddiy ranglar uchun <strong>0</strong> qoldiring.
                     </p>
                     <div id="textileColorsEditor"></div>
                     <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="addTextileItem('colors')">+ Rang qo'shish</button>
@@ -477,43 +564,145 @@
                 </div>
             </div>
 
-            <div class="add-pen-card" id="adminModelAddForm">
-                <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
-                <input type="hidden" id="editPenIndex" value="-1">
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Model ID / Kodu:</label>
-                        <input type="text" id="newPenId" placeholder="TR-01">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Model Nomi:</label>
-                        <input type="text" id="newPenName" placeholder="Model Nomi">
-                    </div>
-
-                    <div class="form-group" id="basePriceGroup">
-                        <label>Model Baza Narxi (so'm):</label>
-                        <input type="number" id="newPenPrice" placeholder="50000">
-                    </div>
-                </div>
-
-                <div class="form-row" id="souvenirFieldsRow">
-                    <div class="form-group">
-                        <label>Rasm Yuklash (Lokal):</label>
-                        <input type="file" id="newPenFile" accept="image/*">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Ruxsat berilgan Chop Turlari:</label>
-                        <div class="checkbox-group" id="checkboxGroupContainer">
-                            <label id="uvCheckLabel"><input type="checkbox" id="chkUv" checked> UF Pechat</label>
-                            <label id="sifravoyCheckLabel"><input type="checkbox" id="chkSifravoy" checked> Sifravoy Pechat</label>
-                            <label id="dtfCheckLabel" style="display:none;"><input type="checkbox" id="chkDtf" checked> <span id="dtfCheckLabelText">UF DTF</span></label>
-                            <label id="gravirovkaCheckLabel" style="display:none;"><input type="checkbox" id="chkGravirovka" checked> <span id="gravirovkaCheckLabelText">Gravirovka</span></label>
+            <!-- BAYROQLAR ADMIN PANEL BLOKI -->
+            <div id="bayroqAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🚚 Taxi (yetkazib berish) narxi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height:1.5;">
+                        Barcha bayroq turlariga umumiy, <strong>bir martalik</strong> yetkazib berish (Taxi) to'lovi —
+                        buyurtma qancha bo'lmasin bir marta olinadi, dona soniga bo'linib qo'shiladi
+                        (masalan 1 donada to'liq, 10 donada har biriga 10 dan 1 ulush).
+                    </p>
+                    <div class="form-row" style="align-items:flex-end; margin-bottom:0;">
+                        <div class="form-group">
+                            <label>Taxi narxi (so'm):</label>
+                            <input type="number" id="bayroqDeliveryFeeInput" min="0" placeholder="50000">
+                        </div>
+                        <div class="form-group" style="justify-content:flex-end;">
+                            <button class="btn" onclick="saveBayroqDeliveryFee()">💾 Saqlash</button>
                         </div>
                     </div>
                 </div>
+
+                <div class="add-pen-card" id="bayroqAddForm">
+                    <div class="add-pen-card-head">
+                        <div class="add-pen-card-title" id="bayroqFormTitle">➕ Yangi Bayroq Qo'shish</div>
+                        <div class="add-pen-card-sub">Nomi/texnik xususiyatlari, narxi va rasmini kiriting.</div>
+                    </div>
+                    <div class="model-form-section">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:2; min-width:280px;">
+                                <label>Nomi / texnik xususiyatlari:</label>
+                                <textarea id="bayroqNameInput" rows="4" placeholder="Masalan: Настольный флаг с одинарным флагштоком&#10;Размер флага: 0,15х0,25 см&#10;..." style="width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.9rem; resize:vertical;"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Narxi (so'm):</label>
+                                <input type="number" id="bayroqPriceInput" placeholder="150000">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Rasm Yuklash (Lokal):</label>
+                                <div class="image-upload-row">
+                                    <div class="image-upload-preview" id="bayroqImagePreviewBox">
+                                        <img id="bayroqImagePreview" alt="" style="display:none;">
+                                        <span id="bayroqImagePreviewPlaceholder">🚩</span>
+                                    </div>
+                                    <input type="file" id="bayroqFileInput" accept="image/*" onchange="previewBayroqImage(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-outline" id="btnCancelBayroqEdit" style="display:none;" onclick="cancelBayroqEdit()">Bekor qilish</button>
+                        <button class="btn" onclick="saveBayroqItem()">💾 Saqlash</button>
+                    </div>
+                </div>
+
+                <div class="table-card" id="bayroqTableCard">
+                    <div class="model-list-head">
+                        <div class="model-list-head-left">
+                            <h3>📋 Bayroqlar Ro'yxati</h3>
+                            <span class="model-list-count" id="bayroqAdminCount"></span>
+                        </div>
+                        <div class="model-list-search">
+                            <input type="text" id="bayroqAdminSearchInput" placeholder="🔍 Nomi bo'yicha qidirish..." oninput="filterBayroqAdminGrid()">
+                        </div>
+                    </div>
+                    <div class="model-grid" id="bayroqAdminGrid"></div>
+                </div>
+            </div>
+
+            <!-- TISNENIYA UCHUN BIR MARTALIK KLISHE NARXI (hozircha faqat Yejidnevnik) -->
+            <div class="add-pen-card" id="klisheFeeAdminBox" style="display:none; margin-bottom: 16px;">
+                <div class="add-pen-card-title">🖨️ Tisneniya uchun Klishe narxi</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height:1.5;">
+                    Mijoz chop turi sifatida <strong>Tisneniya</strong>ni tanlasa, shu narx buyurtmaga <strong>bir marta</strong> qo'shiladi —
+                    dona soniga ko'paytirilmaydi (qolip/klishe bir marta tayyorlanadi).
+                </p>
+                <div class="form-row" style="align-items:flex-end; margin-bottom:0;">
+                    <div class="form-group">
+                        <label>Klishe narxi (so'm):</label>
+                        <input type="number" id="klisheFeeInput" min="0" placeholder="150000">
+                    </div>
+                    <div class="form-group" style="justify-content:flex-end;">
+                        <button class="btn" onclick="saveKlisheFee()">💾 Saqlash</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-pen-card" id="adminModelAddForm">
+                <div class="add-pen-card-head">
+                    <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
+                    <div class="add-pen-card-sub">Ma'lumotlarni to'ldiring va saqlang — ro'yxat pastda avtomatik yangilanadi.</div>
+                </div>
+                <input type="hidden" id="editPenIndex" value="-1">
+
+                <div class="model-form-section">
+                    <div class="model-form-section-title"><span class="mfs-num">1</span> Asosiy ma'lumotlar</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Model ID / Kodu:</label>
+                            <input type="text" id="newPenId" placeholder="TR-01">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Model Nomi:</label>
+                            <input type="text" id="newPenName" placeholder="Model Nomi">
+                        </div>
+
+                        <div class="form-group" id="basePriceGroup">
+                            <label>Model Baza Narxi (so'm):</label>
+                            <input type="number" id="newPenPrice" placeholder="50000">
+                        </div>
+                    </div>
+
+                    <div class="form-row" id="souvenirFieldsRow">
+                        <div class="form-group">
+                            <label>Rasm Yuklash (Lokal):</label>
+                            <div class="image-upload-row">
+                                <div class="image-upload-preview" id="newPenImagePreviewBox">
+                                    <img id="newPenImagePreview" alt="" style="display:none;">
+                                    <span id="newPenImagePreviewPlaceholder">🖼️</span>
+                                </div>
+                                <input type="file" id="newPenFile" accept="image/*" onchange="previewPenImage(this)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ruxsat berilgan Chop Turlari:</label>
+                            <div class="checkbox-group" id="checkboxGroupContainer">
+                                <label id="uvCheckLabel"><input type="checkbox" id="chkUv" checked> UF Pechat</label>
+                                <label id="sifravoyCheckLabel"><input type="checkbox" id="chkSifravoy" checked> Sifravoy Pechat</label>
+                                <label id="dtfCheckLabel" style="display:none;"><input type="checkbox" id="chkDtf" checked> <span id="dtfCheckLabelText">UF DTF</span></label>
+                                <label id="gravirovkaCheckLabel" style="display:none;"><input type="checkbox" id="chkGravirovka" checked> <span id="gravirovkaCheckLabelText">Gravirovka</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="model-form-section">
+                    <div class="model-form-section-title"><span class="mfs-num">2</span> Narxlash</div>
 
                 <div class="price-size-box" id="printPricesBox">
                     <div class="price-size-title">🏷️ Har bir chop turi uchun alohida narxlar (so'mda):</div>
@@ -541,7 +730,7 @@
                     <div class="price-size-title">📊 Narxlar jadvali — mahsulot va chop narxi miqdorga qarab:</div>
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
                         <strong>Bu modelning yagona narx manbai shu jadval.</strong> Buyurtma miqdoriga qarab narx o'zgaradi:
-                        masalan 1–10 dona uchun bir narx, 11–50 dona uchun arzonroq narx.<br>
+                        masalan 1–3 dona uchun bir narx, 4–10 dona uchun arzonroq narx.<br>
                         <strong>"Gacha" ustunini bo'sh yoki 0 qoldirsangiz — cheksiz</strong> (ya'ni "va undan yuqori") deb qabul qilinadi.
                         Oxirgi qatorni shunday yopish tavsiya etiladi.<br>
                         Saqlash uchun kamida bitta oraliq va undagi mahsulot narxi to'ldirilgan bo'lishi shart.
@@ -554,7 +743,7 @@
                     </div>
                     <div id="tierWarningBox"></div>
                     <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="addTierRow()">+ Oraliq qo'shish</button>
-                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="fillDefaultTiers()">⚡ Namuna oraliqlar (1-10, 11-50, 51-100, 101-200, 201-500, 500+)</button>
+                    <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem; margin-top:12px;" onclick="fillDefaultTiers()">⚡ Namuna oraliqlar (1-3, 4-10, 11-20, 21-50, 51-100, 101+)</button>
                 </div>
 
                 <div id="sizePricesBox" class="price-size-box" style="display: none;">
@@ -574,6 +763,10 @@
                         </div>
                     </div>
                 </div>
+                </div>
+
+                <div class="model-form-section">
+                    <div class="model-form-section-title"><span class="mfs-num">3</span> Qo'shimcha xususiyatlar</div>
 
                 <div id="colorsBox" class="price-size-box" style="display: none;">
                     <div class="price-size-title">🎨 Mavjud ranglar (narxga ta'sir qilmaydi):</div>
@@ -592,6 +785,7 @@
                     <div id="detailsChipsEditor" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;"></div>
                     <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem;" onclick="addDetailRow()">+ Detal qo'shish</button>
                 </div>
+                </div>
 
                 <div class="form-actions">
                     <button class="btn btn-outline" id="btnCancelEdit" style="display:none;" onclick="cancelPenEdit()">Bekor qilish</button>
@@ -600,10 +794,17 @@
             </div>
 
             <div class="table-card" id="adminModelTableCard">
-                <div style="padding: 16px 20px; background:#fff; border-bottom:1px solid var(--border);">
-                    <h3 style="font-size: 1.05rem;" id="tableListTitle">📋 Baza Modellari Ro'yxati</h3>
+                <div class="model-list-head">
+                    <div class="model-list-head-left">
+                        <h3 id="tableListTitle">📋 Baza Modellari Ro'yxati</h3>
+                        <span class="model-list-count" id="modelListCount"></span>
+                    </div>
+                    <div class="model-list-search" id="modelListSearchWrap" style="display:none;">
+                        <input type="text" id="adminPensSearchInput" placeholder="🔍 ID yoki nomi bo'yicha qidirish..." oninput="filterAdminPensCards()">
+                    </div>
                 </div>
-                <div class="table-scroll">
+
+                <div class="table-scroll" id="adminPensTableWrap">
                 <table class="admin-table">
                     <thead>
                         <tr id="adminTableHeader">
@@ -618,14 +819,15 @@
                     <tbody id="adminPensTable"></tbody>
                 </table>
                 </div>
+
+                <div class="model-grid" id="adminPensCardGrid" style="display:none;"></div>
             </div>
         </div>
     </div>
 
     <!-- TIJORIY TAKLIF EKRANI -->
     <div id="quoteScreen" class="screen">
-        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-            <button class="btn btn-outline back-btn" style="margin-bottom:0;" onclick="showScreen('selectionScreen')">⬅️ Ortga qaytish</button>
+        <div class="no-print" style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <button class="btn btn-success" onclick="window.print()">⬇️ Yuklab olish (PDF)</button>
         </div>
         <div id="quoteOfferContent"></div>
@@ -633,7 +835,6 @@
 
     <!-- HISOBOTLAR EKRANI -->
     <div id="reportsScreen" class="screen">
-        <button class="btn btn-outline back-btn" onclick="showScreen('selectionScreen')">⬅️ Asosiy ekranga qaytish</button>
         <h2 style="margin-bottom: 20px; color: var(--text-main);">📊 Hisobotlar</h2>
 
         <div class="reports-tabs">

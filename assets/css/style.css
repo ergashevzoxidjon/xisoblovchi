@@ -168,6 +168,116 @@
         .product-card .icon { font-size: 1.4rem; flex-shrink: 0; }
         .product-card h3 { font-size: 0.92rem; font-weight: 600; color: var(--text-main); }
 
+        /* ====================== ADMIN PANEL: BO'LIM TANLASH EKRANI ====================== */
+        .admin-cat-intro { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .admin-cat-intro p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+        .admin-cat-summary { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; color: var(--text-muted); background: #f1efe6; padding: 5px 12px; border-radius: 999px; white-space: nowrap; }
+
+        .admin-cat-search { margin-bottom: 28px; }
+
+        .admin-cat-empty { text-align: center; color: var(--text-muted); font-size: 0.95rem; padding: 40px 20px; }
+
+        .admin-cat-section {
+            margin-bottom: 22px;
+            padding: 20px 20px 22px;
+            border-radius: 16px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            position: relative;
+            overflow: hidden;
+        }
+        .admin-cat-section:last-child { margin-bottom: 0; }
+        .admin-cat-section::before {
+            content: "";
+            position: absolute; top: 0; left: 0; right: 0; height: 5px;
+        }
+
+        .admin-cat-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .admin-cat-section-badge {
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; flex-shrink: 0;
+        }
+        .admin-cat-section-title {
+            font-family: var(--font-display); font-weight: 800; font-size: 1.05rem;
+            color: var(--ink); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .admin-cat-section-count {
+            font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600;
+            color: var(--text-muted); background: #f1efe6; padding: 3px 9px; border-radius: 999px;
+        }
+
+        .admin-cat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .admin-cat-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        .admin-cat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+        .admin-cat-icon-badge {
+            width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+        }
+        .admin-cat-name { font-size: 0.92rem; font-weight: 600; color: var(--text-main); }
+        .admin-cat-go {
+            margin-left: auto; color: var(--text-muted); font-weight: 700;
+            opacity: 0; transform: translateX(-3px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+        .admin-cat-card:hover .admin-cat-go { opacity: 1; transform: translateX(0); }
+
+        /* Toifa aksentlari — har bir bo'lim o'zining rangiga ega, shu bilan bo'limlar bir-biridan
+           yaqqol ajralib turadi: fon rangi, chegara, yuqoridagi rangli chiziq va belgi ranglari
+           barchasi shu bitta aksentdan keladi. Birinchi to'rttasi bosmaxonaning o'z CMYK palitrasi
+           (logotipdagi rang bilan bir xil), oxirgi ikkitasi (Ofset/Sifravoy) alohida ajralib turishi
+           uchun qo'shimcha ranglar. */
+        .admin-cat-accent-cyan { background: rgba(0, 144, 212, 0.045); border-color: rgba(0, 144, 212, 0.28); }
+        .admin-cat-accent-cyan::before { background: var(--primary); }
+        .admin-cat-accent-cyan .admin-cat-section-badge { background: rgba(0, 144, 212, 0.14); color: var(--primary); }
+        .admin-cat-accent-cyan .admin-cat-icon-badge { background: rgba(0, 144, 212, 0.10); color: var(--primary); }
+        .admin-cat-accent-cyan .admin-cat-card:hover { border-color: var(--primary); }
+
+        .admin-cat-accent-magenta { background: rgba(227, 28, 121, 0.04); border-color: rgba(227, 28, 121, 0.25); }
+        .admin-cat-accent-magenta::before { background: var(--magenta); }
+        .admin-cat-accent-magenta .admin-cat-section-badge { background: rgba(227, 28, 121, 0.12); color: var(--magenta); }
+        .admin-cat-accent-magenta .admin-cat-icon-badge { background: rgba(227, 28, 121, 0.08); color: var(--magenta); }
+        .admin-cat-accent-magenta .admin-cat-card:hover { border-color: var(--magenta); }
+
+        .admin-cat-accent-yellow { background: rgba(245, 197, 24, 0.08); border-color: rgba(245, 197, 24, 0.4); }
+        .admin-cat-accent-yellow::before { background: var(--yellow); }
+        .admin-cat-accent-yellow .admin-cat-section-badge { background: rgba(245, 197, 24, 0.25); color: #8a6d00; }
+        .admin-cat-accent-yellow .admin-cat-icon-badge { background: rgba(245, 197, 24, 0.18); color: #8a6d00; }
+        .admin-cat-accent-yellow .admin-cat-card:hover { border-color: var(--yellow); }
+
+        .admin-cat-accent-ink { background: rgba(18, 20, 28, 0.03); border-color: rgba(18, 20, 28, 0.18); }
+        .admin-cat-accent-ink::before { background: var(--ink); }
+        .admin-cat-accent-ink .admin-cat-section-badge { background: rgba(18, 20, 28, 0.09); color: var(--ink); }
+        .admin-cat-accent-ink .admin-cat-icon-badge { background: rgba(18, 20, 28, 0.06); color: var(--ink); }
+        .admin-cat-accent-ink .admin-cat-card:hover { border-color: var(--ink); }
+
+        .admin-cat-accent-green { background: rgba(5, 150, 110, 0.045); border-color: rgba(5, 150, 110, 0.28); }
+        .admin-cat-accent-green::before { background: #05966e; }
+        .admin-cat-accent-green .admin-cat-section-badge { background: rgba(5, 150, 110, 0.14); color: #05966e; }
+        .admin-cat-accent-green .admin-cat-icon-badge { background: rgba(5, 150, 110, 0.10); color: #05966e; }
+        .admin-cat-accent-green .admin-cat-card:hover { border-color: #05966e; }
+
+        .admin-cat-accent-violet { background: rgba(124, 92, 255, 0.045); border-color: rgba(124, 92, 255, 0.28); }
+        .admin-cat-accent-violet::before { background: #7c5cff; }
+        .admin-cat-accent-violet .admin-cat-section-badge { background: rgba(124, 92, 255, 0.14); color: #7c5cff; }
+        .admin-cat-accent-violet .admin-cat-icon-badge { background: rgba(124, 92, 255, 0.10); color: #7c5cff; }
+        .admin-cat-accent-violet .admin-cat-card:hover { border-color: #7c5cff; }
+
         .screen { display: none; background: var(--surface); border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow); animation: screenIn 0.25s ease; }
         @keyframes screenIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .back-btn { margin-bottom: 20px; }
@@ -228,6 +338,58 @@
         .pen-id { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: block; font-family: var(--font-mono); }
         .pen-name { font-size: 0.8rem; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* --- Bayroqlar mijoz tanlov to'ri: sonlari bazaga qarab o'zgaradi (5 tadan 100+ tagacha
+             bo'lishi mumkin), shuning uchun ICHKI scroll-quti ishlatilmaydi — kartochkalar sahifa
+             bo'ylab erkin oqadi, faqat sahifaning o'zi kerak bo'lsa scroll bo'ladi (na X, na Y
+             o'qida alohida scrollbar). Nom ikki qatorgacha to'liq ko'rinadi, narxi ham chiqadi. */
+        .bayroq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .bayroq-card {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .bayroq-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+        .bayroq-card.active { border-color: var(--primary); background: #eaf6fc; box-shadow: 0 0 0 3px rgba(0,144,212,0.14); }
+        .bayroq-card img { width: 100%; height: 92px; object-fit: contain; margin-bottom: 8px; border-radius: 7px; background: #f8fafc; }
+        .bayroq-card-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.32;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 6px;
+            min-height: 2.64em;
+        }
+        .bayroq-card-price { font-size: 0.82rem; font-weight: 700; color: var(--primary); margin-top: auto; }
+        .bayroq-search-wrap { margin-bottom: 12px; }
+        .bayroq-search-wrap input {
+            width: 100%;
+            height: 42px;
+            padding: 0 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            outline: none;
+            background: #f8fafc;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        .bayroq-search-wrap input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 144, 212, 0.12); }
+
         .options-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
         .opt-btn {
             padding: 8px 14px;
@@ -242,6 +404,20 @@
         }
         .opt-btn:hover { border-color: var(--primary); color: var(--primary); }
         .opt-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Flayer aqlli marshrutlash: tiraj admin chegarasidan qaysi tomonga o'tganini ko'rsatuvchi belgi */
+        .engine-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .engine-badge-ofset { background: rgba(0, 144, 212, 0.12); color: var(--primary-hover); border: 1.5px solid var(--primary); }
+        .engine-badge-raqamli { background: rgba(227, 28, 121, 0.1); color: var(--magenta); border: 1.5px solid var(--magenta); }
 
         .right-panel-col { display: flex; flex-direction: column; gap: 16px; }
 
@@ -302,14 +478,65 @@
             box-shadow: var(--shadow);
             margin-bottom: 28px;
         }
+        .add-pen-card-head { margin-bottom: 22px; }
         .add-pen-card-title {
             font-size: 1.05rem;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 20px;
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 10px;
         }
+        .add-pen-card-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+
+        /* Model qo'shish/tahrirlash formasidagi raqamlangan bo'limlar — har biri aniq ajratilgan */
+        .model-form-section {
+            background: #fbfbfa;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 18px 6px 18px;
+            margin-bottom: 18px;
+        }
+        .model-form-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+        .mfs-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Rasm yuklash maydoni + jonli preview */
+        .image-upload-row { display: flex; align-items: center; gap: 12px; }
+        .image-upload-preview {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            border: 1.5px dashed var(--border);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            font-size: 1.4rem;
+        }
+        .image-upload-preview img { width: 100%; height: 100%; object-fit: contain; }
+        .image-upload-row input[type="file"] { flex: 1; min-width: 0; font-size: 0.8rem; }
 
         .form-row {
             display: grid;
@@ -578,6 +805,44 @@
         .tier-preview-table th { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
         .tier-preview-table tr.tier-active td { background: #eef2ff; font-weight: 700; color: #4338ca; }
 
+        /* --- Reklama stend: umumiy miqdor-oraliqlari mini-muharriri (chip qatorlar) --- */
+        .tier-range-chip {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 10px;
+        }
+        .tier-range-chip-field { display: flex; flex-direction: column; gap: 3px; }
+        .tier-range-chip-field label {
+            font-size: 0.66rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .tier-range-chip-field input {
+            width: 64px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-family: var(--font-mono);
+        }
+        .tier-range-chip-remove {
+            border: none;
+            background: none;
+            color: #e11d48;
+            cursor: pointer;
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: 0 2px 6px;
+        }
+
         /* --- Textile: material / pechat o'lchami kartochkalari --- */
         .tx-item {
             border: 1px solid var(--border);
@@ -604,6 +869,30 @@
         .tx-btn.danger { border-color: #fecaca; background: #fef2f2; color: #dc2626; }
         .tx-btn.danger:hover { background: #fee2e2; }
         .tx-empty { color: var(--text-muted); font-size: 0.82rem; padding: 10px 2px; }
+
+        /* Ranglar — bitta doimiy ustama (so'mda), tiraj jadvalisiz ixcham qator */
+        .tx-color-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .tx-color-row-swatch {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            padding: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .tx-color-row-name { flex: 1; min-width: 160px; }
+        .tx-color-row-surcharge { flex: 0 0 160px; }
 
         /* Kalkulyatordagi material / rang tugmachalari va X×Y maydonlari */
         .tx-pick-row { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -693,8 +982,134 @@
         .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
         .badge-uv { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
         .badge-sifravoy { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+        .badge-dtf { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .badge-grav { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
 
         .action-btns { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+
+        /* --- Umumiy model ro'yxati: sarlavha + qidiruv --- */
+        .model-list-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 16px 20px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+        .model-list-head-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .model-list-head-left h3 { font-size: 1.05rem; margin: 0; }
+        .model-list-count {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(0, 144, 212, 0.1);
+            border: 1px solid rgba(0, 144, 212, 0.25);
+            border-radius: 999px;
+            padding: 3px 10px;
+        }
+        .model-list-search input {
+            height: 38px;
+            min-width: 240px;
+            padding: 0 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+        .model-list-search input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 144, 212, 0.12); }
+
+        /* --- Suvenir modellari uchun kartochka ko'rinishi --- */
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 14px;
+            padding: 18px 20px;
+        }
+        .model-grid-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.7;
+            padding: 30px 10px;
+        }
+        .model-card {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+        .model-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-2px); }
+        .model-card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+        .model-card-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            padding: 2px;
+        }
+        .model-card-thumb img { width: 100%; height: 100%; object-fit: contain; }
+        .model-card-head { flex: 1; min-width: 0; }
+        .model-card-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .model-card-id {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .model-card-actions { flex-shrink: 0; }
+        .model-card-body { display: flex; flex-direction: column; gap: 8px; }
+        .model-card-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .model-card-price { font-size: 1rem; font-weight: 700; color: var(--primary); font-family: var(--font-mono); }
+        .model-tier-badge {
+            background: #eef2ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+            border-radius: 999px;
+            padding: 2px 9px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .model-tier-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+        .model-tier-chip {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .model-color-dots { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .model-color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(0,0,0,0.15);
+            display: inline-block;
+        }
+        .model-color-more { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
 
         #toast {
             visibility: hidden; min-width: 250px; background-color: var(--ink); color: #fff;
