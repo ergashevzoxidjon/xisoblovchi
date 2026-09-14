@@ -6688,3 +6688,10 @@ Another git process seems to be running in this repository, or the lock file may
 [15.09.2026 00:07:10] GitHub ga yuklandi.
 [15.09.2026 00:07:25] O'zgarish sezildi, 60 soniya kutilmoqda...
 [15.09.2026 00:08:25] O'zgarish topildi: avto-push.log yangilandi - 15.09.2026 00:08
+[15.09.2026 00:08:25] Commit qilindi.
+[15.09.2026 00:08:28] GitHub ga yuklandi.
+[15.09.2026 01:30:43] === Avtomatik sinxronizatsiya xizmati ishga tushdi (PID 11376) ===
+[15.09.2026 01:30:43] Papka: F:\AI\Xisoblovchi
+[15.09.2026 01:30:43] Push: o'zgarishdan 60 soniya keyin. Pull: har 900 soniyada.
+[15.09.2026 01:30:43] O'zgarish sezildi, 60 soniya kutilmoqda...
+[15.09.2026 01:31:44] O'zgarish topildi: .avto-push.lock, avto-push.log yangilandi - 15.09.2026 01:31
