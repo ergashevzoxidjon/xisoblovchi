@@ -23,17 +23,107 @@
         }));
     }
 
-    // Pechat narxi: 1 kv.sm narxi + eng kam summa, ikkalasi ham tirajga bog'liq.
-    // A4 ≈ 21x29.7 sm ≈ 624 sm². 40 so'm/sm² ≈ 25 000 so'm — eski A4 narxiga mos.
-    function txDefaultPrintRateTiers() {
-        return [
-            { from: 1, to: 10, basePrice: 40, minPrice: 8000 },
-            { from: 11, to: 50, basePrice: 37, minPrice: 7000 },
-            { from: 51, to: 100, basePrice: 34, minPrice: 6000 },
-            { from: 101, to: 200, basePrice: 32, minPrice: 5500 },
-            { from: 201, to: 500, basePrice: 30, minPrice: 5000 },
-            { from: 501, to: 0, basePrice: 28, minPrice: 4500 }
-        ].map(r => ({ ...r, printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 } }));
+    // ====================== DTF Pechat narxi (avtomatik, BARCHA tekstil turlariga umumiy) ======================
+    // Mashina eni maksimal 58 sm, uzunligi rulon hisoblanadi. Narx FAQAT uzunlikka (bo'yi, sm)
+    // bog'liq — eni 58 smgacha narxga ta'sir qilmaydi. 58x100 sm bo'lak narxi — eng kam summa:
+    // hatto kiritilgan uzunlik (10, 20, 30, 35 sm va h.k.) 100 sm dan kichik bo'lsa ham shu eng
+    // kam summa olinadi. Bir nechta dona/tomon bo'lsa, detallar orasiga oraliq (5mm) qo'yib,
+    // BUTUN buyurtma uchun umumiy rulon uzunligi topiladi va narx shunga hisoblanadi (bitta
+    // umumiy summa) — keyin dona soniga bo'linadi. Bosish (yopishtirish) mehnat narxi va Taxi
+    // (yetkazib berish) alohida qo'shiladi. Naqsh setupFee/bayroqDeliveryFee'ga o'xshash.
+    let textileDtfConfig = {
+        rollWidthCm: 58,   // mashinaning maksimal eni — faqat ma'lumot/ogohlantirish uchun
+        rollLengthCm: 100, // narx belgilangan bo'lak uzunligi (sm)
+        rollPrice: 90000,  // shu uzunlikdagi (58x100 sm) DTF narxi, so'm — shu bilan birga eng kam summa
+        gapCm: 0.5,        // detallar orasidagi masofa (5 mm), sm
+        frontFee: 2000,    // bosish narxi — oldi tomon (so'm/dona)
+        backFee: 5000,     // bosish narxi — orqa tomon (so'm/dona)
+        kepkaFee: 1000,    // kepkaga bosish narxi — tomon farqisiz, bitta flat summa (so'm/dona)
+        taxiFee: 50000     // Taxi (yetkazib berish) — bir martalik, BARCHA tekstil turlariga umumiy
+    };
+
+    // Butun buyurtma uchun umumiy DTF (rulon material) xarajati.
+    // front/back: {x,y} sm. qty: dona soni. Eni narxga ta'sir qilmaydi, faqat "y" (bo'yi) hisobga olinadi.
+    function textileDtfTotal(front, back, qty, cfg) {
+        cfg = cfg || textileDtfConfig;
+        let n = Math.max(1, parseInt(qty) || 1);
+        let frontActive = (parseFloat(front && front.x) > 0) && (parseFloat(front && front.y) > 0);
+        let backActive = (parseFloat(back && back.x) > 0) && (parseFloat(back && back.y) > 0);
+
+        let pieceCount = 0;
+        let totalLength = 0;
+        if (frontActive) { totalLength += (parseFloat(front.y) || 0) * n; pieceCount += n; }
+        if (backActive) { totalLength += (parseFloat(back.y) || 0) * n; pieceCount += n; }
+
+        if (pieceCount === 0) {
+            return { cost: 0, totalLength: 0, pieceCount: 0, minQollandi: false };
+        }
+
+        totalLength += Math.max(0, pieceCount - 1) * (parseFloat(cfg.gapCm) || 0);
+        let pricePerCm = (parseFloat(cfg.rollPrice) || 0) / (parseFloat(cfg.rollLengthCm) || 100);
+        let raw = totalLength * pricePerCm;
+        let minPrice = parseFloat(cfg.rollPrice) || 0;
+        let minQollandi = raw < minPrice;
+        return {
+            cost: Math.round(minQollandi ? minPrice : raw),
+            totalLength, pieceCount, minQollandi
+        };
+    }
+
+    // Bosish (DTF yopishtirish) mehnat narxi — DONA boshiga, tomon(lar)ga qarab.
+    // Kepka boshqacha: tomon farqisiz bitta flat summa.
+    function textileBosishNarxi(productKey, front, back, cfg) {
+        cfg = cfg || textileDtfConfig;
+        let frontActive = (parseFloat(front && front.x) > 0) && (parseFloat(front && front.y) > 0);
+        let backActive = (parseFloat(back && back.x) > 0) && (parseFloat(back && back.y) > 0);
+        if (!frontActive && !backActive) return 0;
+        if (productKey === 'kepka') return parseFloat(cfg.kepkaFee) || 0;
+        return (frontActive ? (parseFloat(cfg.frontFee) || 0) : 0) + (backActive ? (parseFloat(cfg.backFee) || 0) : 0);
+    }
+
+    function renderTextileDtfConfigAdmin() {
+        let ids = {
+            rollWidthCm: 'txDtfRollWidth', rollLengthCm: 'txDtfRollLength', rollPrice: 'txDtfRollPrice',
+            gapCm: 'txDtfGap', frontFee: 'txDtfFrontFee', backFee: 'txDtfBackFee',
+            kepkaFee: 'txDtfKepkaFee', taxiFee: 'txDtfTaxiFee'
+        };
+        Object.keys(ids).forEach(k => {
+            let el = document.getElementById(ids[k]);
+            if (el) el.value = textileDtfConfig[k];
+        });
+    }
+
+    function saveTextileDtfConfig() {
+        let get = (id, fallback) => {
+            let el = document.getElementById(id);
+            let v = el ? parseFloat(el.value) : NaN;
+            return isNaN(v) ? fallback : v;
+        };
+        let cfg = {
+            rollWidthCm: get('txDtfRollWidth', 58),
+            rollLengthCm: get('txDtfRollLength', 100),
+            rollPrice: get('txDtfRollPrice', 0),
+            gapCm: get('txDtfGap', 0),
+            frontFee: get('txDtfFrontFee', 0),
+            backFee: get('txDtfBackFee', 0),
+            kepkaFee: get('txDtfKepkaFee', 0),
+            taxiFee: get('txDtfTaxiFee', 0)
+        };
+        if (cfg.rollLengthCm <= 0) {
+            showToast("⚠️ Bo'lak uzunligi 0 dan katta bo'lishi kerak!");
+            return;
+        }
+        if (cfg.rollWidthCm <= 0) {
+            showToast("⚠️ Mashina eni 0 dan katta bo'lishi kerak!");
+            return;
+        }
+        textileDtfConfig = cfg;
+        localStorage.setItem('erp_textile_dtf_config', JSON.stringify(textileDtfConfig));
+        if (typeof logAudit === 'function') {
+            logAudit("Textile DTF/Taxi narxi o'zgartirildi",
+                `Rulon: ${cfg.rollPrice.toLocaleString()} so'm / ${cfg.rollLengthCm}sm, Taxi: ${cfg.taxiFee.toLocaleString()} so'm`);
+        }
+        showToast("💾 DTF va Taxi sozlamalari saqlandi!");
     }
 
     function getDefaultTextileDb() {
@@ -47,7 +137,6 @@
                     { id: txId('MAT'), name: 'Paxta/Polyester (peniye)', tiers: txDefaultTiers(base * 1.15) },
                     { id: txId('MAT'), name: 'Polyester (sport)', tiers: txDefaultTiers(base * 0.9) }
                 ],
-                printRate: { tiers: txDefaultPrintRateTiers() },
                 // Rang — doimiy ustama sifatida qo'shiladi (tirajdan qat'iy nazar bir xil).
                 // Standart ranglar 0, qiyin ranglar qimmatroq.
                 colors: [
@@ -60,6 +149,7 @@
         });
         return db;
     }
+    // (Eslatma: DTF pechat narxi endi bu yerda emas — textileDtfConfig orqali BARCHA turlarga umumiy.)
 
     function normalizeTextileItem(it, prefix) {
         it = it || {};
@@ -97,8 +187,7 @@
         let cfg = textileDatabase[key] || {};
         return {
             materials: (cfg.materials || []).map(m => normalizeTextileItem(m, 'MAT')),
-            colors: (cfg.colors || []).map(normalizeTextileColor),
-            printRate: { tiers: normalizeTierList((cfg.printRate || {}).tiers) }
+            colors: (cfg.colors || []).map(normalizeTextileColor)
         };
     }
 
@@ -114,38 +203,17 @@
         return color ? (parseFloat(color.surcharge) || 0) : 0;
     }
 
-    // Pechat narxi: maydon (sm²) × 1 sm² narxi, lekin eng kam summadan past emas.
-    // Maydon 0 bo'lsa — pechatsiz, narx ham 0.
-    function textilePrintCost(printRate, xSm, ySm, qty) {
-        let x = parseFloat(xSm) || 0;
-        let y = parseFloat(ySm) || 0;
-        let maydon = x * y;
-        if (maydon <= 0) return { cost: 0, maydon: 0, rate: 0, minPrice: 0, minQollandi: false };
-
-        let t = findTierForQty(printRate && printRate.tiers, qty);
-        let rate = t ? t.basePrice : 0;
-        let minPrice = t ? t.minPrice : 0;
-
-        let xom = maydon * rate;
-        let minQollandi = xom < minPrice;
-        return {
-            cost: Math.round(minQollandi ? minPrice : xom),
-            maydon, rate, minPrice, minQollandi
-        };
-    }
-
     // --- Admin muharriri ---
 
     function loadTextileEditState(key) {
         let cfg = getTextileConfig(key);
         textileEditState = {
             materials: JSON.parse(JSON.stringify(cfg.materials)),
-            colors: JSON.parse(JSON.stringify(cfg.colors)),
-            printRate: JSON.parse(JSON.stringify(cfg.printRate))
+            colors: JSON.parse(JSON.stringify(cfg.colors))
         };
         renderTextileEditor('materials');
         renderTextileEditor('colors');
-        renderTextilePrintRateEditor();
+        renderTextileDtfConfigAdmin();
     }
 
     function textileEditorContainer(kind) {
@@ -241,90 +309,6 @@
     function updateTextileColorSurcharge(idx, value) {
         if (!textileEditState.colors[idx]) return;
         textileEditState.colors[idx].surcharge = parseFloat(value) || 0;
-    }
-
-    // Pechat narxi — bitta jadval: 1 kv.sm narxi va eng kam summa
-    function renderTextilePrintRateEditor() {
-        const box = document.getElementById('textilePrintRateEditor');
-        if (!box) return;
-        let tiers = (textileEditState.printRate && textileEditState.printRate.tiers) || [];
-
-        box.innerHTML = `
-            <div class="tx-item">
-                <div class="tx-item-head" style="justify-content:flex-end;">
-                    <div class="tx-item-actions">
-                        <button type="button" class="tx-btn" onclick="addPrintRateTier()">+ Oraliq</button>
-                        <button type="button" class="tx-btn" onclick="fillPrintRateDefaults()">⚡ Namuna oraliqlar</button>
-                    </div>
-                </div>
-                <div style="overflow-x:auto;">
-                    <table class="tier-table">
-                        <thead><tr>
-                            <th style="width:90px;">Dan (dona)</th>
-                            <th style="width:90px;">Gacha</th>
-                            <th style="width:150px;">1 kv.sm narxi (so'm)</th>
-                            <th style="width:170px;">Eng kam pechat summasi</th>
-                            <th style="width:70px;"></th>
-                        </tr></thead>
-                        <tbody>
-                            ${tiers.length === 0
-                                ? `<tr><td colspan="5" style="padding:10px 4px; color:#b45309; font-size:0.8rem;">Oraliq yo'q — pechat narxi 0 bo'lib qoladi.</td></tr>`
-                                : tiers.map((t, ti) => `
-                                    <tr>
-                                        <td><input type="number" min="1" value="${t.from}" oninput="updatePrintRateTier(${ti}, 'from', this.value)"></td>
-                                        <td><input type="number" min="0" value="${t.to}" placeholder="∞" oninput="updatePrintRateTier(${ti}, 'to', this.value)"></td>
-                                        <td><input type="number" min="0" step="0.5" value="${t.basePrice}" oninput="updatePrintRateTier(${ti}, 'basePrice', this.value)"></td>
-                                        <td><input type="number" min="0" value="${t.minPrice}" oninput="updatePrintRateTier(${ti}, 'minPrice', this.value)"></td>
-                                        <td><button type="button" class="tier-remove" onclick="removePrintRateTier(${ti})">✕</button></td>
-                                    </tr>
-                                `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                <div id="printRateWarnings"></div>
-            </div>
-        `;
-        renderPrintRateWarnings();
-    }
-
-    function renderPrintRateWarnings() {
-        const w = document.getElementById('printRateWarnings');
-        if (!w) return;
-        let msgs = tierValidationMessages((textileEditState.printRate || {}).tiers);
-        w.innerHTML = msgs.length === 0 ? '' : `<div class="tier-warning">⚠️ ${msgs.map(m => `<div>• ${m}</div>`).join('')}</div>`;
-    }
-
-    function addPrintRateTier() {
-        let list = normalizeTierList(textileEditState.printRate.tiers);
-        let last = list.slice(-1)[0];
-        list.push({
-            from: last ? (tierUpper(last) === Infinity ? last.from + 1 : tierUpper(last) + 1) : 1,
-            to: 0,
-            basePrice: last ? last.basePrice : 40,
-            minPrice: last ? last.minPrice : 8000,
-            printPrices: { uv: 0, sifravoy: 0, dtf: 0, gravirovka: 0 }
-        });
-        textileEditState.printRate.tiers = list;
-        renderTextilePrintRateEditor();
-    }
-
-    function removePrintRateTier(ti) {
-        textileEditState.printRate.tiers.splice(ti, 1);
-        renderTextilePrintRateEditor();
-    }
-
-    function updatePrintRateTier(ti, field, value) {
-        let t = textileEditState.printRate.tiers[ti];
-        if (!t) return;
-        t[field] = (field === 'from' || field === 'to') ? (parseInt(value) || 0) : (parseFloat(value) || 0);
-        renderPrintRateWarnings();
-    }
-
-    function fillPrintRateDefaults() {
-        if ((textileEditState.printRate.tiers || []).length > 0 &&
-            !confirm("Mavjud oraliqlar o'chib, o'rniga namuna oraliqlar qo'yiladi. Davom etamizmi?")) return;
-        textileEditState.printRate.tiers = txDefaultPrintRateTiers();
-        renderTextilePrintRateEditor();
     }
 
     function addTextileItem(kind) {
@@ -435,15 +419,9 @@
             showToast("⚠️ Kamida bitta material qo'shing!");
             return;
         }
-        if (normalizeTierList(textileEditState.printRate.tiers).length === 0) {
-            showToast("⚠️ Pechat narxi uchun kamida bitta oraliq kiriting!");
-            return;
-        }
-
         textileDatabase[currentManagingProduct] = {
             materials: textileEditState.materials.map(m => normalizeTextileItem(m, 'MAT')),
-            colors: textileEditState.colors.map(normalizeTextileColor),
-            printRate: { tiers: normalizeTierList(textileEditState.printRate.tiers) }
+            colors: textileEditState.colors.map(normalizeTextileColor)
         };
         localStorage.setItem('erp_textile_db', JSON.stringify(textileDatabase));
         if (typeof logAudit === 'function') logAudit("Textile narxlari o'zgartirildi", `Mahsulot: ${currentManagingProduct}`);
@@ -454,17 +432,16 @@
     // --- Kalkulyator uchun jadval ko'rinishi ---
     // Material va o'lchamlarning oraliq chegaralari har xil bo'lishi mumkin,
     // shuning uchun barcha chegaralarni birlashtirib chiqaramiz.
-    function renderTextileTierPreview(mat, color, printRate, front, back, qty, marginPercent) {
+    function renderTextileTierPreview(mat, color, front, back, qty, marginPercent) {
         const box = document.getElementById('tierPreviewBox');
         if (!box) return;
 
-        // Material va pechat narxining oraliq chegaralari har xil bo'lishi mumkin —
-        // hammasini birlashtirib chiqaramiz, shunda har bir qator haqiqiy narxni beradi.
-        // Rang endi doimiy ustama (tirajga bog'liq emas), shuning uchun bu yerga kirmaydi.
+        // Material oraliq chegaralari asosida jadval qatorlari chiqariladi. DTF va Taxi narxi
+        // endi tirajga qarab uzluksiz o'zgaradi (umumiy summa dona soniga bo'linadi), shuning
+        // uchun ular alohida "nuqta" qo'shmaydi — faqat unitAt(t) ichida hisoblab chiqiladi.
+        // Rang doimiy ustama (tirajga bog'liq emas), shuning uchun bu yerga kirmaydi.
         let points = new Set();
         [mat].filter(Boolean).forEach(it => normalizeTierList(it.tiers).forEach(t => points.add(t.from)));
-        let borPechat = (front.x * front.y > 0) || (back.x * back.y > 0);
-        if (borPechat) normalizeTierList(printRate && printRate.tiers).forEach(t => points.add(t.from));
 
         let sorted = [...points].sort((a, b) => a - b);
         if (sorted.length <= 1) { box.style.display = 'none'; box.innerHTML = ''; return; }
@@ -472,13 +449,18 @@
         let m = 1 + ((parseFloat(marginPercent) || 0) / 100);
         let n = parseInt(qty) || 1;
         let colorSurcharge = textileColorSurcharge(color);
+        let bosishPerUnit = textileBosishNarxi(activeProductType, front, back, textileDtfConfig);
 
-        const unitAt = (t) => Math.round((
-            textileItemPrice(mat, t) +
-            colorSurcharge +
-            textilePrintCost(printRate, front.x, front.y, t).cost +
-            textilePrintCost(printRate, back.x, back.y, t).cost
-        ) * m);
+        const unitAt = (t) => {
+            let dtfRes = textileDtfTotal(front, back, t, textileDtfConfig);
+            return Math.round((
+                textileItemPrice(mat, t) +
+                colorSurcharge +
+                bosishPerUnit +
+                (dtfRes.cost / t) +
+                (textileDtfConfig.taxiFee / t)
+            ) * m);
+        };
 
         box.style.display = 'block';
         box.innerHTML = `
@@ -588,6 +570,7 @@ function generateFormHtml_textile(type) {
                         </div>
                         <div class="tx-area-info" id="frontAreaInfo"></div>
                     </div>
+                    <div style="font-size:0.76rem; color:var(--text-muted); margin-top:8px;">Mashina eni max 58 sm — narxga faqat bo'yi (uzunlik) ta'sir qiladi.</div>
                 </div>
 
                 <div class="price-size-box" style="margin-bottom:14px;">
@@ -604,7 +587,7 @@ function generateFormHtml_textile(type) {
                         </div>
                         <div class="tx-area-info" id="backAreaInfo"></div>
                     </div>
-                    <div style="font-size:0.76rem; color:var(--text-muted); margin-top:8px;">0 qoldirsangiz — orqa tomonga pechat qilinmaydi.</div>
+                    <div style="font-size:0.76rem; color:var(--text-muted); margin-top:8px;">0 qoldirsangiz — orqa tomonga pechat qilinmaydi. Mashina eni max 58 sm — narxga faqat bo'yi (uzunlik) ta'sir qiladi.</div>
                 </div>
 
                 <div class="form-group">
@@ -632,34 +615,46 @@ function calculateResult_textile(activeProductTypeParam, qty, marginPercent) {
                     y: parseFloat(document.getElementById('inpBackY')?.value) || 0
                 };
 
+                let n = Math.max(1, parseInt(qty) || 1);
                 let matCost = textileItemPrice(mat, qty);
                 let colorCost = textileColorSurcharge(color);
-                let frontRes = textilePrintCost(cfg.printRate, front.x, front.y, qty);
-                let backRes = textilePrintCost(cfg.printRate, back.x, back.y, qty);
+                let dtfRes = textileDtfTotal(front, back, n, textileDtfConfig);
+                let bosishPerUnit = textileBosishNarxi(activeProductType, front, back, textileDtfConfig);
+                let dtfPerUnit = dtfRes.cost / n;
+                let taxiPerUnit = (parseFloat(textileDtfConfig.taxiFee) || 0) / n;
 
-                baseUnitPrice = matCost + colorCost + frontRes.cost + backRes.cost;
+                baseUnitPrice = matCost + colorCost + bosishPerUnit + dtfPerUnit + taxiPerUnit;
 
-                // Maydon ma'lumotini foydalanuvchiga ko'rsatamiz
-                const yozMaydon = (elId, res) => {
+                // Har bir tomon uchun ma'lumot: faqat uzunlik (sm) narxga ta'sir qiladi,
+                // eni 58 smdan katta bo'lsa ogohlantirish chiqadi.
+                const eniOgohlantirish = (x) => (parseFloat(x) || 0) > (parseFloat(textileDtfConfig.rollWidthCm) || 58)
+                    ? ` <span style="color:#dc2626;">(⚠️ mashina eni max ${textileDtfConfig.rollWidthCm}sm!)</span>`
+                    : '';
+                const yozMaydon = (elId, xy) => {
                     let el = document.getElementById(elId);
                     if (!el) return;
-                    el.innerHTML = res.maydon <= 0
+                    let active = (parseFloat(xy.x) > 0) && (parseFloat(xy.y) > 0);
+                    el.innerHTML = !active
                         ? `<span style="color:var(--text-muted);">Pechatsiz</span>`
-                        : `${res.maydon.toLocaleString()} sm² → <strong>${res.cost.toLocaleString()} so'm</strong>` +
-                          (res.minQollandi ? ` <span style="color:#b45309;">(eng kam summa)</span>` : '');
+                        : `${xy.y} sm uzunlik${eniOgohlantirish(xy.x)}`;
                 };
-                yozMaydon('frontAreaInfo', frontRes);
-                yozMaydon('backAreaInfo', backRes);
+                yozMaydon('frontAreaInfo', front);
+                yozMaydon('backAreaInfo', back);
 
                 let parts = [mat ? mat.name : 'Material tanlanmagan'];
                 if (color) parts.push(`Rang: ${color.name}`);
                 parts.push(front.x * front.y > 0 ? `Oldi: ${front.x}×${front.y} sm` : 'Oldi: pechatsiz');
                 parts.push(back.x * back.y > 0 ? `Orqa: ${back.x}×${back.y} sm` : 'Orqa: pechatsiz');
+                if (dtfRes.pieceCount > 0) {
+                    parts.push(`DTF: ${dtfRes.cost.toLocaleString()} so'm${dtfRes.minQollandi ? ' (eng kam)' : ''} / ${n} donaga bo'lingan`);
+                }
+                if (bosishPerUnit > 0) parts.push(`Bosish: ${bosishPerUnit.toLocaleString()} so'm/dona`);
+                if (textileDtfConfig.taxiFee > 0) parts.push(`Taxi: ${textileDtfConfig.taxiFee.toLocaleString()} so'm (${n} donaga bo'lingan)`);
                 let activeT = mat ? findTierForQty(mat.tiers, qty) : null;
                 if (activeT) parts.push(`Oraliq: ${tierLabel(activeT)}`);
                 details = parts.join(' | ');
 
-                renderTextileTierPreview(mat, color, cfg.printRate, front, back, qty, marginPercent);
+                renderTextileTierPreview(mat, color, front, back, qty, marginPercent);
 
     return { details, baseUnitPrice };
 }

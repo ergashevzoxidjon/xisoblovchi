@@ -132,14 +132,10 @@
                 txChanged = true;
                 return;
             }
-            // Avvalgi versiyada pechat "tayyor o'lchamlar ro'yxati" edi (printSizes).
-            // Endi u 1 kv.sm narxiga almashdi — yetishmayotgan qismlarni to'ldiramiz.
-            if (!cur.printRate || !(cur.printRate.tiers || []).length) {
-                defTx = defTx || getDefaultTextileDb();
-                cur.printRate = defTx[k].printRate;
-                delete cur.printSizes;
-                txChanged = true;
-            }
+            // Eski versiyada har mahsulot turi o'z pechat narxi jadvaliga (printRate) ega edi —
+            // endi bu BUTUN tekstil bo'limiga umumiy DTF/Taxi sozlamasiga (textileDtfConfig)
+            // almashtirildi. Eski saqlangan `printRate`/`printSizes` maydonlari (agar bo'lsa)
+            // shunchaki e'tiborsiz qoldiriladi — o'chirilmaydi, lekin zarari ham yo'q.
             if (!Array.isArray(cur.colors) || cur.colors.length === 0) {
                 defTx = defTx || getDefaultTextileDb();
                 cur.colors = defTx[k].colors;
@@ -147,6 +143,17 @@
             }
         });
         if (txChanged) localStorage.setItem('erp_textile_db', JSON.stringify(textileDatabase));
+
+        // Textile DTF/Taxi narxi — BARCHA tekstil turlariga umumiy (Bayroq Taxi bilan bir xil naqsh)
+        let savedTextileDtf = localStorage.getItem('erp_textile_dtf_config');
+        if (savedTextileDtf) {
+            try {
+                let parsedDtf = JSON.parse(savedTextileDtf);
+                if (parsedDtf && typeof parsedDtf === 'object') {
+                    textileDtfConfig = { ...textileDtfConfig, ...parsedDtf };
+                }
+            } catch (e) {}
+        }
 
         let savedReklamaExtra = localStorage.getItem('erp_reklama_extra_prices');
         if (savedReklamaExtra) {
