@@ -1,5 +1,5 @@
     let textileDatabase = {};
-    let textileEditState = { materials: [], colors: [], printRate: { tiers: [] } };
+    let textileEditState = { materials: [], colors: [] };
     let selectedTextileMaterial = '';
     let selectedTextileColor = '';
 
