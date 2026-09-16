@@ -61,31 +61,37 @@
 
     let poligrafiyaGsmDatabase = {
         flayer: [
-            { gsm: 115, price: 280, isDefault: false },
-            { gsm: 130, price: 300, isDefault: true },
-            { gsm: 150, price: 340, isDefault: false },
-            { gsm: 170, price: 380, isDefault: false }
+            { gsm: 115, isDefault: false },
+            { gsm: 130, isDefault: true },
+            { gsm: 150, isDefault: false },
+            { gsm: 170, isDefault: false }
         ],
         listovka: [
-            { gsm: 115, price: 230, isDefault: false },
-            { gsm: 130, price: 250, isDefault: true },
-            { gsm: 150, price: 290, isDefault: false },
-            { gsm: 170, price: 330, isDefault: false }
+            { gsm: 115, isDefault: false },
+            { gsm: 130, isDefault: true },
+            { gsm: 150, isDefault: false },
+            { gsm: 170, isDefault: false }
         ],
         buklet: [
-            { gsm: 150, price: 750, isDefault: false },
-            { gsm: 170, price: 800, isDefault: true },
-            { gsm: 200, price: 900, isDefault: false },
-            { gsm: 300, price: 1100, isDefault: false }
+            { gsm: 150, isDefault: false },
+            { gsm: 170, isDefault: true },
+            { gsm: 200, isDefault: false },
+            { gsm: 300, isDefault: false }
         ],
         doorhanger: [
-            { gsm: 250, price: 420, isDefault: false },
-            { gsm: 300, price: 450, isDefault: true },
-            { gsm: 350, price: 500, isDefault: false },
-            { gsm: 400, price: 560, isDefault: false }
+            { gsm: 250, isDefault: false },
+            { gsm: 300, isDefault: true },
+            { gsm: 350, isDefault: false },
+            { gsm: 400, isDefault: false }
         ]
     };
     let selectedPoligrafiyaGsmIndex = -1;
+
+    // Menejer tanlagan pechat usuli ('ofset' | 'raqamli') va bosma tomoni (1 yoki 2) —
+    // narx shu tanlovga qarab Ofset Pechat / Raqamli Pechat bo'limlaridagi haqiqiy
+    // qog'oz bazasidan hisoblanadi (pastda calculateResult_poligrafiya ichida).
+    let selectedPoligrafiyaEngine = 'ofset';
+    let selectedPoligrafiyaSides = 2;
 
     function renderAdminPoligrafiyaGsmTable() {
         let grid = document.getElementById('adminPoligrafiyaGsmTableBody');
@@ -93,7 +99,7 @@
         let list = poligrafiyaGsmDatabase[currentManagingProduct] || [];
 
         if (list.length === 0) {
-            grid.innerHTML = `<div class="poli-gsm-empty">Hozircha grammaj kiritilmagan. Kiritilmasa, baza narxi ishlatiladi.</div>`;
+            grid.innerHTML = `<div class="poli-gsm-empty">Hozircha grammaj kiritilmagan. Kiritilgan grammajlar Ofset/Raqamli Pechat bo'limidagi qog'oz bazasi bilan solishtirib narxlanadi.</div>`;
             return;
         }
 
@@ -111,13 +117,6 @@
                         <span>gr</span>
                     </div>
                 </div>
-                <div class="poli-gsm-field">
-                    <label>Narxi</label>
-                    <div class="poli-gsm-input-wrap">
-                        <input type="number" id="polgsm_price_${index}" value="${g.price}">
-                        <span>so'm</span>
-                    </div>
-                </div>
             </div>
         `).join('');
     }
@@ -126,7 +125,7 @@
         if (!currentManagingProduct) return;
         if (!poligrafiyaGsmDatabase[currentManagingProduct]) poligrafiyaGsmDatabase[currentManagingProduct] = [];
         let list = poligrafiyaGsmDatabase[currentManagingProduct];
-        list.push({ gsm: 130, price: defaultPrices[currentManagingProduct] || 0, isDefault: list.length === 0 });
+        list.push({ gsm: 130, isDefault: list.length === 0 });
         renderAdminPoligrafiyaGsmTable();
     }
 
@@ -148,11 +147,9 @@
         for (let index = 0; index < list.length; index++) {
             let gsmInput = document.getElementById(`polgsm_gsm_${index}`);
             if (!gsmInput) continue;
-            let priceInput = document.getElementById(`polgsm_price_${index}`);
             let defaultInput = document.getElementById(`polgsm_default_${index}`);
             updated.push({
                 gsm: parseInt(gsmInput.value) || 0,
-                price: parseFloat(priceInput.value) || 0,
                 isDefault: defaultInput.checked
             });
         }
@@ -171,7 +168,6 @@
         group.innerHTML = gsmList.map((g, idx) => `
             <div class="poli-paper-option ${idx === selectedPoligrafiyaGsmIndex ? 'active' : ''}" onclick="selectPoligrafiyaGsm(${idx})">
                 <div class="poli-paper-gsm">${g.gsm}<small>gr</small></div>
-                <div class="poli-paper-price">${(g.price || 0).toLocaleString()} so'm</div>
             </div>
         `).join('');
     }
@@ -749,6 +745,61 @@
             el.classList.toggle('active', idx === index);
         });
         calculate();
+    }
+
+    // Menejer Ofset yoki Raqamli (Sifravoy) pechatni tanlaydi — narx shu bo'limning
+    // haqiqiy qog'oz bazasidan hisoblanadi (calculateResult_poligrafiya ichida).
+    function selectPoligrafiyaEngine(engine) {
+        selectedPoligrafiyaEngine = engine;
+        document.querySelectorAll('#poligrafiyaEngineGroup .opt-btn').forEach(el => {
+            el.classList.toggle('active', el.dataset.engine === engine);
+        });
+        calculate();
+    }
+
+    function selectPoligrafiyaSides(sides) {
+        selectedPoligrafiyaSides = sides;
+        document.querySelectorAll('#poligrafiyaSidesGroup .opt-btn').forEach(el => {
+            el.classList.toggle('active', parseInt(el.dataset.sides) === sides);
+        });
+        calculate();
+    }
+
+    // "97x210mm" kabi o'lcham yorlig'idan W x H (mm) raqamlarini ajratib oladi.
+    function parsePoligrafiyaSizeLabel(label) {
+        let m = /^(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/i.exec(label || '');
+        if (!m) return null;
+        return { w: parseFloat(m[1]), h: parseFloat(m[2]) };
+    }
+
+    // Raqamli (Sifravoy) Pechat bo'limidagi qog'oz uchun bir dona narxini hisoblaydi —
+    // calculate_raqamli() dagi aynan o'sha joylashtirish (grid-fitting) formulasi,
+    // faqat margin (65%) qo'shilmagan holda — umumiy margin keyinroq calculate() da qo'shiladi.
+    function calculateDigitalPriceForPaper(paperObj, w, h, qty, sides) {
+        if (!paperObj || !w || !h || !qty || qty < 1) return null;
+        let pW = paperObj.p_eni || 310;
+        let pH = paperObj.p_boyi || 440;
+        const gap = 2;
+
+        let cols1 = Math.floor((pW + gap) / (w + gap));
+        let rows1 = Math.floor((pH + gap) / (h + gap));
+        let count1 = cols1 * rows1;
+
+        let cols2 = Math.floor((pW + gap) / (h + gap));
+        let rows2 = Math.floor((pH + gap) / (w + gap));
+        let count2 = cols2 * rows2;
+
+        let perSheet = count1;
+        let isRotated = false;
+        if (count2 > count1) { perSheet = count2; isRotated = true; }
+
+        if (perSheet <= 0) return null;
+
+        let sheetsNeeded = Math.ceil(qty / perSheet);
+        let unitPaperPrice = (sides === 1) ? paperObj.price1 : paperObj.price2;
+        let totalPaperCost = sheetsNeeded * unitPaperPrice;
+
+        return { unitPrice: totalPaperCost / qty, perSheet, sheetsNeeded, isRotated };
     }
 
 
