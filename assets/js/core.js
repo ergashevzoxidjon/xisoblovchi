@@ -277,28 +277,62 @@
     }
 
     // ====================== KIRISH DARVOZASI (LOGIN GATE) ======================
-    // Butun tizim shu ekran ortida — foydalanuvchi ismi va PIN kodi (parol) to'g'ri kelmaguncha
-    // #appContainer ko'rsatilmaydi. Bu index.html dagi mavjud sahifa dizaynini o'zgartirmaydi,
-    // faqat oldiga bitta kirish bosqichini qo'shadi.
-    function attemptLoginGate() {
-        let nameInput = document.getElementById('loginNameInput');
+    // Butun tizim shu ekran ortida — avval Admin yoki Menejer kartochkasi tanlanadi,
+    // keyin o'sha rol uchun PIN kod so'raladi. PIN to'g'ri kelmaguncha #appContainer
+    // ko'rsatilmaydi.
+    let loginSelectedRole = null;
+
+    // Rol kartochkasi bosilganda — kartochkalar bosqichini yashirib, PIN kiritish
+    // blokini ochadi va tanlangan rol nomini ko'rsatadi.
+    function selectLoginRole(role) {
+        loginSelectedRole = role;
+        let roleStep = document.getElementById('loginRoleStep');
+        let pinStep = document.getElementById('loginPinStep');
+        let roleLabel = document.getElementById('loginSelectedRoleLabel');
         let pinInput = document.getElementById('loginPinInput');
         let errEl = document.getElementById('loginErrorMsg');
-        let name = (nameInput?.value || '').trim();
+        if (roleStep) roleStep.style.display = 'none';
+        if (pinStep) pinStep.style.display = 'block';
+        if (roleLabel) roleLabel.innerText = role === 'admin' ? '🛡️ Admin' : '🧾 Menejer';
+        if (errEl) errEl.style.display = 'none';
+        if (pinInput) { pinInput.value = ''; pinInput.focus(); }
+    }
+
+    // "⬅️ Boshqa rol" tugmasi — PIN blokini yopib, rol tanlash kartochkalariga qaytaradi.
+    function backToLoginRoleStep() {
+        loginSelectedRole = null;
+        let roleStep = document.getElementById('loginRoleStep');
+        let pinStep = document.getElementById('loginPinStep');
+        let pinInput = document.getElementById('loginPinInput');
+        let errEl = document.getElementById('loginErrorMsg');
+        if (pinStep) pinStep.style.display = 'none';
+        if (roleStep) roleStep.style.display = 'block';
+        if (pinInput) pinInput.value = '';
+        if (errEl) errEl.style.display = 'none';
+    }
+
+    function attemptLoginGate() {
+        let pinInput = document.getElementById('loginPinInput');
+        let errEl = document.getElementById('loginErrorMsg');
         let pin = (pinInput?.value || '').trim();
 
         function showErr(msg) {
             if (errEl) { errEl.innerText = msg; errEl.style.display = 'block'; }
         }
 
-        if (!name || !pin) {
-            showErr('⚠️ Foydalanuvchi nomi va PIN kodni kiriting.');
+        if (!loginSelectedRole) {
+            showErr('⚠️ Avval Admin yoki Menejer kartochkasini tanlang.');
             return;
         }
 
-        let user = usersDb.find(u => u.name.trim().toLowerCase() === name.toLowerCase() && u.pin === pin);
+        if (!pin) {
+            showErr('⚠️ PIN kodni kiriting.');
+            return;
+        }
+
+        let user = usersDb.find(u => u.role === loginSelectedRole && u.pin === pin);
         if (!user) {
-            showErr('⚠️ Foydalanuvchi nomi yoki PIN kod noto\'g\'ri.');
+            showErr('⚠️ PIN kod noto\'g\'ri.');
             if (pinInput) { pinInput.value = ''; pinInput.focus(); }
             return;
         }
@@ -434,13 +468,7 @@
         let app = document.getElementById('appContainer');
         if (app) app.style.display = 'none';
         if (gate) gate.style.display = 'flex';
-        let nameInput = document.getElementById('loginNameInput');
-        let pinInput = document.getElementById('loginPinInput');
-        let errEl = document.getElementById('loginErrorMsg');
-        if (nameInput) nameInput.value = '';
-        if (pinInput) pinInput.value = '';
-        if (errEl) errEl.style.display = 'none';
-        if (nameInput) nameInput.focus();
+        backToLoginRoleStep();
     }
 
     function updateCurrentUserBadge() {

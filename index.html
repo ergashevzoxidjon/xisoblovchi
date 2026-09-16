@@ -17,19 +17,37 @@
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="13" r="10.5" stroke="var(--ink)" stroke-width="2"/><line x1="13" y1="0" x2="13" y2="26" stroke="var(--ink)" stroke-width="1.4"/><line x1="0" y1="13" x2="26" y2="13" stroke="var(--ink)" stroke-width="1.4"/><circle cx="13" cy="13" r="3.4" fill="var(--magenta)"/></svg>
             <h1 style="font-family: var(--font-display); font-size: 1.25rem; margin:0;">Poligrafiya & Suvenir ERP</h1>
         </div>
-        <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 22px;">Davom etish uchun tizimga kiring.</p>
 
-        <div class="form-group" style="margin-bottom:14px;">
-            <label>Foydalanuvchi nomi</label>
-            <input type="text" id="loginNameInput" placeholder="Masalan: Administrator" autocomplete="username" onkeydown="if(event.key==='Enter'){ document.getElementById('loginPinInput').focus(); }">
+        <!-- 1-QADAM: rol tanlash — Admin yoki Menejer kartochkasi -->
+        <div id="loginRoleStep">
+            <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 20px;">Davom etish uchun rolingizni tanlang.</p>
+            <div class="login-role-grid">
+                <div class="login-role-card login-role-admin" onclick="selectLoginRole('admin')">
+                    <div class="login-role-icon">🛡️</div>
+                    <div class="login-role-name">Admin</div>
+                    <div class="login-role-desc">To'liq boshqaruv</div>
+                </div>
+                <div class="login-role-card login-role-menejer" onclick="selectLoginRole('menejer')">
+                    <div class="login-role-icon">🧾</div>
+                    <div class="login-role-name">Menejer</div>
+                    <div class="login-role-desc">Hisob-kitob, buyurtma</div>
+                </div>
+            </div>
         </div>
-        <div class="form-group" style="margin-bottom:10px;">
-            <label>PIN kod (parol)</label>
-            <input type="password" id="loginPinInput" placeholder="••••" inputmode="numeric" autocomplete="current-password" onkeydown="if(event.key==='Enter'){ attemptLoginGate(); }">
-        </div>
-        <div id="loginErrorMsg" style="display:none; color:var(--magenta); font-size:0.82rem; font-weight:600; margin-bottom:12px;"></div>
 
-        <button class="btn" style="width:100%;" onclick="attemptLoginGate()">Kirish</button>
+        <!-- 2-QADAM: tanlangan rol uchun PIN kod kiritish -->
+        <div id="loginPinStep" style="display:none;">
+            <div class="login-pin-step-head">
+                <span class="login-pin-role-badge" id="loginSelectedRoleLabel"></span>
+                <button type="button" class="login-pin-back-btn" onclick="backToLoginRoleStep()">⬅️ Boshqa rol</button>
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+                <label>PIN kod (parol)</label>
+                <input type="password" id="loginPinInput" placeholder="••••" inputmode="numeric" autocomplete="current-password" onkeydown="if(event.key==='Enter'){ attemptLoginGate(); }">
+            </div>
+            <div id="loginErrorMsg" style="display:none; color:var(--magenta); font-size:0.82rem; font-weight:600; margin-bottom:12px;"></div>
+            <button class="btn" style="width:100%;" onclick="attemptLoginGate()">Kirish</button>
+        </div>
     </div>
 </div>
 
