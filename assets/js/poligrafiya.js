@@ -16,24 +16,48 @@
     };
 
     let bloknotConfig = {
+        // O'lchamlar: usti va ichki varoqlar narxi alohida kiritiladi.
+        // a3Share — bitta bloknot ustiga necha A3 list ketishi (lak hisobi uchun).
         sizes: [
-            { label: "105x148mm (A6)", w: 105, h: 148 },
-            { label: "148x210mm (A5)", w: 148, h: 210 },
-            { label: "210x297mm (A4)", w: 210, h: 297 }
+            { key: 'a6', name: 'A6', label: '105x148mm', sheets: 35, a3Share: 0.25,
+              coverPrice: 2000, innerOnePrice: 4000, innerTwoPrice: 6400, isDefault: true  },
+            { key: 'a5', name: 'A5', label: '148x210mm', sheets: 40, a3Share: 0.5,
+              coverPrice: 3000, innerOnePrice: 6000, innerTwoPrice: 9600, isDefault: false },
+            { key: 'a4', name: 'A4', label: '210x297mm', sheets: 50, a3Share: 1.0,
+              coverPrice: 4500, innerOnePrice: 9500, innerTwoPrice: 15200, isDefault: false }
         ],
+        // Adad pog'onalari: qaysi adaddan boshlab qanday koeffitsient
+        // (faqat usti + ichki varoqlarga qo'llanadi)
         qtyTiers: [
-            { min: 1, max: 49, price: 25000 },
-            { min: 50, max: 99, price: 22000 },
-            { min: 100, max: 299, price: 19000 },
-            { min: 300, max: 999999, price: 16000 }
+            { from: 1,    factor: 1.0  },
+            { from: 1000, factor: 0.85 },
+            { from: 5000, factor: 0.75 }
         ],
-        lakPrice: 2000,
-        tisneniyaPrice: 3000,
-        springPrices: [1500, 2000, 2500],
-        infoText: "Bloknot narxi o'lcham, sahifalar soni va qo'shimcha xizmatlarga qarab hisoblanadi."
+        // Usti lak: A3 list bo'yicha pog'onali hisob
+        lak: {
+            firstPackSheets: 1000,     // birinchi paket - necha A3 list
+            firstPackPrice: 350000,    // birinchi paket narxi (minimal to'lov)
+            nextSheetPrice: 500        // undan keyingi har bir A3 list
+        },
+        // Tisneniya: dona narxi + bir martalik klishe
+        tisneniya: { pricePerUnit: 800, klishePrice: 50000 },
+        // Prujina joyi: har biriga alohida narx
+        spring: [
+            { key: 'top',  name: 'Yuqoridan', price: 0,    isDefault: true  },
+            { key: 'side', name: 'Yonidan',   price: 300,  isDefault: false }
+        ],
+        // Mijozga ma'lumot sifatida ko'rsatiladigan matn
+        infoText: "Bloknot usti 250-300gr kartondan tayyorlanadi."
     };
 
-    let bloknotSelected = { sizeIndex: 0, twoSide: false, extra: 'yoq', springIndex: 0 };
+    // Mijoz ekranida tanlangan qiymatlar
+    // extra: 'yoq' | 'lak' | 'tisneniya'  — faqat bittasi tanlanadi
+    let bloknotSelected = {
+        sizeIndex: 0,
+        twoSide: false,
+        extra: 'yoq',
+        springIndex: 0
+    };
 
     let poligrafiyaGsmDatabase = {
         flayer: [
@@ -61,7 +85,6 @@
             { gsm: 400, price: 560, isDefault: false }
         ]
     };
-
     let selectedPoligrafiyaGsmIndex = -1;
 
     function renderAdminPoligrafiyaGsmTable() {
