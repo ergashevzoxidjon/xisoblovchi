@@ -28,7 +28,15 @@
         setupFee: 0,        // bir martalik forma/sozlash xarajati (so'm), tirajga bo'linib qo'shiladi
         minOrderAmount: 0,  // minimal buyurtma summasi (so'm) — jami narx shundan kam bo'lmaydi
         ofsetRoutingEnabled: true,  // Flayer uchun aqlli marshrutlash (ofset/raqamli modullari orqali hisoblash) yoqilganmi
-        ofsetRoutingThreshold: 1000 // shu sondan kam bo'lsa — Raqamli pechat, ko'p/teng bo'lsa — Ofset pechat orqali hisoblanadi
+        ofsetRoutingThreshold: 1000, // shu sondan kam bo'lsa — Raqamli pechat, ko'p/teng bo'lsa — Ofset pechat orqali hisoblanadi
+
+        // Flayer uchun ADMIN belgilagan standart qog'oz — kalkulyator ochilganda shu avtomatik
+        // tanlangan holda chiqadi (menejer keyin xohlasa boshqasini tanlashi mumkin).
+        // Ofset dvigateli uchun turi+grammaj, Raqamli dvigateli uchun qog'oz nomi bo'yicha saqlanadi
+        // (indeks emas — shunda admin ro'yxatni keyin qayta tartiblasa ham to'g'ri ishlaydi).
+        flayerDefaultOfsetPaperType: null,
+        flayerDefaultOfsetGsm: null,
+        flayerDefaultDigitalPaperName: null
     };
 
     // Flayer uchun foydalanuvchi tanlaydigan chop etish tomoni (aqlli marshrutlash pilotida ishlatiladi)
@@ -60,6 +68,44 @@
         let routingThresholdInput = document.getElementById('poligrafiyaOfsetRoutingThresholdInput');
         if (routingEnabledInput) routingEnabledInput.checked = poligrafiyaAdvancedConfig.ofsetRoutingEnabled !== false;
         if (routingThresholdInput) routingThresholdInput.value = poligrafiyaAdvancedConfig.ofsetRoutingThreshold || 1000;
+
+        renderFlayerDefaultPaperAdminUI();
+    }
+
+    // Admin panel: Flayer uchun "standart qog'oz" tanlovlarini (Ofset turi+grammaj, Raqamli qog'ozi)
+    // ofsetRawPapers/digitalPapersDatabase joriy ro'yxatlaridan to'ldiradi va saqlangan qiymatni
+    // tanlab qo'yadi (saqlangan qiymat endi mavjud bo'lmasa — ro'yxatdagi birinchisini).
+    function renderFlayerDefaultPaperAdminUI() {
+        let typeSelect = document.getElementById('flayerDefaultOfsetTypeInput');
+        let digitalSelect = document.getElementById('flayerDefaultDigitalPaperInput');
+        if (!typeSelect || !digitalSelect) return;
+
+        let typeOptions = ["Ofset", ...new Set(ofsetRawPapers.filter(p => p.name !== "Ofset").map(p => p.name))];
+        let savedType = poligrafiyaAdvancedConfig.flayerDefaultOfsetPaperType;
+        let selectedType = typeOptions.includes(savedType) ? savedType : (typeOptions[0] || 'Ofset');
+        typeSelect.innerHTML = typeOptions.map(t => `<option value="${t}" ${t === selectedType ? 'selected' : ''}>${t}</option>`).join('');
+
+        renderFlayerDefaultOfsetGsmOptions(selectedType, poligrafiyaAdvancedConfig.flayerDefaultOfsetGsm);
+
+        let digitalOptions = digitalPapersDatabase || [];
+        let savedDigitalName = poligrafiyaAdvancedConfig.flayerDefaultDigitalPaperName;
+        let selectedDigitalName = digitalOptions.some(p => p.name === savedDigitalName) ? savedDigitalName : (digitalOptions[0]?.name || '');
+        digitalSelect.innerHTML = digitalOptions.map(p => `<option value="${p.name}" ${p.name === selectedDigitalName ? 'selected' : ''}>${p.name}</option>`).join('');
+    }
+
+    // "Standart qog'oz turi" tanlovi o'zgarganda — grammaj ro'yxatini shu turga mos ravishda
+    // qayta chizadi (birinchi mos grammaj avtomatik tanlanadi).
+    function onFlayerDefaultOfsetTypeChange() {
+        let typeSelect = document.getElementById('flayerDefaultOfsetTypeInput');
+        if (typeSelect) renderFlayerDefaultOfsetGsmOptions(typeSelect.value);
+    }
+
+    function renderFlayerDefaultOfsetGsmOptions(typeName, preferredGsm) {
+        let gsmSelect = document.getElementById('flayerDefaultOfsetGsmInput');
+        if (!gsmSelect) return;
+        let gsmOptions = ofsetRawPapers.filter(p => p.name === typeName);
+        let selectedGsm = gsmOptions.some(p => p.gsm === preferredGsm) ? preferredGsm : (gsmOptions[0]?.gsm ?? '');
+        gsmSelect.innerHTML = gsmOptions.map(p => `<option value="${p.gsm}" ${p.gsm === selectedGsm ? 'selected' : ''}>${p.gsm}gr</option>`).join('');
     }
 
     function addPoligrafiyaQtyTierRow() {
@@ -97,6 +143,13 @@
         let routingThreshold = parseFloat(routingThresholdInput?.value) || 1000;
         poligrafiyaAdvancedConfig.ofsetRoutingEnabled = routingEnabledInput ? !!routingEnabledInput.checked : true;
         poligrafiyaAdvancedConfig.ofsetRoutingThreshold = routingThreshold < 1 ? 1000 : routingThreshold;
+
+        let defaultOfsetTypeInput = document.getElementById('flayerDefaultOfsetTypeInput');
+        let defaultOfsetGsmInput = document.getElementById('flayerDefaultOfsetGsmInput');
+        let defaultDigitalPaperInput = document.getElementById('flayerDefaultDigitalPaperInput');
+        if (defaultOfsetTypeInput) poligrafiyaAdvancedConfig.flayerDefaultOfsetPaperType = defaultOfsetTypeInput.value || null;
+        if (defaultOfsetGsmInput) poligrafiyaAdvancedConfig.flayerDefaultOfsetGsm = parseFloat(defaultOfsetGsmInput.value) || null;
+        if (defaultDigitalPaperInput) poligrafiyaAdvancedConfig.flayerDefaultDigitalPaperName = defaultDigitalPaperInput.value || null;
 
         localStorage.setItem('erp_poligrafiya_advanced_config', JSON.stringify(poligrafiyaAdvancedConfig));
         if (typeof logAudit === 'function') logAudit('Aqlli narxlash sozlamalari o\'zgartirildi', `Pog'onalar: ${newTiers.length} ta, sozlash: ${setupFee.toLocaleString()} so'm, min. buyurtma: ${minOrderAmount.toLocaleString()} so'm, ofset chegarasi: ${poligrafiyaAdvancedConfig.ofsetRoutingThreshold.toLocaleString()} dona (${poligrafiyaAdvancedConfig.ofsetRoutingEnabled ? 'yoqilgan' : "o'chirilgan"})`);
@@ -840,6 +893,24 @@ function generateFormHtml_poligrafiya(type) {
             // to'g'ridan-to'g'ri haqiqiy Ofset/Raqamli bazalaridan tanlanadi — eski alohida
             // gsm-narx jadvali (poligrafiyaGsmDatabase) flayer uchun umuman ishlatilmaydi.
             let useSmartRouting = (type === 'flayer') && poligrafiyaAdvancedConfig.ofsetRoutingEnabled !== false;
+
+            // Flayer kalkulyatori har safar YANGIDAN ochilganda (adad o'zgarganda emas — faqat
+            // bo'lim ochilganda) qog'oz tanlovi admin belgilagan standartga qaytariladi. Standart
+            // hali mavjud/haqiqiy bo'lmasa (masalan o'chirilgan bo'lsa), ro'yxatdagi birinchisiga
+            // tushadi — xuddi pastdagi oddiy grammaj ro'yxati kabi.
+            if (useSmartRouting) {
+                let defaultType = poligrafiyaAdvancedConfig.flayerDefaultOfsetPaperType;
+                let typeOptionsForDefault = ["Ofset", ...new Set(ofsetRawPapers.filter(p => p.name !== "Ofset").map(p => p.name))];
+                flayerSelectedOfsetPaperType = typeOptionsForDefault.includes(defaultType) ? defaultType : (typeOptionsForDefault[0] || 'Ofset');
+
+                let gsmOptionsForDefault = ofsetRawPapers.filter(p => p.name === flayerSelectedOfsetPaperType);
+                let defaultGsm = poligrafiyaAdvancedConfig.flayerDefaultOfsetGsm;
+                flayerSelectedOfsetGsm = gsmOptionsForDefault.some(p => p.gsm === defaultGsm) ? defaultGsm : (gsmOptionsForDefault[0]?.gsm ?? 80);
+
+                let defaultDigitalName = poligrafiyaAdvancedConfig.flayerDefaultDigitalPaperName;
+                let defaultDigitalIdx = digitalPapersDatabase.findIndex(p => p.name === defaultDigitalName);
+                flayerSelectedDigitalPaperIndex = defaultDigitalIdx >= 0 ? defaultDigitalIdx : 0;
+            }
 
             let gsmHtml = '';
             if (!useSmartRouting) {

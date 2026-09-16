@@ -356,6 +356,28 @@
                         </div>
                     </div>
 
+                    <!-- Faqat Flayer + marshrutlash yoqilganda ko'rinadi (updateFlayerAdminCardsVisibility orqali) -->
+                    <div id="flayerDefaultPaperBox" style="display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
+                        <div style="font-weight: 600; margin-bottom: 6px; font-size: 0.88rem;">📋 Standart qog'oz (Flayer)</div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                            Menejer Flayer bo'limini ochganda, quyida belgilangan qog'oz turi va grammaj avtomatik tanlangan holda chiqadi — menejer xohlasa boshqasini ham tanlashi mumkin.
+                        </p>
+                        <div class="form-row" style="gap: 12px;">
+                            <div class="form-group">
+                                <label>Ofset pechat uchun — qog'oz turi:</label>
+                                <select id="flayerDefaultOfsetTypeInput" onchange="onFlayerDefaultOfsetTypeChange()"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Ofset pechat uchun — grammaj:</label>
+                                <select id="flayerDefaultOfsetGsmInput"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Raqamli pechat uchun — qog'oz:</label>
+                            <select id="flayerDefaultDigitalPaperInput"></select>
+                        </div>
+                    </div>
+
                     <button class="btn btn-success" style="width: 100%; margin-top: 16px;" onclick="savePoligrafiyaAdvancedConfig()">💾 Aqlli narxlash sozlamalarini saqlash</button>
                 </div>
             </div>

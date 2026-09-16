@@ -1184,6 +1184,11 @@
                 routingNote.innerHTML = '';
             }
         }
+        // "Standart qog'oz" bloki faqat Flayer + marshrutlash yoqilganda mantiqan kerak —
+        // shundagina kalkulyatorda haqiqatan ham Ofset/Raqamli qog'oz tanlovi ko'rsatiladi.
+        let defaultPaperBox = document.getElementById('flayerDefaultPaperBox');
+        if (defaultPaperBox) defaultPaperBox.style.display = isFlayerRouted ? 'block' : 'none';
+        if (isFlayerRouted && typeof renderFlayerDefaultPaperAdminUI === 'function') renderFlayerDefaultPaperAdminUI();
     }
 
     function closeProductManager() {
