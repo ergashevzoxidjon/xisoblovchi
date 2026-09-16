@@ -1316,9 +1316,6 @@ function generateForm(type) {
         renderPoligrafiyaGsmOptions(gsmListForRender);
     }
 
-    if (type === 'flayer' && document.getElementById('flayerPaperPickerBox')) {
-        renderFlayerPaperPicker();
-    }
 }
 
 function calculate() {

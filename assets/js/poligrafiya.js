@@ -809,12 +809,27 @@ function generateFormHtml_poligrafiya(type) {
 
     let gsmHtml = '';
     let gsmList = poligrafiyaGsmDatabase[type] || [];
-    if (gsmList.length > 0) {
+    let usesRealPaperPricing = gsmList.length > 0;
+    if (usesRealPaperPricing) {
         let defaultIdx = gsmList.findIndex(g => g.isDefault);
         selectedPoligrafiyaGsmIndex = defaultIdx >= 0 ? defaultIdx : 0;
+        selectedPoligrafiyaEngine = 'ofset';
+        selectedPoligrafiyaSides = (poligrafiyaSideTypes[type] === 1) ? 1 : 2;
         gsmHtml = `
             <div class="step-title">Qog'oz grammaji</div>
             <div class="poli-paper-grid" id="poligrafiyaGsmGroup"></div>
+
+            <div class="step-title">Pechat usuli</div>
+            <div class="options-group" id="poligrafiyaEngineGroup">
+                <button type="button" class="opt-btn active" data-engine="ofset" onclick="selectPoligrafiyaEngine('ofset')">🖨️ Ofset Pechat</button>
+                <button type="button" class="opt-btn" data-engine="raqamli" onclick="selectPoligrafiyaEngine('raqamli')">🖥️ Raqamli Pechat</button>
+            </div>
+
+            <div class="step-title">Bosma tomoni</div>
+            <div class="options-group" id="poligrafiyaSidesGroup">
+                <button type="button" class="opt-btn ${selectedPoligrafiyaSides === 1 ? 'active' : ''}" data-sides="1" onclick="selectPoligrafiyaSides(1)">Bir tomonlama (4+0)</button>
+                <button type="button" class="opt-btn ${selectedPoligrafiyaSides === 2 ? 'active' : ''}" data-sides="2" onclick="selectPoligrafiyaSides(2)">Ikki tomonlama (4+4)</button>
+            </div>
         `;
     }
 
@@ -832,13 +847,14 @@ function generateFormHtml_poligrafiya(type) {
                 </div>
             </div>` : ''}
             ${gsmHtml}
+            ${!usesRealPaperPricing ? `
             <div class="poli-spec-row poli-spec-row-muted">
                 <div class="poli-spec-icon">🖨️</div>
                 <div>
                     <div class="poli-spec-label">Bosma turi</div>
                     <div class="poli-spec-value">${sideTypeLabel}</div>
                 </div>
-            </div>
+            </div>` : ''}
             <div class="form-group poli-qty-group">
                 <label>Adad (dona)</label>
                 <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
@@ -850,8 +866,7 @@ function generateFormHtml_poligrafiya(type) {
 }
 
 function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
-    let details = activeProductType.toUpperCase();
-    let baseUnitPrice = 0;
+    let baseUnitPrice = baseCost;
 
     // Kiritish tekshiruvi: manfiy/mantiqsiz miqdorni tozalaymiz
     if (!Number.isFinite(qty) || qty < 1) {
@@ -859,20 +874,63 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
         showToast("⚠️ Miqdor noto'g'ri kiritildi, 1 dona sifatida hisoblandi.");
     }
 
-    let sideFactor = poligrafiyaSideTypes[activeProductType] ?? 1.6;
-
-    let unitBase = baseCost;
-    let gsmLabel = '';
+    let sizeLabel = poligrafiyaSizeLabels[activeProductType] || '';
     let gsmList = poligrafiyaGsmDatabase[activeProductType] || [];
-    if (gsmList.length > 0) {
-        let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList[0];
-        unitBase = g.price;
-        gsmLabel = ` | ${g.gsm}gr`;
-    }
+    let details;
 
-    baseUnitPrice = unitBase * sideFactor;
-    let sizeLabel = poligrafiyaSizeLabels[activeProductType];
-    details = (sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish") + gsmLabel;
+    if (gsmList.length > 0) {
+        // Narx bu yerda qo'lda kiritilmaydi — tanlangan grammaj Ofset Pechat yoki
+        // Raqamli Pechat bo'limidagi haqiqiy qog'oz bazasidan qidiriladi.
+        let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList[0];
+        let gsmLabel = ` | ${g.gsm}gr`;
+        let size = parsePoligrafiyaSizeLabel(sizeLabel);
+        let sides = (selectedPoligrafiyaSides === 1) ? 1 : 2;
+        let engine = (selectedPoligrafiyaEngine === 'raqamli') ? 'raqamli' : 'ofset';
+        let engineLabel = engine === 'ofset' ? 'Ofset Pechat' : 'Raqamli Pechat';
+        let priceFound = false;
+
+        if (size) {
+            if (engine === 'ofset') {
+                let paperEntry = (typeof ofsetRawPapers !== 'undefined') ? ofsetRawPapers.find(p => p.gsm === g.gsm) : null;
+                if (paperEntry) {
+                    let results = ['A3', 'A2', 'A1']
+                        .map(m => calculateOfsetForMachine(m, size.w, size.h, qty, sides, paperEntry.name, g.gsm))
+                        .filter(Boolean);
+                    if (results.length > 0) {
+                        results.sort((a, b) => a.perPieceCostRaw - b.perPieceCostRaw);
+                        baseUnitPrice = results[0].perPieceCostRaw;
+                        priceFound = true;
+                    }
+                }
+            } else {
+                let paperEntry = (typeof digitalPapersDatabase !== 'undefined') ? digitalPapersDatabase.find(p => {
+                    let m = /(\d+)/.exec(p.name || '');
+                    return m && parseInt(m[1]) === g.gsm;
+                }) : null;
+                if (paperEntry) {
+                    let r = calculateDigitalPriceForPaper(paperEntry, size.w, size.h, qty, sides);
+                    if (r) {
+                        baseUnitPrice = r.unitPrice;
+                        priceFound = true;
+                    }
+                }
+            }
+        }
+
+        if (priceFound) {
+            details = (sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish")
+                + gsmLabel + ` | ${engineLabel} | ${sides === 1 ? 'Bir tomonlama' : 'Ikki tomonlama'}`;
+        } else {
+            baseUnitPrice = 0;
+            details = `⚠️ ${g.gsm}gr uchun ${engineLabel} bo'limida mos qog'oz topilmadi — administrator shu grammajni ${engineLabel} bo'limiga kiritishi kerak.`;
+        }
+    } else {
+        // Bu mahsulot turi uchun grammaj bazasi mavjud emas (masalan Paket, Kalendar) —
+        // eski oddiy hisob: baza narx * bosma koeffitsienti.
+        let sideFactor = poligrafiyaSideTypes[activeProductType] ?? 1.6;
+        baseUnitPrice = baseCost * sideFactor;
+        details = sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish";
+    }
 
     return { details, baseUnitPrice };
 }
