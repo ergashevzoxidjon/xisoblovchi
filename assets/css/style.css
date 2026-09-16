@@ -458,20 +458,6 @@
         .opt-btn:hover { border-color: var(--primary); color: var(--primary); }
         .opt-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Flayer aqlli marshrutlash: tiraj admin chegarasidan qaysi tomonga o'tganini ko'rsatuvchi belgi */
-        .engine-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 999px;
-            font-family: var(--font-mono);
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-        .engine-badge-ofset { background: rgba(0, 144, 212, 0.12); color: var(--primary-hover); border: 1.5px solid var(--primary); }
-        .engine-badge-raqamli { background: rgba(227, 28, 121, 0.1); color: var(--magenta); border: 1.5px solid var(--magenta); }
-
         .right-panel-col { display: flex; flex-direction: column; gap: 16px; }
 
         .margin-card {

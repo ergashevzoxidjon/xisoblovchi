@@ -16,26 +16,37 @@
     };
 
     function renderAdminPoligrafiyaGsmTable() {
-        let tbody = document.getElementById('adminPoligrafiyaGsmTableBody');
-        if (!tbody) return;
+        let grid = document.getElementById('adminPoligrafiyaGsmTableBody');
+        if (!grid) return;
         let list = poligrafiyaGsmDatabase[currentManagingProduct] || [];
 
         if (list.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding:20px;">Hozircha grammaj kiritilmagan. Kiritilmasa, baza narxi ishlatiladi.</td></tr>`;
+            grid.innerHTML = `<div class="poli-gsm-empty">Hozircha grammaj kiritilmagan. Kiritilmasa, baza narxi ishlatiladi.</div>`;
             return;
         }
 
-        tbody.innerHTML = list.map((g, index) => `
-            <tr>
-                <td><input type="number" id="polgsm_gsm_${index}" value="${g.gsm}"></td>
-                <td><input type="number" id="polgsm_price_${index}" value="${g.price}"></td>
-                <td style="text-align:center;"><input type="radio" name="polgsm_default" id="polgsm_default_${index}" ${g.isDefault ? 'checked' : ''} style="width:16px; height:16px; accent-color: var(--primary);"></td>
-                <td style="text-align: right;">
-                    <div class="action-btns" style="justify-content: flex-end;">
-                        <button class="btn btn-danger" title="O'chirish" onclick="deletePoligrafiyaGsmRow(${index})">🗑️</button>
+        grid.innerHTML = list.map((g, index) => `
+            <div class="poli-gsm-card ${g.isDefault ? 'is-default' : ''}">
+                <button class="poli-gsm-delete" title="O'chirish" onclick="deletePoligrafiyaGsmRow(${index})">✕</button>
+                <label class="poli-gsm-default-toggle">
+                    <input type="radio" name="polgsm_default" id="polgsm_default_${index}" ${g.isDefault ? 'checked' : ''}>
+                    <span>${g.isDefault ? '★ Standart' : '☆ Standart qilish'}</span>
+                </label>
+                <div class="poli-gsm-field">
+                    <label>Grammaj</label>
+                    <div class="poli-gsm-input-wrap">
+                        <input type="number" id="polgsm_gsm_${index}" value="${g.gsm}">
+                        <span>gr</span>
                     </div>
-                </td>
-            </tr>
+                </div>
+                <div class="poli-gsm-field">
+                    <label>Narxi</label>
+                    <div class="poli-gsm-input-wrap">
+                        <input type="number" id="polgsm_price_${index}" value="${g.price}">
+                        <span>so'm</span>
+                    </div>
+                </div>
+            </div>
         `).join('');
     }
 
@@ -86,7 +97,10 @@
         const group = document.getElementById('poligrafiyaGsmGroup');
         if (!group) return;
         group.innerHTML = gsmList.map((g, idx) => `
-            <button class="opt-btn ${idx === selectedPoligrafiyaGsmIndex ? 'active' : ''}" onclick="selectPoligrafiyaGsm(${idx})">${g.gsm}gr</button>
+            <div class="poli-paper-option ${idx === selectedPoligrafiyaGsmIndex ? 'active' : ''}" onclick="selectPoligrafiyaGsm(${idx})">
+                <div class="poli-paper-gsm">${g.gsm}<small>gr</small></div>
+                <div class="poli-paper-price">${(g.price || 0).toLocaleString()} so'm</div>
+            </div>
         `).join('');
     }
 
@@ -659,8 +673,8 @@
 
     function selectPoligrafiyaGsm(index) {
         selectedPoligrafiyaGsmIndex = index;
-        document.querySelectorAll('#poligrafiyaGsmGroup .opt-btn').forEach((btn, idx) => {
-            btn.classList.toggle('active', idx === index);
+        document.querySelectorAll('#poligrafiyaGsmGroup .poli-paper-option').forEach((el, idx) => {
+            el.classList.toggle('active', idx === index);
         });
         calculate();
     }
@@ -668,7 +682,6 @@
 
 
 function generateFormHtml_poligrafiya(type) {
-    let html = '';
     let sizeLabel = poligrafiyaSizeLabels[type] || '';
 
     let gsmHtml = '';
@@ -677,31 +690,36 @@ function generateFormHtml_poligrafiya(type) {
         let defaultIdx = gsmList.findIndex(g => g.isDefault);
         selectedPoligrafiyaGsmIndex = defaultIdx >= 0 ? defaultIdx : 0;
         gsmHtml = `
-            <div class="step-title">Qog'oz grammaji:</div>
-            <div class="options-group" id="poligrafiyaGsmGroup"></div>
+            <div class="step-title">Qog'oz grammaji</div>
+            <div class="poli-paper-grid" id="poligrafiyaGsmGroup"></div>
         `;
     }
 
     let sideTypeVal = poligrafiyaSideTypes[type] ?? 1.6;
     let sideTypeLabel = sideTypeVal === 1 ? "Bir tomonlama (4+0)" : "Ikki tomonlama (4+4)";
-    let sideBlockHtml = `
-        <div class="form-group" style="margin-bottom:12px;">
-            <label>Bosma turi:</label>
-            <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sideTypeLabel}</div>
-        </div>
-    `;
 
-    html = `
-        ${sizeLabel ? `
-        <div class="form-group" style="margin-bottom:12px;">
-            <label>Standart o'lcham:</label>
-            <div style="font-weight:700; color: var(--primary); font-family: var(--font-mono); font-size: 1rem; padding: 8px 0;">${sizeLabel}</div>
-        </div>` : ''}
-        ${gsmHtml}
-        ${sideBlockHtml}
-        <div class="form-group">
-            <label>Adad (dona):</label>
-            <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
+    let html = `
+        <div class="poli-calc">
+            ${sizeLabel ? `
+            <div class="poli-spec-row">
+                <div class="poli-spec-icon">📐</div>
+                <div>
+                    <div class="poli-spec-label">Standart o'lcham</div>
+                    <div class="poli-spec-value">${sizeLabel}</div>
+                </div>
+            </div>` : ''}
+            ${gsmHtml}
+            <div class="poli-spec-row poli-spec-row-muted">
+                <div class="poli-spec-icon">🖨️</div>
+                <div>
+                    <div class="poli-spec-label">Bosma turi</div>
+                    <div class="poli-spec-value">${sideTypeLabel}</div>
+                </div>
+            </div>
+            <div class="form-group poli-qty-group">
+                <label>Adad (dona)</label>
+                <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
+            </div>
         </div>
     `;
 
