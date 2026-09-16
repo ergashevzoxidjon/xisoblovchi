@@ -15,6 +15,55 @@
         paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6
     };
 
+    let bloknotConfig = {
+        sizes: [
+            { label: "105x148mm (A6)", w: 105, h: 148 },
+            { label: "148x210mm (A5)", w: 148, h: 210 },
+            { label: "210x297mm (A4)", w: 210, h: 297 }
+        ],
+        qtyTiers: [
+            { min: 1, max: 49, price: 25000 },
+            { min: 50, max: 99, price: 22000 },
+            { min: 100, max: 299, price: 19000 },
+            { min: 300, max: 999999, price: 16000 }
+        ],
+        lakPrice: 2000,
+        tisneniyaPrice: 3000,
+        springPrices: [1500, 2000, 2500],
+        infoText: "Bloknot narxi o'lcham, sahifalar soni va qo'shimcha xizmatlarga qarab hisoblanadi."
+    };
+
+    let bloknotSelected = { sizeIndex: 0, twoSide: false, extra: 'yoq', springIndex: 0 };
+
+    let poligrafiyaGsmDatabase = {
+        flayer: [
+            { gsm: 115, price: 280, isDefault: false },
+            { gsm: 130, price: 300, isDefault: true },
+            { gsm: 150, price: 340, isDefault: false },
+            { gsm: 170, price: 380, isDefault: false }
+        ],
+        listovka: [
+            { gsm: 115, price: 230, isDefault: false },
+            { gsm: 130, price: 250, isDefault: true },
+            { gsm: 150, price: 290, isDefault: false },
+            { gsm: 170, price: 330, isDefault: false }
+        ],
+        buklet: [
+            { gsm: 150, price: 750, isDefault: false },
+            { gsm: 170, price: 800, isDefault: true },
+            { gsm: 200, price: 900, isDefault: false },
+            { gsm: 300, price: 1100, isDefault: false }
+        ],
+        doorhanger: [
+            { gsm: 250, price: 420, isDefault: false },
+            { gsm: 300, price: 450, isDefault: true },
+            { gsm: 350, price: 500, isDefault: false },
+            { gsm: 400, price: 560, isDefault: false }
+        ]
+    };
+
+    let selectedPoligrafiyaGsmIndex = -1;
+
     function renderAdminPoligrafiyaGsmTable() {
         let grid = document.getElementById('adminPoligrafiyaGsmTableBody');
         if (!grid) return;
