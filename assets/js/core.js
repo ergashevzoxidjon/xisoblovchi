@@ -255,11 +255,6 @@
             quoteArchive = savedArchive ? JSON.parse(savedArchive) : [];
         } catch (e) { quoteArchive = []; }
 
-        try {
-            let savedPolAdv = localStorage.getItem('erp_poligrafiya_advanced_config');
-            if (savedPolAdv) poligrafiyaAdvancedConfig = { ...poligrafiyaAdvancedConfig, ...JSON.parse(savedPolAdv) };
-        } catch (e) {}
-
         renderAdminCategoryGrid();
 
         // Kirish darvozasi: shu brauzer TAB sessiyasida allaqachon kirilgan bo'lsa (sahifa yangilansa ham)
@@ -1099,9 +1094,7 @@
             return;
         }
         if (isPoligrafiya) {
-            updateFlayerAdminCardsVisibility(key);
             renderAdminPoligrafiyaGsmTable();
-            renderPoligrafiyaAdvancedConfigUI();
             return;
         }
 
@@ -1162,33 +1155,6 @@
 
         cancelPenEdit();
         renderAdminPensTable();
-    }
-
-    // Flayer aqlli marshrutlash orqali hisoblanadi — qog'oz narxi to'g'ridan-to'g'ri Ofset/Raqamli
-    // bazalaridan olinadi, shuning uchun admin paneldagi alohida gsm-narx jadvali flayer uchun
-    // ko'rsatilmaydi (chalg'ituvchi va endi ishlatilmaydi); o'rniga tushuntiruvchi eslatma chiqadi.
-    // Ham admin panel ochilganda, ham "Aqlli narxlash" sozlamalari saqlanganda (routing yoqish/
-    // o'chirish) chaqiriladi — shuning uchun ikkalasida ham darhol yangilanadi.
-    function updateFlayerAdminCardsVisibility(key) {
-        let isFlayerRouted = (key === 'flayer') && poligrafiyaAdvancedConfig.ofsetRoutingEnabled !== false;
-        let gsmPriceCard = document.getElementById('poligrafiyaGsmPriceCard');
-        if (gsmPriceCard) gsmPriceCard.style.display = isFlayerRouted ? 'none' : 'block';
-        let routingNote = document.getElementById('flayerRoutingNote');
-        if (routingNote) {
-            if (isFlayerRouted) {
-                routingNote.style.display = 'block';
-                let threshold = (poligrafiyaAdvancedConfig.ofsetRoutingThreshold || 1000).toLocaleString();
-                routingNote.innerHTML = `🧠 <strong>Aqlli marshrutlash yoqilgan.</strong> Qog'oz narxi bu yerda emas, balki Ofset va Raqamli pechat bo'limlaridagi bazalardan avtomatik olinadi. Tiraj <strong>${threshold} donadan kam</strong> bo'lsa — Raqamli pechat, <strong>teng yoki ko'p</strong> bo'lsa — Ofset pechat orqali hisoblanadi. Narxlarni o'zgartirish uchun tegishli bo'limning admin panelidan foydalaning.`;
-            } else {
-                routingNote.style.display = 'none';
-                routingNote.innerHTML = '';
-            }
-        }
-        // "Standart qog'oz" bloki faqat Flayer + marshrutlash yoqilganda mantiqan kerak —
-        // shundagina kalkulyatorda haqiqatan ham Ofset/Raqamli qog'oz tanlovi ko'rsatiladi.
-        let defaultPaperBox = document.getElementById('flayerDefaultPaperBox');
-        if (defaultPaperBox) defaultPaperBox.style.display = isFlayerRouted ? 'block' : 'none';
-        if (isFlayerRouted && typeof renderFlayerDefaultPaperAdminUI === 'function') renderFlayerDefaultPaperAdminUI();
     }
 
     function closeProductManager() {
@@ -1408,16 +1374,6 @@ function calculate() {
         else {
             let r = calculateResult_poligrafiya(activeProductType, qty, baseCost);
             details = r.details; baseUnitPrice = r.baseUnitPrice;
-
-            // Minimal buyurtma summasi — jami narx (marja qo'shilgandan keyin) shundan kam bo'lmasin
-            let minAmt = poligrafiyaAdvancedConfig.minOrderAmount || 0;
-            if (minAmt > 0 && qty > 0) {
-                let taxminiyJami = Math.round(baseUnitPrice * (1 + marginPercent / 100)) * qty;
-                if (taxminiyJami < minAmt) {
-                    baseUnitPrice = (minAmt / qty) / (1 + marginPercent / 100);
-                    details += ` | (minimal buyurtma qiymati: ${minAmt.toLocaleString()} so'm qo'llanildi)`;
-                }
-            }
         }
     }
 

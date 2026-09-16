@@ -669,8 +669,7 @@ function calculateResult_textile(activeProductTypeParam, qty, marginPercent) {
 // Formula manba jadvaldan aniq chiqarilgan (bir nechta qatorda tekshirilgan):
 //   Jami xarajat = Bayroq narxi × Soni + Taxi   (Taxi — HAR BIR qatorda bir xil, 50 000 so'm)
 //   Narxi (dona) = Jami xarajat × Marja / Soni  ⇒  Narxi = (Bayroq narxi + Taxi/Soni) × Marja
-// Bu xuddi poligrafiyaAdvancedConfig.setupFee bilan bir xil matematik naqsh (rate += setupFee/qty),
-// shuning uchun o'sha o'rnatilgan pattern qayta ishlatildi — yangi mexanizm o'ylab topilmadi.
+// Bu odatiy 'bir martalik xarajatni tirajga bo'lib qo'shish' matematik naqshi (rate += taxi/qty).
 function bqId() { return 'BQ-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
 
 // Nomlar — mijozning haqiqiy texnik xususiyatlari (o'lcham, mato, pechat turi va h.k.) bo'lgani
