@@ -278,6 +278,59 @@
         .admin-cat-accent-violet .admin-cat-icon-badge { background: rgba(124, 92, 255, 0.10); color: #7c5cff; }
         .admin-cat-accent-violet .admin-cat-card:hover { border-color: #7c5cff; }
 
+
+        /* KIRISH DARVOZASI — rol tanlash kartochkalari (Admin / Menejer) va PIN bosqichi */
+        .login-role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        .login-role-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        .login-role-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+        .login-role-icon {
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+        }
+        .login-role-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--ink); text-transform: uppercase; letter-spacing: 0.3px; }
+        .login-role-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+        .login-role-card.login-role-admin .login-role-icon { background: rgba(227, 28, 121, 0.10); color: var(--magenta); }
+        .login-role-card.login-role-admin:hover { border-color: var(--magenta); }
+        .login-role-card.login-role-menejer .login-role-icon { background: rgba(0, 144, 212, 0.10); color: var(--primary); }
+        .login-role-card.login-role-menejer:hover { border-color: var(--primary); }
+
+        .login-pin-step-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .login-pin-role-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+            color: var(--ink); letter-spacing: 0.3px;
+        }
+        .login-pin-back-btn {
+            background: none; border: none; cursor: pointer;
+            font-size: 0.78rem; font-weight: 600; color: var(--text-muted);
+            padding: 4px 8px; border-radius: 6px;
+        }
+        .login-pin-back-btn:hover { background: #f1efe6; color: var(--text-main); }
+
         .screen { display: none; background: var(--surface); border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); box-shadow: var(--shadow); animation: screenIn 0.25s ease; }
         @keyframes screenIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .back-btn { margin-bottom: 20px; }

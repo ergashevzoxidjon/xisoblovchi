@@ -7562,3 +7562,22 @@ Another git process seems to be running in this repository, or the lock file may
 [16.09.2026 21:14:59] GitHub ga yuklandi.
 [16.09.2026 21:15:15] O'zgarish sezildi, 60 soniya kutilmoqda...
 [16.09.2026 21:16:15] O'zgarish topildi: core.js, avto-push.log, index.html yangilandi - 16.09.2026 21:16
+[16.09.2026 21:16:15] Commit qilindi.
+[16.09.2026 21:16:19] GitHub ga yuklandi.
+[16.09.2026 21:16:34] O'zgarish sezildi, 60 soniya kutilmoqda...
+[16.09.2026 21:17:34] O'zgarish topildi: style.css, avto-push.log yangilandi - 16.09.2026 21:17
+[16.09.2026 21:17:34] XATO add: fatal: Unable to create 'F:/AI/Xisoblovchi/.git/index.lock': File exists.
+System.Management.Automation.RemoteException
+Another git process seems to be running in this repository, or the lock file may be stale
+[16.09.2026 21:17:49] O'zgarish sezildi, 60 soniya kutilmoqda...
+[16.09.2026 21:18:50] O'zgarish topildi: style.css, avto-push.log yangilandi - 16.09.2026 21:18
+[16.09.2026 21:18:50] XATO add: fatal: Unable to create 'F:/AI/Xisoblovchi/.git/index.lock': File exists.
+System.Management.Automation.RemoteException
+Another git process seems to be running in this repository, or the lock file may be stale
+[16.09.2026 21:19:05] O'zgarish sezildi, 60 soniya kutilmoqda...
+[16.09.2026 21:20:05] O'zgarish topildi: style.css, avto-push.log, _fix_git_lock.bat yangilandi - 16.09.2026 21:20
+[16.09.2026 21:20:05] XATO add: fatal: Unable to create 'F:/AI/Xisoblovchi/.git/index.lock': File exists.
+System.Management.Automation.RemoteException
+Another git process seems to be running in this repository, or the lock file may be stale
+[16.09.2026 21:20:21] O'zgarish sezildi, 60 soniya kutilmoqda...
+[16.09.2026 21:21:21] O'zgarish topildi: style.css, avto-push.log yangilandi - 16.09.2026 21:21
