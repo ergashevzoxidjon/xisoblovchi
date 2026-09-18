@@ -157,11 +157,90 @@
                 <p>Bazasini tahrirlash yoki model/narx qo'shmoqchi bo'lgan <strong>Mahsulotni</strong> tanlang.</p>
                 <span class="admin-cat-summary" id="adminCatSummary"></span>
             </div>
-            <div class="search-box admin-cat-search">
-                <input type="text" id="adminCategorySearchInput" placeholder="Mahsulot yoki bo'lim nomini qidiring..." oninput="filterAdminCategoryGrid()">
+            <div class="search-box admin-cat-search" style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="adminCategorySearchInput" placeholder="Mahsulot yoki bo'lim nomini qidiring..." oninput="filterAdminCategoryGrid()" style="flex:1;">
+                <button class="btn btn-warning" style="white-space:nowrap;" onclick="openAddCustomProduct()">➕ Yangi mahsulot qo'shish</button>
             </div>
             <div id="adminCategoryGridContainer"></div>
             <div id="adminCatEmptyState" class="admin-cat-empty" style="display:none;">🔍 Hech narsa topilmadi. Qidiruvni tekshiring.</div>
+
+            <div id="customProductsSection" style="margin-top:20px;"></div>
+
+            <div id="customProductFormBox" class="add-pen-card" style="display:none; margin-top:20px;">
+                <div class="add-pen-card-title" id="customProductFormTitle">➕ Yangi mahsulot qo'shish</div>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
+                    Bu yerda qo'shilgan mahsulot mijoz/menejer ekranida tanlangan bo'limga avtomatik chiqadi.
+                    Narxlash oddiy: miqdor oralig'i + chop etish turi bo'yicha jadval. Murakkabroq (poligrafiya grammaji,
+                    tekstil rulon-DTF, reklama-stend o'lchami kabi) hisoblash kerak bo'lsa — buni admin bilan alohida sozlash kerak.
+                </p>
+                <div style="display:flex; gap:14px; flex-wrap:wrap;">
+                    <div class="form-group" style="flex:2; min-width:200px;">
+                        <label>Mahsulot nomi:</label>
+                        <input type="text" id="cpName" placeholder="Masalan: Magnit">
+                    </div>
+                    <div class="form-group" style="flex:0 0 90px;">
+                        <label>Ikonka (emoji):</label>
+                        <input type="text" id="cpIcon" placeholder="🆕" value="🆕">
+                    </div>
+                    <div class="form-group" style="flex:1; min-width:160px;">
+                        <label>Bo'lim (kategoriya):</label>
+                        <select id="cpCategory">
+                            <option value="poligrafiya">Poligrafiya</option>
+                            <option value="textile">Tekstil</option>
+                            <option value="souvenir" selected>Suvenir</option>
+                            <option value="reklama">Reklama</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:14px;">
+                    <label>Chop etish turlari (kamida bittasi):</label>
+                    <div class="options-group">
+                        <label style="display:flex; align-items:center; gap:6px; font-weight:500; font-size:0.9rem;">
+                            <input type="checkbox" id="cpPrint_uv" checked onchange="onCustomPrintTypeToggle()"> UF Pechat
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; font-weight:500; font-size:0.9rem;">
+                            <input type="checkbox" id="cpPrint_dtf" onchange="onCustomPrintTypeToggle()"> UF DTF Pechat
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; font-weight:500; font-size:0.9rem;">
+                            <input type="checkbox" id="cpPrint_gravirovka" onchange="onCustomPrintTypeToggle()"> Gravirovka
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:10px;">
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:500; font-size:0.9rem;">
+                        <input type="checkbox" id="cpHasSize"> O'lcham (kenglik/balandlik) kiritish kerak
+                    </label>
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:500; font-size:0.9rem;">
+                        <input type="checkbox" id="cpHasSides"> Bir/ikki tomonlama tanlov kerak <span style="color:var(--text-muted); font-weight:400;">(ikki tomonlama — narx 2x)</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:500; font-size:0.9rem;">
+                        <input type="checkbox" id="cpHasKlishe" onchange="toggleCustomKlisheRow()"> Bir martalik to'lov (klishe va h.k.) kerak
+                    </label>
+                </div>
+                <div id="cpKlisheFeeRow" class="form-group" style="display:none; max-width:240px; margin-top:10px;">
+                    <label>Bir martalik to'lov summasi (so'm):</label>
+                    <input type="number" id="cpKlisheFee" min="0" value="0">
+                    <p style="font-size:0.78rem; color:var(--text-muted);">Faqat "Gravirovka" chop turi tanlanganda qo'llanadi.</p>
+                </div>
+
+                <div style="margin-top:18px;">
+                    <div class="price-size-title" style="margin-bottom:8px;">📊 Narx jadvali (miqdor oralig'i bo'yicha):</div>
+                    <div style="overflow-x:auto;">
+                        <table class="tier-table">
+                            <thead><tr id="cpTierHead"></tr></thead>
+                            <tbody id="cpTierBody"></tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-outline" style="margin-top:10px;" onclick="addCustomTierRow()">+ Oraliq qo'shish</button>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="btn" onclick="saveCustomProduct()">💾 Saqlash</button>
+                    <button class="btn btn-outline" onclick="closeCustomProductForm()">Bekor qilish</button>
+                </div>
+            </div>
         </div>
 
         <div id="adminSpecificProductManager" style="display: none;">
@@ -931,6 +1010,7 @@
 <script src="assets/js/reklama.js"></script>
 <script src="assets/js/ofset.js"></script>
 <script src="assets/js/raqamli.js"></script>
+<script src="assets/js/custom-products.js"></script>
 <script src="assets/js/core.js"></script>
 
 </body>
