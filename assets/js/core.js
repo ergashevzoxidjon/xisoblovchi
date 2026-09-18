@@ -1288,6 +1288,9 @@ function generateForm(type) {
     else if (type === 'bloknot') {
         html = buildBloknotForm();
     }
+    else if (typeof isCustomProductKey === 'function' && isCustomProductKey(type)) {
+        html = generateFormHtml_custom(type);
+    }
     else {
         html = generateFormHtml_poligrafiya(type);
     }
@@ -1325,6 +1328,10 @@ function calculate() {
     let details = activeProductType.toUpperCase();
     let previewImgUrl = '';
     let previewNameText = activeProductType.toUpperCase();
+    if (typeof getCustomProduct === 'function') {
+        let cp = getCustomProduct(activeProductType);
+        if (cp) { previewNameText = cp.name; details = cp.name; }
+    }
 
     if (activeProductType === 'ofset_pechat') {
         calculate_ofset();
@@ -1367,6 +1374,10 @@ function calculate() {
             let res = calculateBloknot(qty);
             baseUnitPrice = res.unitPrice;
             details = res.details;
+        }
+        else if (typeof isCustomProductKey === 'function' && isCustomProductKey(activeProductType)) {
+            let r = calculateResult_custom(activeProductType, qty);
+            details = r.details; baseUnitPrice = r.baseUnitPrice;
         }
         else {
             let r = calculateResult_poligrafiya(activeProductType, qty, baseCost);
