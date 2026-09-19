@@ -3500,7 +3500,7 @@
         kalendarSelected.gsm = s.defaultGsm || null;
         kalendarSelected.engine = 'ofset';
         kalendarSelected.sides = (s.group === 'compound') ? 2 : 1;
-        kalendarSelected.extras = { laminatsiya: false, prujina: false, yigish: false, tisneniya: false, lak: false };
+        kalendarSelected.extras = { tisneniya: false, lak: false };
     }
 
     function buildKalendarForm() {
@@ -3541,6 +3541,9 @@
     }
 
     const KALENDAR_EXTRA_LABELS = { laminatsiya: '🧴 Laminatsiya', prujina: '🌀 Prujina', yigish: "🧷 Yig'ish", tisneniya: '🔨 Tisneniya', lak: '✨ LAK' };
+    // Laminatsiya/Prujina/Yig'ish — mijoz/menejer tanlamaydi, admin narx kiritsa har doim
+    // qo'shiladi (calculateKalendar() ichida). Faqat shu ikkitasi menejerga tugma sifatida chiqadi.
+    const KALENDAR_TOGGLEABLE_EXTRAS = ['tisneniya', 'lak'];
 
     function renderKalendarDynamicOptions() {
         let box = document.getElementById('kalendarDynamicOptions');
@@ -3613,7 +3616,10 @@
                 <button class="opt-btn ${kalendarSelected.sides === 2 ? 'active' : ''}" onclick="selectKalendarSides(2)">Ikki tomonlama</button>
             </div>`;
 
-        let extraKeys = Object.keys(s.extras || {});
+        // Laminatsiya/Prujina/Yig'ish mijoz/menejerdan yashirilgan — admin narx kiritsa,
+        // avtomatik (har doim) qo'shiladi. Faqat haqiqiy ixtiyoriy qo'shimchalar (Tisneniya/LAK)
+        // tugma sifatida ko'rsatiladi.
+        let extraKeys = Object.keys(s.extras || {}).filter(k => KALENDAR_TOGGLEABLE_EXTRAS.includes(k));
         if (extraKeys.length > 0) {
             html += `
                 <div class="step-title" style="margin-top:16px;">Qo'shimcha ishlovlar:</div>
@@ -3732,17 +3738,18 @@
             }
         }
 
-        // --- Barcha guruhga tegishli qo'shimchalar ---
+        // --- Laminatsiya/Prujina/Yig'ish: mijoz/menejer tanlamaydi — admin narxi bo'lsa
+        // doim (avtomatik) qo'shiladi. Tisneniya/LAK — haqiqiy ixtiyoriy, menejer tanlaydi.
         let extras = s.extras || {};
-        if (kalendarSelected.extras.laminatsiya && extras.laminatsiya) {
+        if (extras.laminatsiya) {
             unit += (extras.laminatsiya.price || 0);
             qismlar.push('Laminatsiya');
         }
-        if (kalendarSelected.extras.prujina && extras.prujina) {
+        if (extras.prujina) {
             unit += (extras.prujina.price || 0);
             qismlar.push('Prujina');
         }
-        if (kalendarSelected.extras.yigish && extras.yigish) {
+        if (extras.yigish) {
             unit += (extras.yigish.price || 0);
             qismlar.push("Yig'ish");
         }
