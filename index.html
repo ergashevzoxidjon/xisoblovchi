@@ -8819,6 +8819,40 @@ renderCustomProductsAdminSection();
             }
         }
 
+        let savedKalendar = localStorage.getItem('erp_kalendar_config');
+        if (savedKalendar) {
+            try {
+                let parsed = JSON.parse(savedKalendar);
+                if (Array.isArray(parsed.subtypes)) {
+                    // Admin saqlagan qiymatlarni standart subtypes ustiga qo'shib qo'yamiz — yangi
+                    // subtype maydoni keyinchalik qo'shilsa ham eski saqlangan sozlama buzilmaydi.
+                    kalendarConfig.subtypes = kalendarConfig.subtypes.map(defSub => {
+                        let saved = parsed.subtypes.find(p => p.key === defSub.key);
+                        return saved ? { ...defSub, ...saved, extras: { ...defSub.extras, ...(saved.extras || {}) } } : defSub;
+                    });
+                }
+            } catch (e) {
+                console.warn('Kalendar sozlamalarini o\'qishda xato:', e);
+            }
+        }
+
+        // Bir martalik migratsiya: Kalendar moduli uchun kerakli Melovka/Karton grammajlari
+        // Ofset bazasida mavjud bo'lmasa, narxi 0 bilan qo'shib qo'yamiz (admin keyin narxni
+        // to'g'rilaydi) — admin keyinchalik shu qatorlarni o'chirsa, qayta paydo bo'lmasligi
+        // uchun bitta marta ishlaydigan bayroq bilan himoyalangan.
+        if (!localStorage.getItem('erp_kalendar_paper_seeded')) {
+            let paperChanged = false;
+            [["Melovka", 200], ["Melovka", 300], ["Karton", 300], ["Karton", 350]].forEach(([pName, pGsm]) => {
+                let exists = ofsetRawPapers.some(p => p.name === pName && p.gsm === pGsm);
+                if (!exists) {
+                    ofsetRawPapers.push({ name: pName, gsm: pGsm, prices: { "sra3": 0, "620x880": 0, "620x940": 0, "700x1000": 0 } });
+                    paperChanged = true;
+                }
+            });
+            if (paperChanged) localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
+            localStorage.setItem('erp_kalendar_paper_seeded', '1');
+        }
+
         try {
             let savedUsers = localStorage.getItem('erp_users_db');
             usersDb = savedUsers ? JSON.parse(savedUsers) : getDefaultUsersDb();
