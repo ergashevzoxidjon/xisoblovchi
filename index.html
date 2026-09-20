@@ -9110,6 +9110,14 @@ renderCustomProductsAdminSection();
             } catch (e) {}
         }
 
+        let savedTaxiExpenses = localStorage.getItem('erp_taxi_expenses');
+        if (savedTaxiExpenses) {
+            try {
+                taxiExpenses = { ...taxiExpenses, ...JSON.parse(savedTaxiExpenses) };
+            } catch (e) {}
+        }
+        renderTaxiExpensesAdmin();
+
         let savedBayroqDb = localStorage.getItem('erp_bayroq_db');
         if (savedBayroqDb) {
             try {
@@ -10429,6 +10437,20 @@ function calculate() {
         if (klishePrice > 0) {
             totalPrice += Math.round(klishePrice * (1 + marginPercent / 100));
             details += ` | Klishe (bir martalik): ${klishePrice.toLocaleString()} so'm qo'shildi`;
+        }
+    }
+
+    // Poligrafiya/Suvenir/Textile — har bir hisob-kitobga (buyurtmaga), miqdordan qat'iy nazar,
+    // BIR MARTA qo'shiladigan taxi xarajati (bo'lim bo'yicha alohida, admin belgilaydi).
+    let taxiExpenseCategory = poligrafiyaKeys.includes(activeProductType) ? 'poligrafiya'
+        : souvenirKeys.includes(activeProductType) ? 'souvenir'
+        : textileKeys.includes(activeProductType) ? 'textile'
+        : null;
+    if (taxiExpenseCategory) {
+        let taxiPrice = taxiExpenses[taxiExpenseCategory] || 0;
+        if (taxiPrice > 0) {
+            totalPrice += Math.round(taxiPrice * (1 + marginPercent / 100));
+            details += ` | Taxi xarajati (bir martalik): ${taxiPrice.toLocaleString()} so'm qo'shildi`;
         }
     }
 
