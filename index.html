@@ -7934,7 +7934,11 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
                 let oborotType = "STANDART";
                 let totalPlates = 4;
                 let totalPrintCost = 0;
-                let totalWorkingSheets = baseSheets;
+                // Bosma narxi RAW (xom) varoq soniga emas, mashinaga (A3/A2/A1) yuklanadigan
+                // haqiqiy ish varag'i soniga bog'liq — chunki 1 xom varoq bosishdan OLDIN
+                // kesilib, `divisor` dona alohida mashina-o'lchamdagi varoqqa aylanadi, va har
+                // biri PRESSDAN ALOHIDA o'tadi. Zaxira varoqlar ham shu hisobga kiradi.
+                let totalWorkingSheets = totalBaseSheets * ws.divisor;
 
                 if (side === 1) {
                     oborotType = "1_SIDE";
