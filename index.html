@@ -1678,14 +1678,13 @@
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">📄 Melovka Qog'ozi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar. <b>SRA3 (320x450mm)</b> ustuni — kichik-format mahsulotlar (masalan Flayer) uchun ishlatiladigan alohida, kesilgan varoq; narx kiritilmasa (0), o'sha qator SRA3 uchun hisobga olinmaydi.</p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar.</p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
                         <table class="admin-table">
                             <thead>
                                 <tr>
                                     <th style="width: 90px;">Gramaj (g)</th>
-                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
                                     <th style="width: 130px;">620x880 (so'm)</th>
                                     <th style="width: 130px;">620x940 (so'm)</th>
                                     <th style="width: 130px;">700x1000 (so'm)</th>
@@ -1708,7 +1707,6 @@
                             <thead>
                                 <tr>
                                     <th style="width: 90px;">Gramaj (g)</th>
-                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
                                     <th style="width: 130px;">620x880 (so'm)</th>
                                     <th style="width: 130px;">620x940 (so'm)</th>
                                     <th style="width: 130px;">700x1000 (so'm)</th>
@@ -7520,13 +7518,16 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
         };
         let rowsByType = { Melovka: [], Karton: [], "Dizayn qog'ozi": [] };
 
+        // Melovka/Karton yetkazib beruvchilarida SRA3 (320x450mm) o'lchamli xom varoq umuman
+        // sotilmaydi — shu sababli bu ustun faqat Dizayn qog'ozi jadvalida ko'rsatiladi.
         ofsetRawPapers.forEach((item, index) => {
             if (item.name === 'Ofset') return;
             if (!rowsByType[item.name]) rowsByType[item.name] = [];
+            let hasSra3Column = (item.name === "Dizayn qog'ozi");
             rowsByType[item.name].push(`
                 <tr>
                     <td><input type="number" id="ofset_mtx_gsm_${index}" value="${item.gsm}"></td>
-                    <td><input type="number" id="ofset_mtx_psra3_${index}" value="${item.prices['sra3'] || 0}"></td>
+                    ${hasSra3Column ? `<td><input type="number" id="ofset_mtx_psra3_${index}" value="${item.prices['sra3'] || 0}"></td>` : ''}
                     <td><input type="number" id="ofset_mtx_p880_${index}" value="${item.prices['620x880'] || 0}"></td>
                     <td><input type="number" id="ofset_mtx_p940_${index}" value="${item.prices['620x940'] || 0}"></td>
                     <td><input type="number" id="ofset_mtx_p1000_${index}" value="${item.prices['700x1000'] || 0}"></td>
@@ -7577,13 +7578,15 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
             if (item.name === 'Ofset') return;
             let gsmInput = document.getElementById(`ofset_mtx_gsm_${index}`);
             if (!gsmInput) return;
+            // Melovka/Karton jadvalida SRA3 ustuni yo'q (bu turlarda bunday xom varoq
+            // kiritilmaydi) — shu input mavjud bo'lmasa, avvalgi (odatda 0) qiymat saqlanadi.
             let psra3Input = document.getElementById(`ofset_mtx_psra3_${index}`);
             let p880Input = document.getElementById(`ofset_mtx_p880_${index}`);
             let p940Input = document.getElementById(`ofset_mtx_p940_${index}`);
             let p1000Input = document.getElementById(`ofset_mtx_p1000_${index}`);
             item.gsm = parseInt(gsmInput.value) || item.gsm;
             item.prices = {
-                "sra3": parseFloat(psra3Input.value) || 0,
+                "sra3": psra3Input ? (parseFloat(psra3Input.value) || 0) : (item.prices['sra3'] || 0),
                 "620x880": parseFloat(p880Input.value) || 0,
                 "620x940": parseFloat(p940Input.value) || 0,
                 "700x1000": parseFloat(p1000Input.value) || 0
