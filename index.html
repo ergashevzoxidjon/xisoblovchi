@@ -1977,9 +1977,10 @@
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">📁 Papka Turlari va Yoyilgan O'lchamlari</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Narx REAL ofset hisobidan (Karton 250gr, Ofset bo'limidagi mavjud qog'oz/mashina
-                        bazasidan) avtomatik topiladi — bu yerda faqat YOYILGAN (pona qirqilgandan keyingi)
-                        o'lcham va shu turga xos qo'shimcha ishlov (karmashka/visochka yopishtirish) narxi kiritiladi.
+                        Narx REAL ofset hisobidan (Ofset bo'limidagi Karton narx bazasidan — mijoz/menejer
+                        grammajni o'zi tanlaydi) avtomatik topiladi — mashina (A3/A2) har bir tur uchun
+                        qat'iy belgilangan. "Karmashka+Yig'ish" narxi mijozga umuman ko'rsatilmaydi, faqat
+                        shu turga avtomatik qo'shiladi (hozircha faqat Karmashkalida ishlatiladi).
                     </p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
@@ -1989,7 +1990,8 @@
                                     <th style="width: 180px;">Nomi</th>
                                     <th style="width: 100px;">Eni (mm)</th>
                                     <th style="width: 100px;">Bo'yi (mm)</th>
-                                    <th style="width: 180px;">Qo'shimcha ishlov (so'm/dona)</th>
+                                    <th style="width: 80px;">Mashina</th>
+                                    <th style="width: 200px;">Karmashka+Yig'ish (mijozga ko'rinmaydi, so'm/dona)</th>
                                 </tr>
                             </thead>
                             <tbody id="adminPapkaVariantTableBody"></tbody>
@@ -1999,23 +2001,83 @@
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">✨ LAK va 🔨 Tisneniya</div>
+                    <div class="add-pen-card-title">🧴 Laminatsiya va 📎 Visochka</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Ikkalasi ham bir vaqtda tanlanishi mumkin — mijoz xohlasa faqat LAK, faqat Tisneniya,
-                        yoki ikkalasini ham birga tanlaydi.
+                        Ikkalasi ham BARCHA Papka turlariga avtomatik qo'shiladi — mijoz/menejerga
+                        umuman ko'rsatilmaydi. Visochka tiered: birinchi ko'rsatilgan donagacha qat'iy
+                        summa, undan oshgan har bir donaga qo'shimcha narx qo'shiladi.
                     </p>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>LAK (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaLakPrice" value="800">
+                            <label>Laminatsiya A3 (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaLaminatsiyaA3" value="0">
                         </div>
                         <div class="form-group">
-                            <label>Tisneniya (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaTisneniyaPrice" value="1000">
+                            <label>Laminatsiya A2 (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaLaminatsiyaA2" value="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Visochka A3 — 1000tagacha (so'm):</label>
+                            <input type="number" min="0" id="papkaVisochkaA3First" value="120000">
                         </div>
                         <div class="form-group">
-                            <label>Tisneniya klishesi (bir martalik):</label>
-                            <input type="number" min="0" id="papkaKlishePrice" value="100000">
+                            <label>Visochka A3 — 1000dan keyin (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaVisochkaA3Next" value="120">
+                        </div>
+                        <div class="form-group">
+                            <label>Visochka A2 — 1000tagacha (so'm):</label>
+                            <input type="number" min="0" id="papkaVisochkaA2First" value="200000">
+                        </div>
+                        <div class="form-group">
+                            <label>Visochka A2 — 1000dan keyin (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaVisochkaA2Next" value="200">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">✨ LAK va 🔨 Tisneniya</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Ixtiyoriy — mijoz/menejer tanlaydi, ikkalasi ham bir vaqtda tanlanishi mumkin.
+                        LAK tiered: birinchi ko'rsatilgan donagacha qat'iy summa, undan oshgan har bir
+                        donaga qo'shimcha narx qo'shiladi.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>LAK A3 — 1000tagacha (so'm):</label>
+                            <input type="number" min="0" id="papkaLakA3First" value="500000">
+                        </div>
+                        <div class="form-group">
+                            <label>LAK A3 — 1000dan keyin (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaLakA3Next" value="500">
+                        </div>
+                        <div class="form-group">
+                            <label>LAK A2 — 1000tagacha (so'm):</label>
+                            <input type="number" min="0" id="papkaLakA2First" value="750000">
+                        </div>
+                        <div class="form-group">
+                            <label>LAK A2 — 1000dan keyin (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaLakA2Next" value="750">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tisneniya A3 (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA3Price" value="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya A3 klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA3Klishe" value="500000">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya A2 (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA2Price" value="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya A2 klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA2Klishe" value="1000000">
                         </div>
                     </div>
                 </div>
@@ -3509,6 +3571,50 @@
             logAudit("Papka sozlamalari o'zgartirildi", `MOQ: ${papkaConfig.minQty}`);
         }
         showToast("💾 Papka sozlamalari saqlandi!");
+    }
+
+    // Eski (yangi A3/A2 + tiered strukturadan OLDINGI) saqlangan papkaConfig'ni yangi shaklga
+    // moslashtiradi — eski `lak: {pricePerUnit}` / `tisneniya: {pricePerUnit,klishePrice}` kabi
+    // "yassi" obyektlarni yangi standart (a3/a2 ichki kalitli) qiymatlar bilan almashtiradi,
+    // aks holda eski saqlangan qiymatlar yangi strukturani "spread" orqali buzib qo'yardi.
+    function migratePapkaConfig(saved, defaults) {
+        let cfg = JSON.parse(JSON.stringify(defaults));
+        if (!saved || typeof saved !== 'object') return cfg;
+
+        if (Array.isArray(saved.variants)) {
+            cfg.variants = defaults.variants.map(defV => {
+                let sv = saved.variants.find(v => v.key === defV.key);
+                if (!sv) return defV;
+                return {
+                    ...defV,
+                    flatW: sv.flatW ?? defV.flatW,
+                    flatH: sv.flatH ?? defV.flatH,
+                    hiddenFee: (sv.hiddenFee !== undefined) ? sv.hiddenFee : (sv.extraFee !== undefined ? sv.extraFee : defV.hiddenFee)
+                };
+            });
+        }
+        if (Array.isArray(saved.paperGsmOptions) && saved.paperGsmOptions.length > 0) cfg.paperGsmOptions = saved.paperGsmOptions;
+        if (typeof saved.defaultGsm === 'number') cfg.defaultGsm = saved.defaultGsm;
+        if (saved.laminatsiya && ('a3' in saved.laminatsiya || 'a2' in saved.laminatsiya)) {
+            cfg.laminatsiya = { ...defaults.laminatsiya, ...saved.laminatsiya };
+        }
+        ['visochka', 'lak'].forEach(key => {
+            if (saved[key] && saved[key].a3 && saved[key].a2) {
+                cfg[key] = {
+                    a3: { ...defaults[key].a3, ...saved[key].a3 },
+                    a2: { ...defaults[key].a2, ...saved[key].a2 }
+                };
+            }
+        });
+        if (saved.tisneniya && saved.tisneniya.a3 && saved.tisneniya.a2) {
+            cfg.tisneniya = {
+                a3: { ...defaults.tisneniya.a3, ...saved.tisneniya.a3 },
+                a2: { ...defaults.tisneniya.a2, ...saved.tisneniya.a2 }
+            };
+        }
+        if (typeof saved.minQty === 'number') cfg.minQty = saved.minQty;
+        if (typeof saved.infoText === 'string') cfg.infoText = saved.infoText;
+        return cfg;
     }
 
     // ====================== KALENDAR (poligrafiya, 8 pastki tur) ======================
@@ -8900,9 +9006,7 @@ renderCustomProductsAdminSection();
         let savedPapka = localStorage.getItem('erp_papka_config');
         if (savedPapka) {
             try {
-                let parsed = JSON.parse(savedPapka);
-                papkaConfig = { ...papkaConfig, ...parsed };
-                if (Array.isArray(parsed.variants)) papkaConfig.variants = parsed.variants;
+                papkaConfig = migratePapkaConfig(JSON.parse(savedPapka), papkaConfig);
             } catch (e) {
                 console.warn('Papka sozlamalarini o\'qishda xato:', e);
             }
