@@ -10473,7 +10473,10 @@ function calculate() {
     document.getElementById('resUnitPrice').innerText = unitPrice.toLocaleString() + " so'm";
     document.getElementById('resTotalPrice').innerText = totalPrice.toLocaleString() + " so'm";
 
-    currentCalcResult = { details, qty, unitPrice, totalPrice, name: previewNameText, imageUrl: previewImgUrl };
+    currentCalcResult = {
+        details, qty, unitPrice, totalPrice, name: previewNameText, imageUrl: previewImgUrl,
+        baseUnitPrice, marginPercent, productType: activeProductType
+    };
     if (typeof renderPriceSuggestion === 'function') renderPriceSuggestion(activeProductType, unitPrice);
 }
 
