@@ -1665,14 +1665,25 @@
             <!-- OFSET PECHAT ADMIN PANEL BLOKI -->
             <div id="ofsetAdminPanelBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">📄 Xom Ashyo (Qog'oz) Narxlar Matrixi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Qog'oz turi, grammaji va bosma bichimlari bo'yicha narxlar. "Ofset" qatori standart va o'chirilmaydi. <b>SRA3 (320x450mm)</b> ustuni — kichik-format mahsulotlar (masalan Flayer) uchun ishlatiladigan alohida, kesilgan varoq; narx kiritilmasa (0), o'sha qog'oz SRA3 uchun hisobga olinmaydi.</p>
+                    <div class="add-pen-card-title">🖨️ Ofset Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Ofset qog'ozining faqat bitta standart (A3) turi bor — shu qator o'chirilmaydi,
+                        faqat narxi kiritiladi.
+                    </p>
+                    <div class="form-group" style="max-width: 260px;">
+                        <label>Narxi (so'm):</label>
+                        <input type="number" min="0" id="ofsetSinglePrice" value="22000">
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📄 Melovka Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar. <b>SRA3 (320x450mm)</b> ustuni — kichik-format mahsulotlar (masalan Flayer) uchun ishlatiladigan alohida, kesilgan varoq; narx kiritilmasa (0), o'sha qator SRA3 uchun hisobga olinmaydi.</p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
                         <table class="admin-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 150px;">Qog'oz turi</th>
                                     <th style="width: 90px;">Gramaj (g)</th>
                                     <th style="width: 130px;">SRA3 320x450 (so'm)</th>
                                     <th style="width: 130px;">620x880 (so'm)</th>
@@ -1681,14 +1692,61 @@
                                     <th style="width: 70px; text-align: right;">Amal</th>
                                 </tr>
                             </thead>
-                            <tbody id="adminOfsetPaperTableBody"></tbody>
+                            <tbody id="adminMelovkaPaperTableBody"></tbody>
                         </table>
                         </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow()">+ Yangi qog'oz turi qo'shish</button>
-                        <button class="btn btn-success" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Melovka')">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📦 Karton Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar (Papka, Kalendar kabi mahsulotlar shu bazadan foydalanadi).</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminKartonPaperTableBody"></tbody>
+                        </table>
+                        </div>
                     </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Karton')">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🎨 Dizayn Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar.</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminDizaynPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow(&quot;Dizayn qog&#39;ozi&quot;)">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                    <button class="btn btn-success" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
