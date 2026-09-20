@@ -6794,8 +6794,9 @@ function generateForm_suvenir(type, form, rightCol) {
                         <div class="result-item result-total"><span>Jami summa:</span> <span id="resTotalPrice">0 so'm</span></div>
                     </div>
                     <div id="tierPreviewBox" style="display:none; margin-top:16px;"></div>
-                    <div style="margin-top: 20px;">
-                        <button class="btn" style="width: 100%;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                    <div style="margin-top: 20px; display:flex; gap:8px;">
+                        <button class="btn" style="flex:1;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                        <button class="btn btn-outline" title="To'liq hisob-kitob (parol talab qilinadi)" onclick="openFullCalcInfoModal()">👁️</button>
                     </div>
                 </div>
             `;
@@ -10285,8 +10286,9 @@ function generateForm(type) {
                 </div>
                 <div id="priceSuggestionBox" style="display:none;"></div>
                 <div id="tierPreviewBox" style="display:none; margin-top:16px;"></div>
-                <div style="margin-top: 20px;">
-                    <button class="btn" style="width: 100%;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                <div style="margin-top: 20px; display:flex; gap:8px;">
+                    <button class="btn" style="flex:1;" onclick="copyResult()">📋 Natijani nusxalash</button>
+                    <button class="btn btn-outline" title="To'liq hisob-kitob (parol talab qilinadi)" onclick="openFullCalcInfoModal()">👁️</button>
                 </div>
             </div>
         `;
@@ -10522,6 +10524,93 @@ function renderPriceSuggestion(type, unitPrice) {
 
 init();
 
+</script>
+
+<!-- TO'LIQ HISOB-KITOB MA'LUMOTI MODALI — admin paroli bilan himoyalangan (barcha mahsulotlar uchun umumiy) -->
+<div id="fullCalcInfoOverlay" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(15,23,42,0.55); align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:14px; max-width:560px; width:100%; max-height:85vh; overflow-y:auto; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,0.35);">
+        <div id="fullCalcInfoGate">
+            <h3 style="margin:0 0 6px 0; color:var(--primary);">🔒 Parolni kiriting</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">To'liq hisob-kitob ma'lumotini ko'rish uchun admin paroli kerak.</p>
+            <input type="password" id="fullCalcInfoPinInput" placeholder="PIN kod" style="width:100%; padding:10px 12px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; box-sizing:border-box;" onkeydown="if(event.key==='Enter'){ submitFullCalcInfoPin(); }">
+            <div id="fullCalcInfoError" style="color:#dc2626; font-size:0.8rem; margin-bottom:10px; display:none;">❌ Parol noto'g'ri.</div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeFullCalcInfoModal()">Bekor qilish</button>
+                <button class="btn" onclick="submitFullCalcInfoPin()">Kirish</button>
+            </div>
+        </div>
+        <div id="fullCalcInfoContent" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="color:var(--primary); margin:0;">👁️ To'liq hisob-kitob</h3>
+                <button class="btn btn-outline" style="padding:4px 10px;" onclick="closeFullCalcInfoModal()">✕</button>
+            </div>
+            <div id="fullCalcInfoBody" style="font-size:0.85rem; line-height:1.8; color:var(--text-main);"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// === full-calc-info-modal.js ===
+function openFullCalcInfoModal() {
+    let overlay = document.getElementById('fullCalcInfoOverlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    document.getElementById('fullCalcInfoGate').style.display = 'block';
+    document.getElementById('fullCalcInfoContent').style.display = 'none';
+    document.getElementById('fullCalcInfoError').style.display = 'none';
+    let pinInput = document.getElementById('fullCalcInfoPinInput');
+    pinInput.value = '';
+    setTimeout(() => pinInput.focus(), 50);
+}
+
+function closeFullCalcInfoModal() {
+    let overlay = document.getElementById('fullCalcInfoOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+function submitFullCalcInfoPin() {
+    let pin = document.getElementById('fullCalcInfoPinInput').value;
+    let isAdmin = Array.isArray(usersDb) && usersDb.some(u => u.role === 'admin' && u.pin === pin);
+    if (!isAdmin) {
+        document.getElementById('fullCalcInfoError').style.display = 'block';
+        return;
+    }
+    document.getElementById('fullCalcInfoGate').style.display = 'none';
+    document.getElementById('fullCalcInfoContent').style.display = 'block';
+    renderFullCalcInfoBody();
+}
+
+// currentCalcResult'dagi barcha hisob-kitob qismlarini (tafsilot, miqdor, marja, baza narx,
+// birlik narx, jami summa) to'liq, o'qilishi qulay shaklda ko'rsatadi — har qanday mahsulot
+// turi uchun umumiy (calculate() ichida to'ldiriladi).
+function renderFullCalcInfoBody() {
+    let r = currentCalcResult || {};
+    let body = document.getElementById('fullCalcInfoBody');
+    if (!body) return;
+
+    let detailLines = (r.details || '-').split(' | ').map(line => `<div style="padding:4px 0; border-bottom:1px dashed #e2e8f0;">${line}</div>`).join('');
+
+    const row = (label, val, bold) => `<tr><td style="padding:6px 0; color:var(--text-muted);">${label}</td><td style="padding:6px 0; text-align:right; ${bold ? 'font-weight:700; color:var(--primary);' : 'font-weight:600;'}">${val}</td></tr>`;
+
+    let rows = [];
+    rows.push(row('Mahsulot', r.name || r.productType || '-'));
+    rows.push(row('Miqdor', (r.qty || 0).toLocaleString() + ' dona'));
+    rows.push(row('Ishxona marjasi', (r.marginPercent != null ? r.marginPercent : '-') + '%'));
+    if (r.baseUnitPrice != null) {
+        rows.push(row('Baza narx (marjasiz, 1 dona)', Math.round(r.baseUnitPrice).toLocaleString() + " so'm"));
+    }
+    rows.push(row('Birlik narxi (marja bilan)', (r.unitPrice || 0).toLocaleString() + " so'm"));
+    rows.push(row('Birlik narxi × Miqdor', ((r.unitPrice || 0) * (r.qty || 0)).toLocaleString() + " so'm"));
+    rows.push(row('JAMI SUMMA', (r.totalPrice || 0).toLocaleString() + " so'm", true));
+
+    body.innerHTML = `
+        <div style="margin-bottom:14px;">
+            <div style="font-weight:700; margin-bottom:6px;">To'liq tafsilot:</div>
+            ${detailLines}
+        </div>
+        <table style="width:100%; border-collapse:collapse;">${rows.join('')}</table>
+    `;
+}
 </script>
 </body>
 </html>
