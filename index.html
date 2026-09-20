@@ -10525,10 +10525,14 @@ function calculate() {
         : null;
     if (taxiExpenseCategory) {
         let taxiPrice = taxiExpenses[taxiExpenseCategory] || 0;
+        // To'liq hisob-kitob jadvalida (👁️) doim ko'rinadi — 0 bo'lsa ham, shunda admin buni
+        // hali "🚕 Taxi Xarajatlari" panelida kiritmaganini darhol ko'radi (Kalendar'dagi
+        // Laminatsiya/Prujina/Yig'ish qatorlari kabi — 0 ham "ishlatilmadi" emas, "kiritilmagan"
+        // ma'nosida ko'rsatiladi).
+        costItems.push({ label: 'Taxi xarajati (bir martalik)', qty: '1 marta', total: taxiPrice });
         if (taxiPrice > 0) {
             totalPrice += Math.round(taxiPrice * (1 + marginPercent / 100));
             details += ` | Taxi xarajati (bir martalik): ${taxiPrice.toLocaleString()} so'm qo'shildi`;
-            costItems.push({ label: 'Taxi xarajati (bir martalik)', qty: '1 marta', total: taxiPrice });
         }
     }
 
