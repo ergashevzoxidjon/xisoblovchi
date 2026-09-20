@@ -7472,8 +7472,6 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
 
 <script>
 // === ofset.js ===
-    const ofsetAvailablePaperTypes = ["Karton", "Melovka", "Dizayn qog'ozi"];
-
     // "sra3" (320x450mm) — kichik-format mahsulotlar (Flayer va h.k.) uchun alohida kesilgan
     // varoq narxi. 0 bo'lsa, o'sha qog'oz SRA3 hisob-kitobida hisobga olinmaydi.
     let ofsetRawPapers = [
@@ -7509,90 +7507,102 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
         document.getElementById('setPrintA1Step').value = ofsetMachineSettings.printA1Step;
     }
 
+    // Admin panelda 4 alohida bo'lim/jadval sifatida ko'rsatiladi (Ofset/Melovka/Karton/Dizayn
+    // qog'ozi), lekin ichkarida `ofsetRawPapers` bitta umumiy massiv bo'lib qolaveradi (hisoblash
+    // mexanizmi — calculateOfsetForMachine — o'zgarishsiz shu massivdan o'qiydi). Har bir input
+    // elementi massivdagi GLOBAL indeksi bilan nomlanadi, shuning uchun qator qaysi bo'lim
+    // jadvaliga chizilganidan qat'iy nazar saqlashda to'g'ri elementga mos keladi.
     function renderAdminOfsetPapersMatrix() {
-        let tbody = document.getElementById('adminOfsetPaperTableBody');
-        if (!tbody) return;
+        let sectionBoxes = {
+            'Melovka': document.getElementById('adminMelovkaPaperTableBody'),
+            'Karton': document.getElementById('adminKartonPaperTableBody'),
+            "Dizayn qog'ozi": document.getElementById('adminDizaynPaperTableBody')
+        };
+        let rowsByType = { Melovka: [], Karton: [], "Dizayn qog'ozi": [] };
 
-        tbody.innerHTML = ofsetRawPapers.map((item, index) => {
-            let isOffset = (item.name === "Ofset");
-            let nameFieldHtml = isOffset
-                ? `<input type="text" value="Ofset" readonly style="background:#f1f5f9; font-weight:600;" id="ofset_mtx_name_${index}">`
-                : `<select id="ofset_mtx_name_${index}">${ofsetAvailablePaperTypes.map(t => `<option value="${t}" ${item.name === t ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
-            return `
-            <tr>
-                <td>${nameFieldHtml}</td>
-                <td><input type="number" id="ofset_mtx_gsm_${index}" value="${item.gsm}" ${isOffset ? 'readonly style="background:#f1f5f9;"' : ''}></td>
-                <td><input type="number" id="ofset_mtx_psra3_${index}" value="${item.prices['sra3'] || 0}"></td>
-                <td><input type="number" id="ofset_mtx_p880_${index}" value="${item.prices['620x880'] || 0}"></td>
-                <td><input type="number" id="ofset_mtx_p940_${index}" value="${item.prices['620x940'] || 0}" ${isOffset ? 'disabled style="background:#f1f5f9;"' : ''}></td>
-                <td><input type="number" id="ofset_mtx_p1000_${index}" value="${item.prices['700x1000'] || 0}" ${isOffset ? 'disabled style="background:#f1f5f9;"' : ''}></td>
-                <td style="text-align: right;">
-                    <div class="action-btns" style="justify-content: flex-end;">
-                        <button class="btn btn-danger" title="O'chirish" ${isOffset ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} onclick="deleteOfsetPaperRow(${index})">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        }).join('');
+        ofsetRawPapers.forEach((item, index) => {
+            if (item.name === 'Ofset') return;
+            if (!rowsByType[item.name]) rowsByType[item.name] = [];
+            rowsByType[item.name].push(`
+                <tr>
+                    <td><input type="number" id="ofset_mtx_gsm_${index}" value="${item.gsm}"></td>
+                    <td><input type="number" id="ofset_mtx_psra3_${index}" value="${item.prices['sra3'] || 0}"></td>
+                    <td><input type="number" id="ofset_mtx_p880_${index}" value="${item.prices['620x880'] || 0}"></td>
+                    <td><input type="number" id="ofset_mtx_p940_${index}" value="${item.prices['620x940'] || 0}"></td>
+                    <td><input type="number" id="ofset_mtx_p1000_${index}" value="${item.prices['700x1000'] || 0}"></td>
+                    <td style="text-align: right;">
+                        <div class="action-btns" style="justify-content: flex-end;">
+                            <button class="btn btn-danger" title="O'chirish" onclick="deleteOfsetPaperRow(${index})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `);
+        });
+
+        Object.keys(sectionBoxes).forEach(type => {
+            if (sectionBoxes[type]) sectionBoxes[type].innerHTML = (rowsByType[type] || []).join('');
+        });
+
+        let offsetItem = ofsetRawPapers.find(p => p.name === 'Ofset');
+        let singlePriceInput = document.getElementById('ofsetSinglePrice');
+        if (singlePriceInput && offsetItem) {
+            singlePriceInput.value = offsetItem.prices['620x880'] || offsetItem.prices['sra3'] || 0;
+        }
     }
 
-    function addOfsetPaperRow() {
-        ofsetRawPapers.push({ name: "Melovka", gsm: 200, prices: { "sra3": 55000, "620x880": 200000, "620x940": 210000, "700x1000": 230000 } });
+    function addOfsetPaperRow(type) {
+        let defaults = {
+            'Melovka': { gsm: 200, prices: { "sra3": 55000, "620x880": 200000, "620x940": 210000, "700x1000": 230000 } },
+            'Karton': { gsm: 250, prices: { "sra3": 60000, "620x880": 230000, "620x940": 240000, "700x1000": 260000 } },
+            "Dizayn qog'ozi": { gsm: 200, prices: { "sra3": 79000, "620x880": 300000, "620x940": 320000, "700x1000": 350000 } }
+        };
+        let d = defaults[type] || defaults['Melovka'];
+        ofsetRawPapers.push({ name: type, gsm: d.gsm, prices: { ...d.prices } });
         renderAdminOfsetPapersMatrix();
     }
 
     function deleteOfsetPaperRow(index) {
-        if (ofsetRawPapers[index] && ofsetRawPapers[index].name === "Ofset") {
+        if (!ofsetRawPapers[index] || ofsetRawPapers[index].name === "Ofset") {
             showToast("⚠️ 'Ofset' qatorini o'chirib bo'lmaydi!");
             return;
         }
-        if (ofsetRawPapers.length <= 1) {
-            showToast("⚠️ Kamida bitta xom ashyo qolishi kerak!");
-            return;
-        }
-        if (confirm("Ushbu qog'oz turini o'chirmoqchimisiz?")) {
+        if (confirm("Ushbu qog'oz qatorini o'chirmoqchimisiz?")) {
             ofsetRawPapers.splice(index, 1);
             renderAdminOfsetPapersMatrix();
         }
     }
 
     function saveAllOfsetPapers() {
-        let updated = [];
-        let offsetItem = ofsetRawPapers.find(p => p.name === "Ofset");
-        let offsetIndex = ofsetRawPapers.findIndex(p => p.name === "Ofset");
-        if (offsetItem) {
-            let p880Input = document.getElementById(`ofset_mtx_p880_${offsetIndex}`);
-            let psra3Input = document.getElementById(`ofset_mtx_psra3_${offsetIndex}`);
-            if (p880Input) offsetItem.prices["620x880"] = parseFloat(p880Input.value) || 0;
-            if (psra3Input) offsetItem.prices["sra3"] = parseFloat(psra3Input.value) || 0;
-            updated.push(offsetItem);
-        } else {
-            updated.push({ name: "Ofset", gsm: 80, prices: { "sra3": 22000, "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true });
-        }
-
-        for (let index = 0; index < ofsetRawPapers.length; index++) {
-            let nameField = document.getElementById(`ofset_mtx_name_${index}`);
-            if (!nameField || nameField.value === "Ofset") continue;
-
+        ofsetRawPapers.forEach((item, index) => {
+            if (item.name === 'Ofset') return;
             let gsmInput = document.getElementById(`ofset_mtx_gsm_${index}`);
+            if (!gsmInput) return;
             let psra3Input = document.getElementById(`ofset_mtx_psra3_${index}`);
             let p880Input = document.getElementById(`ofset_mtx_p880_${index}`);
             let p940Input = document.getElementById(`ofset_mtx_p940_${index}`);
             let p1000Input = document.getElementById(`ofset_mtx_p1000_${index}`);
+            item.gsm = parseInt(gsmInput.value) || item.gsm;
+            item.prices = {
+                "sra3": parseFloat(psra3Input.value) || 0,
+                "620x880": parseFloat(p880Input.value) || 0,
+                "620x940": parseFloat(p940Input.value) || 0,
+                "700x1000": parseFloat(p1000Input.value) || 0
+            };
+        });
 
-            updated.push({
-                name: nameField.value || "Melovka",
-                gsm: parseInt(gsmInput.value) || 80,
-                prices: {
-                    "sra3": parseFloat(psra3Input.value) || 0,
-                    "620x880": parseFloat(p880Input.value) || 0,
-                    "620x940": parseFloat(p940Input.value) || 0,
-                    "700x1000": parseFloat(p1000Input.value) || 0
-                }
-            });
+        let offsetItem = ofsetRawPapers.find(p => p.name === 'Ofset');
+        let singlePriceInput = document.getElementById('ofsetSinglePrice');
+        let singlePrice = singlePriceInput ? (parseFloat(singlePriceInput.value) || 0) : 0;
+        if (offsetItem) {
+            // Bitta admin narxi ichkarida ikkita eski kalitga (sra3 va 620x880) bir xil qiymat
+            // bilan ko'chiriladi — shu orqali hisoblash mexanizmi qaysi xom-varoq formatini
+            // so'rasa ham (kichik-format SRA3 yoki A3/A2 uchun 620x880) narx topiladi.
+            offsetItem.prices['sra3'] = singlePrice;
+            offsetItem.prices['620x880'] = singlePrice;
+        } else {
+            ofsetRawPapers.unshift({ name: "Ofset", gsm: 80, prices: { "sra3": singlePrice, "620x880": singlePrice, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true });
         }
 
-        ofsetRawPapers = updated;
         localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
 
         ofsetMachineSettings = {
