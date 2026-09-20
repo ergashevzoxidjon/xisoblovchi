@@ -10479,6 +10479,7 @@ function calculate() {
             let res = calculateKalendar(qty);
             baseUnitPrice = res.unitPrice;
             details = res.details;
+            costItems = res.costItems || [];
         }
         else if (typeof isCustomProductKey === 'function' && isCustomProductKey(activeProductType)) {
             let r = calculateResult_custom(activeProductType, qty);
@@ -10487,6 +10488,7 @@ function calculate() {
         else {
             let r = calculateResult_poligrafiya(activeProductType, qty, baseCost);
             details = r.details; baseUnitPrice = r.baseUnitPrice;
+            costItems = r.costItems || [];
         }
     }
 
@@ -10511,6 +10513,7 @@ function calculate() {
         if (klishePrice > 0) {
             totalPrice += Math.round(klishePrice * (1 + marginPercent / 100));
             details += ` | Klishe (bir martalik): ${klishePrice.toLocaleString()} so'm qo'shildi`;
+            costItems.push({ label: 'Klishe (bir martalik)', qty: '1 marta', total: klishePrice });
         }
     }
 
@@ -10525,6 +10528,7 @@ function calculate() {
         if (taxiPrice > 0) {
             totalPrice += Math.round(taxiPrice * (1 + marginPercent / 100));
             details += ` | Taxi xarajati (bir martalik): ${taxiPrice.toLocaleString()} so'm qo'shildi`;
+            costItems.push({ label: 'Taxi xarajati (bir martalik)', qty: '1 marta', total: taxiPrice });
         }
     }
 
@@ -10535,7 +10539,7 @@ function calculate() {
 
     currentCalcResult = {
         details, qty, unitPrice, totalPrice, name: previewNameText, imageUrl: previewImgUrl,
-        baseUnitPrice, marginPercent, productType: activeProductType
+        baseUnitPrice, marginPercent, productType: activeProductType, costItems
     };
     if (typeof renderPriceSuggestion === 'function') renderPriceSuggestion(activeProductType, unitPrice);
 }
@@ -10650,6 +10654,39 @@ function renderFullCalcInfoBody() {
 
     const row = (label, val, bold) => `<tr><td style="padding:6px 0; color:var(--text-muted);">${label}</td><td style="padding:6px 0; text-align:right; ${bold ? 'font-weight:700; color:var(--primary);' : 'font-weight:600;'}">${val}</td></tr>`;
 
+    // NIMA va NECHTA ishlatilgani, hamda har birining tannarxi (marjasiz) — faqat ofset
+    // asosidagi turlarda (Papka/Kalendar/Poligrafiya) to'ldiriladi.
+    let costItemsHtml = '';
+    if (Array.isArray(r.costItems) && r.costItems.length > 0) {
+        let itemRows = r.costItems.map(ci => `
+            <tr>
+                <td style="padding:6px 0; color:var(--text-main);">${ci.label}</td>
+                <td style="padding:6px 0; text-align:center; color:var(--text-muted); white-space:nowrap;">${ci.qty || ''}</td>
+                <td style="padding:6px 0; text-align:right; font-weight:600; white-space:nowrap;">${(ci.total || 0).toLocaleString()} so'm</td>
+            </tr>`).join('');
+        let tannarxJami = r.costItems.reduce((sum, ci) => sum + (ci.total || 0), 0);
+        costItemsHtml = `
+            <div style="margin-bottom:14px;">
+                <div style="font-weight:700; margin-bottom:6px;">Nima va nechta ishlatilgan (tannarx, marjasiz):</div>
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:2px solid #e2e8f0;">
+                            <th style="text-align:left; padding:4px 0; font-size:0.78rem; color:var(--text-muted);">Nomi</th>
+                            <th style="text-align:center; padding:4px 0; font-size:0.78rem; color:var(--text-muted);">Miqdori</th>
+                            <th style="text-align:right; padding:4px 0; font-size:0.78rem; color:var(--text-muted);">Narxi</th>
+                        </tr>
+                    </thead>
+                    <tbody>${itemRows}</tbody>
+                    <tfoot>
+                        <tr style="border-top:2px solid #e2e8f0;">
+                            <td style="padding:6px 0; font-weight:700;" colspan="2">Jami tannarx (marjasiz)</td>
+                            <td style="padding:6px 0; text-align:right; font-weight:700;">${tannarxJami.toLocaleString()} so'm</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>`;
+    }
+
     let rows = [];
     rows.push(row('Mahsulot', r.name || r.productType || '-'));
     rows.push(row('Miqdor', (r.qty || 0).toLocaleString() + ' dona'));
@@ -10666,6 +10703,7 @@ function renderFullCalcInfoBody() {
             <div style="font-weight:700; margin-bottom:6px;">To'liq tafsilot:</div>
             ${detailLines}
         </div>
+        ${costItemsHtml}
         <table style="width:100%; border-collapse:collapse;">${rows.join('')}</table>
     `;
 }
