@@ -1576,10 +1576,12 @@
             <div class="add-pen-card" style="margin-bottom: 20px;">
                 <div class="add-pen-card-title">🚕 Taxi Xarajatlari</div>
                 <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                    Poligrafiya, Suvenir va Textile bo'limlaridagi HAR BIR hisob-kitobga (buyurtmaga),
-                    miqdordan (tiraj) qat'iy nazar, BIR MARTA qo'shiladigan taxi/yetkazish xarajati —
-                    har bir bo'lim uchun alohida. Mijoz/menejer ekranida alohida ko'rsatilmaydi, jami
-                    summaga avtomatik qo'shiladi.
+                    Poligrafiya va Suvenir bo'limlaridagi HAR BIR hisob-kitobga (buyurtmaga), miqdordan
+                    (tiraj) qat'iy nazar, BIR MARTA qo'shiladigan taxi/yetkazish xarajati — har bir
+                    bo'lim uchun alohida. Mijoz/menejer ekranida alohida ko'rsatilmaydi, jami summaga
+                    avtomatik qo'shiladi. (Textile uchun bu xarajat allaqachon mavjud — Tekstil admin
+                    bo'limidagi "🚚 Taxi (yetkazib berish) narxi" va Bayroqlar uchun alohida Taxi narxi
+                    orqali boshqariladi, shuning uchun bu yerga qo'shilmagan.)
                 </p>
                 <div class="form-row">
                     <div class="form-group">
@@ -1589,10 +1591,6 @@
                     <div class="form-group">
                         <label>Suvenir (so'm):</label>
                         <input type="number" min="0" id="taxiExpenseSouvenir" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Textile (so'm):</label>
-                        <input type="number" min="0" id="taxiExpenseTextile" value="0">
                     </div>
                 </div>
                 <div style="display:flex; justify-content:flex-end;">
@@ -5562,13 +5560,16 @@ function saveBayroqDeliveryFee() {
     // qat'iy nazar, BIR MARTA qo'shiladigan taxi/yetkazish xarajati — har bir bo'lim uchun
     // alohida admin-belgilangan qiymat (klishe narxi kabi, lekin qtyga bo'linmasdan, to'g'ridan
     // to'g'ri jami summaga qo'shiladi — calculate() ichida qarang).
-    let taxiExpenses = { poligrafiya: 0, souvenir: 0, textile: 0 };
+    // Textile bo'limi bu yerga kiritilmagan — u allaqachon o'z Taxi (yetkazib berish)
+    // mexanizmiga ega: oddiy tekstil turlari uchun `textileDtfConfig.taxiFee`
+    // (Tekstil admin bo'limi, "🚚 Taxi (yetkazib berish) narxi"), Bayroqlar uchun esa
+    // alohida `bayroqDeliveryFee` — ikkalasi ham bir martalik, admin-belgilangan.
+    let taxiExpenses = { poligrafiya: 0, souvenir: 0 };
 
     function renderTaxiExpensesAdmin() {
         let q = id => document.getElementById(id);
         if (q('taxiExpensePoligrafiya')) q('taxiExpensePoligrafiya').value = taxiExpenses.poligrafiya;
         if (q('taxiExpenseSouvenir')) q('taxiExpenseSouvenir').value = taxiExpenses.souvenir;
-        if (q('taxiExpenseTextile')) q('taxiExpenseTextile').value = taxiExpenses.textile;
     }
 
     function saveTaxiExpenses() {
@@ -5579,11 +5580,10 @@ function saveBayroqDeliveryFee() {
         };
         taxiExpenses.poligrafiya = Math.max(0, son('taxiExpensePoligrafiya', 0));
         taxiExpenses.souvenir = Math.max(0, son('taxiExpenseSouvenir', 0));
-        taxiExpenses.textile = Math.max(0, son('taxiExpenseTextile', 0));
         localStorage.setItem('erp_taxi_expenses', JSON.stringify(taxiExpenses));
         if (typeof logAudit === 'function') {
             logAudit("Taxi xarajatlari o'zgartirildi",
-                `Poligrafiya: ${taxiExpenses.poligrafiya.toLocaleString()} so'm, Suvenir: ${taxiExpenses.souvenir.toLocaleString()} so'm, Textile: ${taxiExpenses.textile.toLocaleString()} so'm`);
+                `Poligrafiya: ${taxiExpenses.poligrafiya.toLocaleString()} so'm, Suvenir: ${taxiExpenses.souvenir.toLocaleString()} so'm`);
         }
         showToast("💾 Taxi xarajatlari saqlandi!");
     }
@@ -10440,11 +10440,11 @@ function calculate() {
         }
     }
 
-    // Poligrafiya/Suvenir/Textile — har bir hisob-kitobga (buyurtmaga), miqdordan qat'iy nazar,
+    // Poligrafiya/Suvenir — har bir hisob-kitobga (buyurtmaga), miqdordan qat'iy nazar,
     // BIR MARTA qo'shiladigan taxi xarajati (bo'lim bo'yicha alohida, admin belgilaydi).
+    // Textile bu yerga kiritilmagan — u o'zining alohida Taxi mexanizmiga ega (yuqoriga qarang).
     let taxiExpenseCategory = poligrafiyaKeys.includes(activeProductType) ? 'poligrafiya'
         : souvenirKeys.includes(activeProductType) ? 'souvenir'
-        : textileKeys.includes(activeProductType) ? 'textile'
         : null;
     if (taxiExpenseCategory) {
         let taxiPrice = taxiExpenses[taxiExpenseCategory] || 0;
