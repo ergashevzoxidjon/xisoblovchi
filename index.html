@@ -3255,36 +3255,72 @@
         return { unitPrice: unit, details: qismlar.join(' | '), lakTotal: lakJami };
     }
 
-    // ====================== PAPKA (poligrafiya, FAQAT ofset, Karton 250gr) ======================
-    // 4 ta tayyor tur, har biri o'z YOYILGAN (pona qirqilgandan keyingi) o'lchamiga ega — narx shu
-    // o'lcham bo'yicha REAL ofset hisobidan (calculateOfsetForMachine, Karton 250gr) avtomatik
-    // topiladi (buklet/flayer'dagi kabi), keyin turga xos qo'shimcha ishlov (karmashka/visochka
-    // yopishtirish/kesish) narxi qo'shiladi. LAK va Tisneniya mustaqil — ikkalasi ham birga
-    // tanlanishi mumkin. Eng kam buyurtma 100 dona — kam kiritilsa avtomatik 100ga ko'tariladi.
+    // ====================== PAPKA (poligrafiya, FAQAT ofset, Karton) ======================
+    // 4 ta tayyor tur, har biri o'z YOYILGAN (pona qirqilgandan keyingi) o'lchamiga va QAT'IY
+    // ofset mashinasiga ega (1,2,3-turlar A3da, 4-tur A2da hisoblanadi — mashina tanlab
+    // ko'rilmaydi). Karton grammajini endi menejer o'zi tanlaydi (Ofset bo'limidagi Karton
+    // narx bazasidan). Laminatsiya va Visochka — BARCHA turlarga har doim avtomatik qo'shiladi,
+    // mijoz/menejerga umuman ko'rsatilmaydi (faqat admin narxini kiritadi, A3/A2 uchun alohida).
+    // Visochka narxi tiered: birinchi 1000 donagacha qat'iy summa, undan oshgan har bir donaga
+    // qo'shimcha narx. LAK ham xuddi shunday tiered, lekin — Tisneniya kabi — ixtiyoriy va
+    // mijoz/menejer tanlaydi (ikkalasi ham bir vaqtda tanlanishi mumkin). "Karmashkali" turida
+    // qo'shimcha "karmashka+yig'ish" narxi ham (hiddenFee) mijozga ko'rsatilmasdan avtomatik
+    // qo'shiladi. Eng kam buyurtma 100 dona — kam kiritilsa avtomatik 100ga ko'tariladi.
     let papkaConfig = {
         variants: [
-            { key: 'a4_karmashkasiz', name: "A4 Karmashkasiz", flatW: 308, flatH: 440, extraFee: 0, isDefault: true },
-            { key: 'a4_karmashkalik', name: "A4 Karmashkali", flatW: 308, flatH: 440, extraFee: 1500 },
-            { key: 'a4_visochkalik', name: "A4 Visochkali", flatW: 308, flatH: 440, extraFee: 1000 },
-            { key: 'a3_visochkalik', name: "A3 Visochkali", flatW: 460, flatH: 680, extraFee: 1500 }
+            { key: 'a4_karmashkasiz', name: "A4 Karmashkasiz", flatW: 308, flatH: 440, machine: 'A3', hiddenFee: 0, isDefault: true },
+            { key: 'a4_karmashkalik', name: "A4 Karmashkali", flatW: 308, flatH: 440, machine: 'A3', hiddenFee: 1500 },
+            { key: 'a4_visochkalik', name: "A4 Visochkali", flatW: 308, flatH: 440, machine: 'A3', hiddenFee: 0 },
+            { key: 'a3_visochkalik', name: "A3 Visochkali", flatW: 460, flatH: 680, machine: 'A2', hiddenFee: 0 }
         ],
-        lak: { pricePerUnit: 800 },
-        tisneniya: { pricePerUnit: 1000, klishePrice: 100000 },
+        paperGsmOptions: [250, 300, 350],
+        defaultGsm: 250,
+        // Barcha turlarga avtomatik, mijozga ko'rsatilmaydi (so'm/dona, tirajga ko'paytiriladi).
+        laminatsiya: { a3: 0, a2: 0 },
+        // Barcha turlarga avtomatik, mijozga ko'rsatilmaydi (tiered: 1000tagacha qat'iy summa).
+        visochka: {
+            a3: { firstQty: 1000, firstPrice: 120000, nextPrice: 120 },
+            a2: { firstQty: 1000, firstPrice: 200000, nextPrice: 200 }
+        },
+        // Ixtiyoriy, mijoz/menejer tanlaydi (tiered: 1000tagacha qat'iy summa).
+        lak: {
+            a3: { firstQty: 1000, firstPrice: 500000, nextPrice: 500 },
+            a2: { firstQty: 1000, firstPrice: 750000, nextPrice: 750 }
+        },
+        // Ixtiyoriy, mijoz/menejer tanlaydi (so'm/dona + bir martalik klishe).
+        tisneniya: {
+            a3: { pricePerUnit: 1000, klishePrice: 500000 },
+            a2: { pricePerUnit: 2000, klishePrice: 1000000 }
+        },
         minQty: 100,
-        paperType: 'Karton',
-        paperGsm: 250,
-        infoText: "Papka 250gr kartondan, faqat ofset usulida tayyorlanadi."
+        infoText: "Papka Karton qog'ozidan, faqat ofset usulida tayyorlanadi."
     };
 
-    let papkaSelected = { variantIndex: 0, lak: false, tisneniya: false };
+    let papkaSelected = { variantIndex: 0, gsm: 250, lak: false, tisneniya: false };
+
+    // Bloknot/Kalendar'dagi bir martalik-to'lov naqshiga o'xshash, lekin "tiered total" shaklida:
+    // birinchi `firstQty` donagacha qat'iy `firstPrice`, undan oshgan HAR BIR qo'shimcha donaga
+    // `nextPrice` qo'shiladi. Visochka va LAK ikkalasi ham shu formuladan foydalanadi.
+    function papkaTieredTotal(qty, tier) {
+        if (!tier) return 0;
+        let extra = Math.max(0, qty - (tier.firstQty || 0));
+        return (tier.firstPrice || 0) + extra * (tier.nextPrice || 0);
+    }
+
+    function papkaMachineKey(v) {
+        return (v && v.machine === 'A2') ? 'a2' : 'a3';
+    }
 
     function buildPapkaForm() {
         let defIdx = papkaConfig.variants.findIndex(v => v.isDefault);
-        papkaSelected = { variantIndex: defIdx >= 0 ? defIdx : 0, lak: false, tisneniya: false };
+        papkaSelected = { variantIndex: defIdx >= 0 ? defIdx : 0, gsm: papkaConfig.defaultGsm || papkaConfig.paperGsmOptions[0], lak: false, tisneniya: false };
 
         return `
             <div class="step-title">Papka turi:</div>
             <div class="options-group" id="papkaVariantGroup"></div>
+
+            <div class="step-title" style="margin-top:16px;">Karton grammaji:</div>
+            <div class="options-group" id="papkaGsmGroup"></div>
 
             <div class="step-title" style="margin-top:16px;">Qo'shimcha ishlov:</div>
             <div class="options-group" id="papkaExtraGroup"></div>
@@ -3310,7 +3346,16 @@
                     onclick="selectPapkaVariant(${idx})">${v.name}</button>
         `).join('');
 
+        const gsmGroup = document.getElementById('papkaGsmGroup');
+        if (gsmGroup) {
+            gsmGroup.innerHTML = papkaConfig.paperGsmOptions.map(g => `
+                <button class="opt-btn ${papkaSelected.gsm === g ? 'active' : ''}" onclick="selectPapkaGsm(${g})">${g}gr</button>
+            `).join('');
+        }
+
         // LAK va Tisneniya mustaqil — ikkalasi ham birga tanlanishi mumkin (bloknotdan farqli).
+        // Laminatsiya/Visochka/Karmashka+Yig'ish bu yerda umuman ko'rsatilmaydi — ular admin
+        // narxi bilan avtomatik qo'shiladi (calculatePapka() ichida).
         document.getElementById('papkaExtraGroup').innerHTML = `
             <button class="opt-btn ${papkaSelected.lak ? 'active' : ''}" onclick="togglePapkaExtra('lak')">✨ LAK</button>
             <button class="opt-btn ${papkaSelected.tisneniya ? 'active' : ''}" onclick="togglePapkaExtra('tisneniya')">🔨 Tisneniya</button>
@@ -3323,12 +3368,14 @@
         const box = document.getElementById('papkaInfoText');
         if (!box) return;
         let v = papkaConfig.variants[papkaSelected.variantIndex] || papkaConfig.variants[0];
+        let gsm = papkaSelected.gsm || papkaConfig.defaultGsm;
+        let machineKey = papkaMachineKey(v);
         let qatorlar = [];
         if (papkaConfig.infoText) qatorlar.push(papkaConfig.infoText);
         qatorlar.push(`<b>${v.name}</b> yoyilgan o'lchami: ${v.flatW}×${v.flatH} mm`);
-        qatorlar.push(`Material: <b>Karton ${papkaConfig.paperGsm}gr</b> | Pechat: <b>faqat Ofset</b>`);
-        if (papkaSelected.tisneniya && papkaConfig.tisneniya.klishePrice > 0) {
-            qatorlar.push(`Tisneniya klishesi: <b>${papkaConfig.tisneniya.klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
+        qatorlar.push(`Material: <b>Karton ${gsm}gr</b> | Mashina: <b>${v.machine}</b> | Pechat: <b>faqat Ofset</b>`);
+        if (papkaSelected.tisneniya && papkaConfig.tisneniya[machineKey].klishePrice > 0) {
+            qatorlar.push(`Tisneniya klishesi: <b>${papkaConfig.tisneniya[machineKey].klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
         }
         let qty = parseInt(document.getElementById('inpQuantity')?.value) || 0;
         if (qty > 0 && qty < papkaConfig.minQty) {
@@ -3343,40 +3390,53 @@
         calculate();
     }
 
+    function selectPapkaGsm(g) {
+        papkaSelected.gsm = g;
+        renderPapkaOptions();
+        calculate();
+    }
+
     function togglePapkaExtra(kind) {
         papkaSelected[kind] = !papkaSelected[kind];
         renderPapkaOptions();
         calculate();
     }
 
-    // Real ofset hisobi: yoyilgan o'lcham Karton (250gr) qog'ozida A3/A2/A1 mashinalarining
-    // barchasida sinaladi, eng arzon variant tanlanadi (calculateResult_poligrafiya'dagi bilan bir xil naqsh).
+    // Real ofset hisobi: yoyilgan o'lcham, tanlangan Karton grammaji bilan, turga QAT'IY
+    // biriktirilgan mashinada (A3 yoki A2) hisoblanadi — endi barcha mashinalar sinalmaydi.
     function calculatePapka(qty) {
         let v = papkaConfig.variants[papkaSelected.variantIndex] || papkaConfig.variants[0];
         let effectiveQty = Math.max(parseInt(qty) || 1, papkaConfig.minQty || 1);
+        let gsm = papkaSelected.gsm || papkaConfig.defaultGsm;
+        let machineKey = papkaMachineKey(v);
 
-        let results = ['A3', 'A2', 'A1']
-            .map(m => calculateOfsetForMachine(m, v.flatW, v.flatH, effectiveQty, 1, papkaConfig.paperType, papkaConfig.paperGsm))
-            .filter(Boolean);
+        let result = calculateOfsetForMachine(v.machine, v.flatW, v.flatH, effectiveQty, 1, 'Karton', gsm);
 
         let unit = 0;
         let ofsetInfo = '';
-        if (results.length > 0) {
-            results.sort((a, b) => a.perPieceCostRaw - b.perPieceCostRaw);
-            unit = results[0].perPieceCostRaw;
-            ofsetInfo = ` (${results[0].machine} mashina, ${results[0].itemsPerSheet} dona/varoq)`;
+        if (result) {
+            unit = result.perPieceCostRaw;
+            ofsetInfo = ` (${result.machine} mashina, ${result.itemsPerSheet} dona/varoq)`;
         } else {
-            showToast("⚠️ Karton (250gr) uchun ofset qog'oz bazasi topilmadi — admin panelda tekshiring.");
+            showToast(`⚠️ Karton ${gsm}gr uchun ${v.machine} ofset bazasi topilmadi — admin panelda tekshiring.`);
         }
 
-        unit += (v.extraFee || 0);
-        if (papkaSelected.lak) unit += (papkaConfig.lak.pricePerUnit || 0);
+        // --- Barcha turlarga avtomatik, mijozga ko'rsatilmaydigan xizmatlar ---
+        unit += (papkaConfig.laminatsiya[machineKey] || 0);
+        unit += (papkaTieredTotal(effectiveQty, papkaConfig.visochka[machineKey]) / effectiveQty);
+        unit += (v.hiddenFee || 0);
+
+        // --- Ixtiyoriy, mijoz/menejer tanlaydigan xizmatlar ---
+        if (papkaSelected.lak) {
+            unit += (papkaTieredTotal(effectiveQty, papkaConfig.lak[machineKey]) / effectiveQty);
+        }
         if (papkaSelected.tisneniya) {
-            unit += (papkaConfig.tisneniya.pricePerUnit || 0);
-            if (papkaConfig.tisneniya.klishePrice > 0) unit += (papkaConfig.tisneniya.klishePrice / effectiveQty);
+            let tis = papkaConfig.tisneniya[machineKey];
+            unit += (tis.pricePerUnit || 0);
+            if (tis.klishePrice > 0) unit += (tis.klishePrice / effectiveQty);
         }
 
-        let qismlar = [`Papka ${v.name} (${v.flatW}×${v.flatH}mm, Karton ${papkaConfig.paperGsm}gr)${ofsetInfo}`];
+        let qismlar = [`Papka ${v.name} (${v.flatW}×${v.flatH}mm, Karton ${gsm}gr)${ofsetInfo}`];
         if (papkaSelected.lak) qismlar.push('LAK');
         if (papkaSelected.tisneniya) qismlar.push('Tisneniya + klishe');
         if (effectiveQty !== (parseInt(qty) || 1)) qismlar.push(`eng kam ${papkaConfig.minQty} donaga ko'tarildi`);
@@ -3395,14 +3455,26 @@
                     <td>${v.name}</td>
                     <td><input type="number" min="1" value="${v.flatW}" onchange="updatePapkaVariantField(${idx}, 'flatW', this.value)"></td>
                     <td><input type="number" min="1" value="${v.flatH}" onchange="updatePapkaVariantField(${idx}, 'flatH', this.value)"></td>
-                    <td><input type="number" min="0" value="${v.extraFee || 0}" onchange="updatePapkaVariantField(${idx}, 'extraFee', this.value)"></td>
+                    <td style="text-align:center; font-weight:700;">${v.machine}</td>
+                    <td><input type="number" min="0" value="${v.hiddenFee || 0}" onchange="updatePapkaVariantField(${idx}, 'hiddenFee', this.value)"></td>
                 </tr>
             `).join('');
         }
         let q = id => document.getElementById(id);
-        if (q('papkaLakPrice')) q('papkaLakPrice').value = papkaConfig.lak.pricePerUnit;
-        if (q('papkaTisneniyaPrice')) q('papkaTisneniyaPrice').value = papkaConfig.tisneniya.pricePerUnit;
-        if (q('papkaKlishePrice')) q('papkaKlishePrice').value = papkaConfig.tisneniya.klishePrice;
+        if (q('papkaLaminatsiyaA3')) q('papkaLaminatsiyaA3').value = papkaConfig.laminatsiya.a3;
+        if (q('papkaLaminatsiyaA2')) q('papkaLaminatsiyaA2').value = papkaConfig.laminatsiya.a2;
+        if (q('papkaVisochkaA3First')) q('papkaVisochkaA3First').value = papkaConfig.visochka.a3.firstPrice;
+        if (q('papkaVisochkaA3Next')) q('papkaVisochkaA3Next').value = papkaConfig.visochka.a3.nextPrice;
+        if (q('papkaVisochkaA2First')) q('papkaVisochkaA2First').value = papkaConfig.visochka.a2.firstPrice;
+        if (q('papkaVisochkaA2Next')) q('papkaVisochkaA2Next').value = papkaConfig.visochka.a2.nextPrice;
+        if (q('papkaLakA3First')) q('papkaLakA3First').value = papkaConfig.lak.a3.firstPrice;
+        if (q('papkaLakA3Next')) q('papkaLakA3Next').value = papkaConfig.lak.a3.nextPrice;
+        if (q('papkaLakA2First')) q('papkaLakA2First').value = papkaConfig.lak.a2.firstPrice;
+        if (q('papkaLakA2Next')) q('papkaLakA2Next').value = papkaConfig.lak.a2.nextPrice;
+        if (q('papkaTisneniyaA3Price')) q('papkaTisneniyaA3Price').value = papkaConfig.tisneniya.a3.pricePerUnit;
+        if (q('papkaTisneniyaA3Klishe')) q('papkaTisneniyaA3Klishe').value = papkaConfig.tisneniya.a3.klishePrice;
+        if (q('papkaTisneniyaA2Price')) q('papkaTisneniyaA2Price').value = papkaConfig.tisneniya.a2.pricePerUnit;
+        if (q('papkaTisneniyaA2Klishe')) q('papkaTisneniyaA2Klishe').value = papkaConfig.tisneniya.a2.klishePrice;
         if (q('papkaMinQty')) q('papkaMinQty').value = papkaConfig.minQty;
     }
 
@@ -3417,14 +3489,24 @@
             let v = el ? parseFloat(el.value) : NaN;
             return isNaN(v) ? fallback : v;
         };
-        papkaConfig.lak.pricePerUnit = son('papkaLakPrice', 0);
-        papkaConfig.tisneniya.pricePerUnit = son('papkaTisneniyaPrice', 0);
-        papkaConfig.tisneniya.klishePrice = son('papkaKlishePrice', 0);
+        papkaConfig.laminatsiya.a3 = son('papkaLaminatsiyaA3', 0);
+        papkaConfig.laminatsiya.a2 = son('papkaLaminatsiyaA2', 0);
+        papkaConfig.visochka.a3.firstPrice = son('papkaVisochkaA3First', 0);
+        papkaConfig.visochka.a3.nextPrice = son('papkaVisochkaA3Next', 0);
+        papkaConfig.visochka.a2.firstPrice = son('papkaVisochkaA2First', 0);
+        papkaConfig.visochka.a2.nextPrice = son('papkaVisochkaA2Next', 0);
+        papkaConfig.lak.a3.firstPrice = son('papkaLakA3First', 0);
+        papkaConfig.lak.a3.nextPrice = son('papkaLakA3Next', 0);
+        papkaConfig.lak.a2.firstPrice = son('papkaLakA2First', 0);
+        papkaConfig.lak.a2.nextPrice = son('papkaLakA2Next', 0);
+        papkaConfig.tisneniya.a3.pricePerUnit = son('papkaTisneniyaA3Price', 0);
+        papkaConfig.tisneniya.a3.klishePrice = son('papkaTisneniyaA3Klishe', 0);
+        papkaConfig.tisneniya.a2.pricePerUnit = son('papkaTisneniyaA2Price', 0);
+        papkaConfig.tisneniya.a2.klishePrice = son('papkaTisneniyaA2Klishe', 0);
         papkaConfig.minQty = Math.max(1, son('papkaMinQty', 100));
         localStorage.setItem('erp_papka_config', JSON.stringify(papkaConfig));
         if (typeof logAudit === 'function') {
-            logAudit("Papka sozlamalari o'zgartirildi",
-                `MOQ: ${papkaConfig.minQty}, LAK: ${papkaConfig.lak.pricePerUnit.toLocaleString()} so'm, Tisneniya: ${papkaConfig.tisneniya.pricePerUnit.toLocaleString()} so'm`);
+            logAudit("Papka sozlamalari o'zgartirildi", `MOQ: ${papkaConfig.minQty}`);
         }
         showToast("💾 Papka sozlamalari saqlandi!");
     }
