@@ -1722,13 +1722,13 @@
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">🎨 Dizayn Qog'ozi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar.</p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Bu yerda qog'oz gramaj bilan emas, nomi bilan kiritiladi (masalan "Colotech-200gr", "Lyon", "Kvarts").</p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
                         <table class="admin-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 150px;">Nomi</th>
                                     <th style="width: 130px;">SRA3 320x450 (so'm)</th>
                                     <th style="width: 130px;">620x880 (so'm)</th>
                                     <th style="width: 130px;">620x940 (so'm)</th>
@@ -7471,13 +7471,36 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
 <script>
 // === ofset.js ===
     // "sra3" (320x450mm) — kichik-format mahsulotlar (Flayer va h.k.) uchun alohida kesilgan
-    // varoq narxi. 0 bo'lsa, o'sha qog'oz SRA3 hisob-kitobida hisobga olinmaydi.
+    // varoq narxi. 0 bo'lsa, o'sha qog'oz SRA3 hisob-kitobida hisobga olinmaydi. Dizayn qog'ozi
+    // qatorlari real hayotda gsm-raqam emas, balki NOMLANGAN mahsulot (masalan "Colotech-200gr",
+    // "Lyon") — shuning uchun ular uchun `label` (matn) maydoni bor, `gsm` faqat eski/ichki
+    // moslik uchun saqlanadi (hech qanday hisoblash yo'lida ishlatilmaydi).
     let ofsetRawPapers = [
-        { name: "Ofset", gsm: 80, prices: { "sra3": 22000, "620x880": 85000, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true },
-        { name: "Melovka", gsm: 80, prices: { "sra3": 24000, "620x880": 90000, "620x940": 95000, "700x1000": 110000 } },
-        { name: "Melovka", gsm: 115, prices: { "sra3": 30000, "620x880": 115000, "620x940": 120000, "700x1000": 140000 } },
-        { name: "Karton", gsm: 250, prices: { "sra3": 63000, "620x880": 240000, "620x940": 255000, "700x1000": 280000 } },
-        { name: "Dizayn qog'ozi", gsm: 200, prices: { "sra3": 79000, "620x880": 300000, "620x940": 320000, "700x1000": 350000 } }
+        { name: "Ofset", gsm: 80, prices: { "sra3": 200, "620x880": 200, "620x940": 0, "700x1000": 0 }, isDefaultOffset: true },
+        { name: "Melovka", gsm: 105, prices: { "sra3": 0, "620x880": 915, "620x940": 980, "700x1000": 1175 } },
+        { name: "Melovka", gsm: 115, prices: { "sra3": 0, "620x880": 995, "620x940": 1065, "700x1000": 1275 } },
+        { name: "Melovka", gsm: 130, prices: { "sra3": 0, "620x880": 1105, "620x940": 1180, "700x1000": 1420 } },
+        { name: "Melovka", gsm: 150, prices: { "sra3": 0, "620x880": 1300, "620x940": 1385, "700x1000": 1660 } },
+        { name: "Melovka", gsm: 170, prices: { "sra3": 0, "620x880": 1500, "620x940": 1600, "700x1000": 1920 } },
+        { name: "Melovka", gsm: 200, prices: { "sra3": 0, "620x880": 1760, "620x940": 1880, "700x1000": 2260 } },
+        { name: "Melovka", gsm: 250, prices: { "sra3": 0, "620x880": 2200, "620x940": 2350, "700x1000": 2825 } },
+        { name: "Melovka", gsm: 300, prices: { "sra3": 0, "620x880": 2640, "620x940": 2825, "700x1000": 3390 } },
+        { name: "Melovka", gsm: 350, prices: { "sra3": 0, "620x880": 3150, "620x940": 3365, "700x1000": 4040 } },
+        { name: "Karton", gsm: 190, prices: { "sra3": 0, "620x880": 0, "620x940": 0, "700x1000": 2415 } },
+        { name: "Karton", gsm: 210, prices: { "sra3": 0, "620x880": 0, "620x940": 2265, "700x1000": 2625 } },
+        { name: "Karton", gsm: 250, prices: { "sra3": 0, "620x880": 0, "620x940": 2590, "700x1000": 3025 } },
+        { name: "Karton", gsm: 300, prices: { "sra3": 0, "620x880": 0, "620x940": 3150, "700x1000": 3875 } },
+        { name: "Karton", gsm: 325, prices: { "sra3": 0, "620x880": 0, "620x940": 0, "700x1000": 3925 } },
+        { name: "Karton", gsm: 350, prices: { "sra3": 0, "620x880": 0, "620x940": 3660, "700x1000": 4225 } },
+        { name: "Dizayn qog'ozi", gsm: 120, label: "Colotech-120gr", prices: { "sra3": 1520, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 160, label: "Colotech-160gr", prices: { "sra3": 1945, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 200, label: "Colotech-200gr", prices: { "sra3": 2480, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 250, label: "Colotech-250gr", prices: { "sra3": 3047, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 300, label: "Colotech-300gr", prices: { "sra3": 3840, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 350, label: "Colotech-350gr", prices: { "sra3": 4680, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 0, label: "Lyon", prices: { "sra3": 6000, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 0, label: "Kvarts", prices: { "sra3": 6000, "620x880": 0, "620x940": 0, "700x1000": 0 } },
+        { name: "Dizayn qog'ozi", gsm: 0, label: "Samokleyka", prices: { "sra3": 1800, "620x880": 0, "620x940": 0, "700x1000": 0 } }
     ];
 
     let ofsetMachineSettings = {
@@ -7524,9 +7547,14 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
             if (item.name === 'Ofset') return;
             if (!rowsByType[item.name]) rowsByType[item.name] = [];
             let hasSra3Column = (item.name === "Dizayn qog'ozi");
+            // Dizayn qog'ozi haqiqiy hayotda gsm-raqam emas, nomlangan mahsulot (masalan
+            // "Colotech-200gr", "Lyon") — shu sabab birinchi ustun matn (label), raqam emas.
+            let firstCellHtml = hasSra3Column
+                ? `<input type="text" id="ofset_mtx_label_${index}" value="${(item.label || '').replace(/"/g, '&quot;')}" placeholder="Nomi">`
+                : `<input type="number" id="ofset_mtx_gsm_${index}" value="${item.gsm}">`;
             rowsByType[item.name].push(`
                 <tr>
-                    <td><input type="number" id="ofset_mtx_gsm_${index}" value="${item.gsm}"></td>
+                    <td>${firstCellHtml}</td>
                     ${hasSra3Column ? `<td><input type="number" id="ofset_mtx_psra3_${index}" value="${item.prices['sra3'] || 0}"></td>` : ''}
                     <td><input type="number" id="ofset_mtx_p880_${index}" value="${item.prices['620x880'] || 0}"></td>
                     <td><input type="number" id="ofset_mtx_p940_${index}" value="${item.prices['620x940'] || 0}"></td>
@@ -7553,12 +7581,14 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
 
     function addOfsetPaperRow(type) {
         let defaults = {
-            'Melovka': { gsm: 200, prices: { "sra3": 55000, "620x880": 200000, "620x940": 210000, "700x1000": 230000 } },
-            'Karton': { gsm: 250, prices: { "sra3": 60000, "620x880": 230000, "620x940": 240000, "700x1000": 260000 } },
-            "Dizayn qog'ozi": { gsm: 200, prices: { "sra3": 79000, "620x880": 300000, "620x940": 320000, "700x1000": 350000 } }
+            'Melovka': { gsm: 200, prices: { "sra3": 0, "620x880": 1760, "620x940": 1880, "700x1000": 2260 } },
+            'Karton': { gsm: 250, prices: { "sra3": 0, "620x880": 0, "620x940": 2590, "700x1000": 3025 } },
+            "Dizayn qog'ozi": { gsm: 0, label: "Yangi qog'oz", prices: { "sra3": 2000, "620x880": 0, "620x940": 0, "700x1000": 0 } }
         };
         let d = defaults[type] || defaults['Melovka'];
-        ofsetRawPapers.push({ name: type, gsm: d.gsm, prices: { ...d.prices } });
+        let newItem = { name: type, gsm: d.gsm, prices: { ...d.prices } };
+        if (d.label !== undefined) newItem.label = d.label;
+        ofsetRawPapers.push(newItem);
         renderAdminOfsetPapersMatrix();
     }
 
@@ -7576,15 +7606,19 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
     function saveAllOfsetPapers() {
         ofsetRawPapers.forEach((item, index) => {
             if (item.name === 'Ofset') return;
-            let gsmInput = document.getElementById(`ofset_mtx_gsm_${index}`);
-            if (!gsmInput) return;
+            let isDizayn = (item.name === "Dizayn qog'ozi");
+            // Dizayn qog'ozi qatorida gsm o'rniga matn (Nomi) inputi bor.
+            let idField = isDizayn ? document.getElementById(`ofset_mtx_label_${index}`) : document.getElementById(`ofset_mtx_gsm_${index}`);
+            if (!idField) return;
+            if (isDizayn) item.label = idField.value || item.label || '';
+            else item.gsm = parseInt(idField.value) || item.gsm;
+
             // Melovka/Karton jadvalida SRA3 ustuni yo'q (bu turlarda bunday xom varoq
             // kiritilmaydi) — shu input mavjud bo'lmasa, avvalgi (odatda 0) qiymat saqlanadi.
             let psra3Input = document.getElementById(`ofset_mtx_psra3_${index}`);
             let p880Input = document.getElementById(`ofset_mtx_p880_${index}`);
             let p940Input = document.getElementById(`ofset_mtx_p940_${index}`);
             let p1000Input = document.getElementById(`ofset_mtx_p1000_${index}`);
-            item.gsm = parseInt(gsmInput.value) || item.gsm;
             item.prices = {
                 "sra3": psra3Input ? (parseFloat(psra3Input.value) || 0) : (item.prices['sra3'] || 0),
                 "620x880": parseFloat(p880Input.value) || 0,
@@ -9040,9 +9074,21 @@ renderCustomProductsAdminSection();
             currentPaper = digitalPapersDatabase[0];
         }
 
+        // Bir martalik migratsiya: kod ichidagi standart (v2, real narxlar bilan to'ldirilgan)
+        // ofsetRawPapers ro'yxatini oldin saqlab qo'yamiz — pastda, agar admin hali bu yangi
+        // bazani ko'rmagan bo'lsa (localStorage'da eski/bo'sh ma'lumot bo'lsa), shu bilan
+        // to'liq almashtiramiz. Bitta marta ishlaydigan bayroq bilan himoyalangan — shundan
+        // keyin admin kiritgan har qanday o'zgarish doim ustun turadi.
+        let ofsetRawPapersDefaultsV2 = ofsetRawPapers;
+
         let savedOfsetRawPapers = localStorage.getItem('erp_ofset_raw_papers');
         if (savedOfsetRawPapers) {
             ofsetRawPapers = JSON.parse(savedOfsetRawPapers);
+        }
+        if (!localStorage.getItem('erp_ofset_papers_v2_seeded')) {
+            ofsetRawPapers = ofsetRawPapersDefaultsV2;
+            localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
+            localStorage.setItem('erp_ofset_papers_v2_seeded', '1');
         }
 
         let savedOfsetMachineSettings = localStorage.getItem('erp_ofset_machine_settings');
