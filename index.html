@@ -3420,7 +3420,7 @@
         paperGsmOptions: [250, 300, 350],
         defaultGsm: 250,
         // Barcha turlarga avtomatik, mijozga ko'rsatilmaydi (so'm/dona, tirajga ko'paytiriladi).
-        laminatsiya: { a3: 0, a2: 0 },
+        laminatsiya: { a3: 550, a2: 1100 },
         // Barcha turlarga avtomatik, mijozga ko'rsatilmaydi (tiered: 1000tagacha qat'iy summa).
         visochka: {
             a3: { firstQty: 1000, firstPrice: 120000, nextPrice: 120 },
@@ -9194,6 +9194,16 @@ renderCustomProductsAdminSection();
             } catch (e) {
                 console.warn('Papka sozlamalarini o\'qishda xato:', e);
             }
+        }
+
+        // Bir martalik migratsiya: Laminatsiya uchun standart narx (A3-550, A2-1100 so'm)
+        // qo'yiladi — admin keyinchalik o'zgartirishi mumkin, shundan keyin bu bayroq bilan
+        // qayta ustidan yozilmaydi.
+        if (!localStorage.getItem('erp_papka_laminatsiya_v2_seeded')) {
+            papkaConfig.laminatsiya.a3 = 550;
+            papkaConfig.laminatsiya.a2 = 1100;
+            localStorage.setItem('erp_papka_config', JSON.stringify(papkaConfig));
+            localStorage.setItem('erp_papka_laminatsiya_v2_seeded', '1');
         }
 
         let savedKalendar = localStorage.getItem('erp_kalendar_config');
