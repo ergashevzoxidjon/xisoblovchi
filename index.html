@@ -2734,32 +2734,37 @@
         springIndex: 0
     };
 
+    // Har bir grammaj qatori endi o'zining qog'oz TURIGA (paperType: Ofset/Melovka/Karton/
+    // Dizayn qog'ozi) ham ega — chunki bir xil gsm qiymati bir nechta qog'oz turida bo'lishi
+    // mumkin (masalan Melovka 250gr VA Karton 250gr), va admin qaysi birini nazarda tutayotgani
+    // aniq bo'lishi kerak (avval faqat gsm bo'yicha, turini aniqlamasdan qidirilar edi).
     let poligrafiyaGsmDatabase = {
         flayer: [
-            { gsm: 115, isDefault: false },
-            { gsm: 130, isDefault: true },
-            { gsm: 150, isDefault: false },
-            { gsm: 170, isDefault: false }
+            { gsm: 115, paperType: 'Melovka', isDefault: false },
+            { gsm: 130, paperType: 'Melovka', isDefault: true },
+            { gsm: 150, paperType: 'Melovka', isDefault: false },
+            { gsm: 170, paperType: 'Melovka', isDefault: false }
         ],
         listovka: [
-            { gsm: 115, isDefault: false },
-            { gsm: 130, isDefault: true },
-            { gsm: 150, isDefault: false },
-            { gsm: 170, isDefault: false }
+            { gsm: 115, paperType: 'Melovka', isDefault: false },
+            { gsm: 130, paperType: 'Melovka', isDefault: true },
+            { gsm: 150, paperType: 'Melovka', isDefault: false },
+            { gsm: 170, paperType: 'Melovka', isDefault: false }
         ],
         buklet: [
-            { gsm: 150, isDefault: false },
-            { gsm: 170, isDefault: true },
-            { gsm: 200, isDefault: false },
-            { gsm: 300, isDefault: false }
+            { gsm: 150, paperType: 'Melovka', isDefault: false },
+            { gsm: 170, paperType: 'Melovka', isDefault: true },
+            { gsm: 200, paperType: 'Melovka', isDefault: false },
+            { gsm: 300, paperType: 'Melovka', isDefault: false }
         ],
         doorhanger: [
-            { gsm: 250, isDefault: false },
-            { gsm: 300, isDefault: true },
-            { gsm: 350, isDefault: false },
-            { gsm: 400, isDefault: false }
+            { gsm: 250, paperType: 'Karton', isDefault: false },
+            { gsm: 300, paperType: 'Karton', isDefault: true },
+            { gsm: 350, paperType: 'Karton', isDefault: false },
+            { gsm: 400, paperType: 'Karton', isDefault: false }
         ]
     };
+    const POLIGRAFIYA_PAPER_TYPES = ['Ofset', 'Melovka', 'Karton', "Dizayn qog'ozi"];
     let selectedPoligrafiyaGsmIndex = -1;
 
     // Menejer tanlagan pechat usuli ('ofset' | 'raqamli') va bosma tomoni (1 yoki 2) —
@@ -2786,6 +2791,12 @@
                     <span>${g.isDefault ? '★ Standart' : '☆ Standart qilish'}</span>
                 </label>
                 <div class="poli-gsm-field">
+                    <label>Qog'oz turi</label>
+                    <select id="polgsm_type_${index}">
+                        ${POLIGRAFIYA_PAPER_TYPES.map(t => `<option value="${t}" ${((g.paperType || 'Melovka') === t) ? 'selected' : ''}>${t}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="poli-gsm-field">
                     <label>Grammaj</label>
                     <div class="poli-gsm-input-wrap">
                         <input type="number" id="polgsm_gsm_${index}" value="${g.gsm}">
@@ -2800,7 +2811,10 @@
         if (!currentManagingProduct) return;
         if (!poligrafiyaGsmDatabase[currentManagingProduct]) poligrafiyaGsmDatabase[currentManagingProduct] = [];
         let list = poligrafiyaGsmDatabase[currentManagingProduct];
-        list.push({ gsm: 130, isDefault: list.length === 0 });
+        // Doorhanger kabi kartonli mahsulotlarda yangi qator ham Karton bilan boshlansin —
+        // qolganlarida Melovka eng ko'p ishlatiladigan standart tur.
+        let defaultType = (list.length > 0 && list[list.length - 1].paperType) ? list[list.length - 1].paperType : 'Melovka';
+        list.push({ gsm: 130, paperType: defaultType, isDefault: list.length === 0 });
         renderAdminPoligrafiyaGsmTable();
     }
 
@@ -2822,9 +2836,11 @@
         for (let index = 0; index < list.length; index++) {
             let gsmInput = document.getElementById(`polgsm_gsm_${index}`);
             if (!gsmInput) continue;
+            let typeInput = document.getElementById(`polgsm_type_${index}`);
             let defaultInput = document.getElementById(`polgsm_default_${index}`);
             updated.push({
                 gsm: parseInt(gsmInput.value) || 0,
+                paperType: typeInput ? typeInput.value : 'Melovka',
                 isDefault: defaultInput.checked
             });
         }
@@ -2840,8 +2856,11 @@
     function renderPoligrafiyaGsmOptions(gsmList) {
         const group = document.getElementById('poligrafiyaGsmGroup');
         if (!group) return;
+        // Bir xil gsm bir nechta qog'oz turida bo'lishi mumkin (masalan Melovka 250gr va
+        // Karton 250gr) — shuning uchun tur nomi ham kartochkada ko'rsatiladi.
         group.innerHTML = gsmList.map((g, idx) => `
             <div class="poli-paper-option ${idx === selectedPoligrafiyaGsmIndex ? 'active' : ''}" onclick="selectPoligrafiyaGsm(${idx})">
+                <div style="font-size:0.68rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.02em;">${g.paperType || 'Melovka'}</div>
                 <div class="poli-paper-gsm">${g.gsm}<small>gr</small></div>
             </div>
         `).join('');
@@ -4299,17 +4318,18 @@
             return { details: '⚠️ Doorhanger uchun grammaj bazasi topilmadi — admin panelda tekshiring.', baseUnitPrice: 0, costItems: [] };
         }
 
+        let paperTypeName = g.paperType || doorhangerConfig.paperType || 'Karton';
         let size = parsePoligrafiyaSizeLabel(poligrafiyaSizeLabels.doorhanger);
-        let r = size ? calculateOfsetForMachine('A3', size.w, size.h, qty, 2, doorhangerConfig.paperType, g.gsm, true) : null;
+        let r = size ? calculateOfsetForMachine('A3', size.w, size.h, qty, 2, paperTypeName, g.gsm, true) : null;
 
         if (r) {
             unit += r.perPieceCostRaw;
             costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPaperCost) });
             costItems.push({ label: 'Forma (klishe, Chujoy — 8 plastina)', qty: `${r.totalPlates} plastina`, total: Math.round(r.totalPlateCost) });
             costItems.push({ label: 'Bosma (pechat, Chujoy)', qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPrintCost) });
-            details = `Doorhanger chop etish (${poligrafiyaSizeLabels.doorhanger}) | ${g.gsm}gr ${doorhangerConfig.paperType} | Ofset A3 | Chujoy (ikki tomonlama)`;
+            details = `Doorhanger chop etish (${poligrafiyaSizeLabels.doorhanger}) | ${paperTypeName} ${g.gsm}gr | Ofset A3 | Chujoy (ikki tomonlama)`;
         } else {
-            details = `⚠️ ${g.gsm}gr ${doorhangerConfig.paperType} uchun Ofset A3 bazasi topilmadi — admin panelda tekshiring.`;
+            details = `⚠️ ${paperTypeName} ${g.gsm}gr uchun Ofset A3 bazasi topilmadi — admin panelda tekshiring.`;
         }
 
         let visochkaTotal = papkaTieredTotal(qty, doorhangerConfig.visochka.a3);
@@ -4464,7 +4484,8 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
         // Narx bu yerda qo'lda kiritilmaydi — tanlangan grammaj Ofset Pechat yoki
         // Raqamli Pechat bo'limidagi haqiqiy qog'oz bazasidan qidiriladi.
         let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList[0];
-        let gsmLabel = ` | ${g.gsm}gr`;
+        let paperTypeName = g.paperType || 'Melovka';
+        let gsmLabel = ` | ${paperTypeName} ${g.gsm}gr`;
         let size = parsePoligrafiyaSizeLabel(sizeLabel);
         let sides = (selectedPoligrafiyaSides === 1) ? 1 : 2;
         let engine = (selectedPoligrafiyaEngine === 'raqamli') ? 'raqamli' : 'ofset';
@@ -4476,7 +4497,7 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
         let costItems = [];
         if (size) {
             if (engine === 'ofset') {
-                let paperEntry = (typeof ofsetRawPapers !== 'undefined') ? ofsetRawPapers.find(p => p.gsm === g.gsm) : null;
+                let paperEntry = (typeof ofsetRawPapers !== 'undefined') ? ofsetRawPapers.find(p => p.gsm === g.gsm && p.name === paperTypeName) : null;
                 if (paperEntry) {
                     let results = ['A3', 'A2', 'A1']
                         .map(m => calculateOfsetForMachine(m, size.w, size.h, qty, sides, paperEntry.name, g.gsm))
@@ -4494,7 +4515,7 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
             } else {
                 let paperEntry = (typeof digitalPapersDatabase !== 'undefined') ? digitalPapersDatabase.find(p => {
                     let m = /(\d+)/.exec(p.name || '');
-                    return m && parseInt(m[1]) === g.gsm;
+                    return m && parseInt(m[1]) === g.gsm && (p.name || '').toLowerCase().startsWith(paperTypeName.toLowerCase());
                 }) : null;
                 if (paperEntry) {
                     let r = calculateDigitalPriceForPaper(paperEntry, size.w, size.h, qty, sides);
@@ -4512,7 +4533,7 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                 + gsmLabel + ` | ${engineLabel} | ${sides === 1 ? 'Bir tomonlama' : 'Ikki tomonlama'}`;
         } else {
             baseUnitPrice = 0;
-            details = `⚠️ ${g.gsm}gr uchun ${engineLabel} bo'limida mos qog'oz topilmadi — administrator shu grammajni ${engineLabel} bo'limiga kiritishi kerak.`;
+            details = `⚠️ ${paperTypeName} ${g.gsm}gr uchun ${engineLabel} bo'limida mos qog'oz topilmadi — administrator shu qog'ozni ${engineLabel} bo'limiga kiritishi kerak.`;
         }
 
         return { details, baseUnitPrice, costItems };
@@ -9406,6 +9427,15 @@ renderCustomProductsAdminSection();
         if (savedPoligrafiyaGsm) {
             poligrafiyaGsmDatabase = { ...poligrafiyaGsmDatabase, ...JSON.parse(savedPoligrafiyaGsm) };
         }
+        // Bir martalik migratsiya: paperType maydoni qo'shilishidan OLDIN saqlangan
+        // qatorlarda bu maydon yo'q — Doorhanger uchun Karton, qolganlari uchun Melovka
+        // standart qilib to'ldiramiz (avvalgi xatti-harakat bilan mos: doorhanger allaqachon
+        // faqat Karton bilan ishlar edi, qolganlari faqat Melovka bilan).
+        Object.keys(poligrafiyaGsmDatabase).forEach(key => {
+            let list = poligrafiyaGsmDatabase[key];
+            if (!Array.isArray(list)) return;
+            list.forEach(g => { if (!g.paperType) g.paperType = (key === 'doorhanger') ? 'Karton' : 'Melovka'; });
+        });
 
         let savedPoligrafiyaSideTypes = localStorage.getItem('erp_poligrafiya_side_types');
         if (savedPoligrafiyaSideTypes) {
