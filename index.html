@@ -1573,31 +1573,6 @@
                 <span class="admin-cat-summary" id="adminCatSummary"></span>
             </div>
 
-            <div class="add-pen-card" style="margin-bottom: 20px;">
-                <div class="add-pen-card-title">🚕 Taxi Xarajatlari</div>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                    Poligrafiya va Suvenir bo'limlaridagi HAR BIR hisob-kitobga (buyurtmaga), miqdordan
-                    (tiraj) qat'iy nazar, BIR MARTA qo'shiladigan taxi/yetkazish xarajati — har bir
-                    bo'lim uchun alohida. Mijoz/menejer ekranida alohida ko'rsatilmaydi, jami summaga
-                    avtomatik qo'shiladi. (Textile uchun bu xarajat allaqachon mavjud — Tekstil admin
-                    bo'limidagi "🚚 Taxi (yetkazib berish) narxi" va Bayroqlar uchun alohida Taxi narxi
-                    orqali boshqariladi, shuning uchun bu yerga qo'shilmagan.)
-                </p>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Poligrafiya (so'm):</label>
-                        <input type="number" min="0" id="taxiExpensePoligrafiya" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Suvenir (so'm):</label>
-                        <input type="number" min="0" id="taxiExpenseSouvenir" value="0">
-                    </div>
-                </div>
-                <div style="display:flex; justify-content:flex-end;">
-                    <button class="btn btn-success" onclick="saveTaxiExpenses()">💾 Taxi xarajatlarini saqlash</button>
-                </div>
-            </div>
-
             <div class="search-box admin-cat-search" style="display:flex; gap:10px; align-items:center;">
                 <input type="text" id="adminCategorySearchInput" placeholder="Mahsulot yoki bo'lim nomini qidiring..." oninput="filterAdminCategoryGrid()" style="flex:1;">
                 <button class="btn btn-warning" style="white-space:nowrap;" onclick="openAddCustomProduct()">➕ Yangi mahsulot qo'shish</button>
@@ -1680,6 +1655,20 @@
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button class="btn" onclick="saveCustomProduct()">💾 Saqlash</button>
                     <button class="btn btn-outline" onclick="closeCustomProductForm()">Bekor qilish</button>
+                </div>
+            </div>
+
+            <div class="add-pen-card" style="margin-top: 24px; padding: 12px 16px;">
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span style="font-weight:700; color:var(--primary); white-space:nowrap; font-size:0.88rem;">🚕 Taxi xarajatlari</span>
+                    <label style="font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:5px;">Poligrafiya:
+                        <input type="number" min="0" id="taxiExpensePoligrafiya" value="0" style="width:100px; padding:5px 8px;">
+                    </label>
+                    <label style="font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:5px;">Suvenir:
+                        <input type="number" min="0" id="taxiExpenseSouvenir" value="0" style="width:100px; padding:5px 8px;">
+                    </label>
+                    <button class="btn btn-success" style="padding:6px 14px; font-size:0.8rem;" onclick="saveTaxiExpenses()">💾 Saqlash</button>
+                    <span style="font-size:0.75rem; color:var(--text-muted); flex-basis:100%;">Har bir buyurtmaga bir martalik qo'shiladi (Textile o'zining Taxi narxiga ega).</span>
                 </div>
             </div>
         </div>
