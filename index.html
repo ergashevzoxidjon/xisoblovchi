@@ -1841,6 +1841,32 @@
                     </div>
                     <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
                 </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📎 Visochka va 🧴 Laminatsiya (umumiy xizmatlar)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Bu ikkala xizmat Poligrafiya bo'limidagi ko'plab mahsulotlarda (Papka, Doorhanger
+                        va boshqalar) takrorlanadi — narxi shu yerda BIR MARTA, mashina formati (A3/A2/A1)
+                        bo'yicha kiritiladi. Har bir mahsulotning o'z admin bo'limida esa faqat shu xizmatdan
+                        foydalanadimi-yo'qmi (yoqilgan/o'chirilgan) belgilanadi — narx har doim shu yerdan olinadi.
+                    </p>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group"><label>Visochka A3 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA3First" value="120000"></div>
+                        <div class="form-group"><label>Visochka A3 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA3Next" value="120"></div>
+                        <div class="form-group"><label>Laminatsiya A3 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA3" value="550"></div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group"><label>Visochka A2 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA2First" value="200000"></div>
+                        <div class="form-group"><label>Visochka A2 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA2Next" value="200"></div>
+                        <div class="form-group"><label>Laminatsiya A2 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA2" value="1100"></div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group"><label>Visochka A1 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA1First" value="0"></div>
+                        <div class="form-group"><label>Visochka A1 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA1Next" value="0"></div>
+                        <div class="form-group"><label>Laminatsiya A1 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA1" value="0"></div>
+                    </div>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveOfsetFinishingServices()">💾 Visochka/Laminatsiya narxlarini saqlash</button>
+                </div>
             </div>
 
             <!-- RAQAMLI PECHAT ADMIN PANEL BLOKI -->
@@ -1893,20 +1919,13 @@
                     <div class="add-pen-card-title">📎 Visochka (osish uchun teshik)</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
                         Doorhanger FAQAT A3 ofsetda, ikki tomonlama (Chujoy — old/orqa uchun alohida forma)
-                        hisoblanadi, qog'oz turi: Karton. Visochka barcha buyurtmalarga avtomatik qo'shiladi,
-                        mijoz/menejerga ko'rsatilmaydi — tiered: birinchi ko'rsatilgan donagacha qat'iy summa,
-                        undan oshgan har bir donaga qo'shimcha narx.
+                        hisoblanadi, qog'oz turi: Karton. Visochka narxi endi <b>"Ofset pechat kalkulyatori"</b>
+                        admin bo'limidagi umumiy sozlamadan olinadi — bu yerda faqat Doorhanger shu
+                        xizmatdan foydalanadimi-yo'qmi belgilanadi, mijoz/menejerga ko'rsatilmaydi.
                     </p>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Visochka — 1000tagacha (so'm):</label>
-                            <input type="number" min="0" id="doorhangerVisochkaFirst" value="120000">
-                        </div>
-                        <div class="form-group">
-                            <label>Visochka — 1000dan keyin (so'm/dona):</label>
-                            <input type="number" min="0" id="doorhangerVisochkaNext" value="120">
-                        </div>
-                    </div>
+                    <label style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.9rem; cursor:pointer; margin-bottom:12px;">
+                        <input type="checkbox" id="doorhangerVisochkaEnabled" checked style="width:18px; height:18px;"> Visochka ishlatiladi
+                    </label>
                     <div style="display:flex; justify-content:flex-end;">
                         <button class="btn btn-success" onclick="saveDoorhangerConfig()">💾 Saqlash</button>
                     </div>
@@ -2127,37 +2146,18 @@
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">🧴 Laminatsiya va 📎 Visochka</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Ikkalasi ham BARCHA Papka turlariga avtomatik qo'shiladi — mijoz/menejerga
-                        umuman ko'rsatilmaydi. Visochka tiered: birinchi ko'rsatilgan donagacha qat'iy
-                        summa, undan oshgan har bir donaga qo'shimcha narx qo'shiladi.
+                        Narxi endi <b>"Ofset pechat kalkulyatori"</b> admin bo'limidagi umumiy sozlamadan
+                        olinadi (barcha mahsulotlar uchun bitta joyda boshqariladi). Bu yerda faqat Papka
+                        shu xizmatlardan foydalanadimi-yo'qmi belgilanadi — BARCHA Papka turlariga
+                        qo'llaniladi, mijoz/menejerga umuman ko'rsatilmaydi.
                     </p>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Laminatsiya A3 (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaLaminatsiyaA3" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Laminatsiya A2 (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaLaminatsiyaA2" value="0">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Visochka A3 — 1000tagacha (so'm):</label>
-                            <input type="number" min="0" id="papkaVisochkaA3First" value="120000">
-                        </div>
-                        <div class="form-group">
-                            <label>Visochka A3 — 1000dan keyin (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaVisochkaA3Next" value="120">
-                        </div>
-                        <div class="form-group">
-                            <label>Visochka A2 — 1000tagacha (so'm):</label>
-                            <input type="number" min="0" id="papkaVisochkaA2First" value="200000">
-                        </div>
-                        <div class="form-group">
-                            <label>Visochka A2 — 1000dan keyin (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaVisochkaA2Next" value="200">
-                        </div>
+                    <div style="display:flex; gap:24px; flex-wrap:wrap;">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.9rem; cursor:pointer;">
+                            <input type="checkbox" id="papkaLaminatsiyaEnabled" checked style="width:18px; height:18px;"> Laminatsiya ishlatiladi
+                        </label>
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.9rem; cursor:pointer;">
+                            <input type="checkbox" id="papkaVisochkaEnabled" checked style="width:18px; height:18px;"> Visochka ishlatiladi
+                        </label>
                     </div>
                 </div>
 
@@ -3475,13 +3475,11 @@
         ],
         paperGsmOptions: [250, 300, 350],
         defaultGsm: 250,
-        // Barcha turlarga avtomatik, mijozga ko'rsatilmaydi (so'm/dona, tirajga ko'paytiriladi).
-        laminatsiya: { a3: 550, a2: 1100 },
-        // Barcha turlarga avtomatik, mijozga ko'rsatilmaydi (tiered: 1000tagacha qat'iy summa).
-        visochka: {
-            a3: { firstQty: 1000, firstPrice: 120000, nextPrice: 120 },
-            a2: { firstQty: 1000, firstPrice: 200000, nextPrice: 200 }
-        },
+        // Narxi endi "Ofset pechat kalkulyatori" admin bo'limidagi umumiy
+        // Visochka/Laminatsiya sozlamasidan (ofsetFinishingServices) olinadi — bu yerda
+        // faqat Papka shu xizmatlardan foydalanadimi-yo'qmi belgilanadi.
+        laminatsiyaEnabled: true,
+        visochkaEnabled: true,
         // Ixtiyoriy, mijoz/menejer tanlaydi (tiered: 1000tagacha qat'iy summa).
         lak: {
             a3: { firstQty: 1000, firstPrice: 500000, nextPrice: 500 },
@@ -3622,16 +3620,21 @@
             showToast(`⚠️ Karton ${gsm}gr uchun ${v.machine} ofset bazasi topilmadi — admin panelda tekshiring.`);
         }
 
-        // --- Barcha turlarga avtomatik, mijozga ko'rsatilmaydigan xizmatlar ---
-        let laminatsiyaPerUnit = papkaConfig.laminatsiya[machineKey] || 0;
-        if (laminatsiyaPerUnit > 0) {
-            unit += laminatsiyaPerUnit;
-            costItems.push({ label: 'Laminatsiya', qty: `${effectiveQty} dona`, total: Math.round(laminatsiyaPerUnit * effectiveQty) });
+        // --- Barcha turlarga avtomatik, mijozga ko'rsatilmaydigan xizmatlar — narxi
+        // umumiy ofsetFinishingServices'dan (Ofset admin bo'limi) olinadi. ---
+        if (papkaConfig.laminatsiyaEnabled) {
+            let laminatsiyaPerUnit = ofsetFinishingServices.laminatsiya[machineKey] || 0;
+            if (laminatsiyaPerUnit > 0) {
+                unit += laminatsiyaPerUnit;
+                costItems.push({ label: 'Laminatsiya', qty: `${effectiveQty} dona`, total: Math.round(laminatsiyaPerUnit * effectiveQty) });
+            }
         }
-        let visochkaTotal = papkaTieredTotal(effectiveQty, papkaConfig.visochka[machineKey]);
-        if (visochkaTotal > 0) {
-            unit += visochkaTotal / effectiveQty;
-            costItems.push({ label: 'Visochka', qty: `${effectiveQty} dona`, total: Math.round(visochkaTotal) });
+        if (papkaConfig.visochkaEnabled) {
+            let visochkaTotal = papkaTieredTotal(effectiveQty, ofsetFinishingServices.visochka[machineKey]);
+            if (visochkaTotal > 0) {
+                unit += visochkaTotal / effectiveQty;
+                costItems.push({ label: 'Visochka', qty: `${effectiveQty} dona`, total: Math.round(visochkaTotal) });
+            }
         }
         if (v.hiddenFee > 0) {
             unit += v.hiddenFee;
@@ -3679,12 +3682,8 @@
             `).join('');
         }
         let q = id => document.getElementById(id);
-        if (q('papkaLaminatsiyaA3')) q('papkaLaminatsiyaA3').value = papkaConfig.laminatsiya.a3;
-        if (q('papkaLaminatsiyaA2')) q('papkaLaminatsiyaA2').value = papkaConfig.laminatsiya.a2;
-        if (q('papkaVisochkaA3First')) q('papkaVisochkaA3First').value = papkaConfig.visochka.a3.firstPrice;
-        if (q('papkaVisochkaA3Next')) q('papkaVisochkaA3Next').value = papkaConfig.visochka.a3.nextPrice;
-        if (q('papkaVisochkaA2First')) q('papkaVisochkaA2First').value = papkaConfig.visochka.a2.firstPrice;
-        if (q('papkaVisochkaA2Next')) q('papkaVisochkaA2Next').value = papkaConfig.visochka.a2.nextPrice;
+        if (q('papkaLaminatsiyaEnabled')) q('papkaLaminatsiyaEnabled').checked = !!papkaConfig.laminatsiyaEnabled;
+        if (q('papkaVisochkaEnabled')) q('papkaVisochkaEnabled').checked = !!papkaConfig.visochkaEnabled;
         if (q('papkaLakA3First')) q('papkaLakA3First').value = papkaConfig.lak.a3.firstPrice;
         if (q('papkaLakA3Next')) q('papkaLakA3Next').value = papkaConfig.lak.a3.nextPrice;
         if (q('papkaLakA2First')) q('papkaLakA2First').value = papkaConfig.lak.a2.firstPrice;
@@ -3707,12 +3706,10 @@
             let v = el ? parseFloat(el.value) : NaN;
             return isNaN(v) ? fallback : v;
         };
-        papkaConfig.laminatsiya.a3 = son('papkaLaminatsiyaA3', 0);
-        papkaConfig.laminatsiya.a2 = son('papkaLaminatsiyaA2', 0);
-        papkaConfig.visochka.a3.firstPrice = son('papkaVisochkaA3First', 0);
-        papkaConfig.visochka.a3.nextPrice = son('papkaVisochkaA3Next', 0);
-        papkaConfig.visochka.a2.firstPrice = son('papkaVisochkaA2First', 0);
-        papkaConfig.visochka.a2.nextPrice = son('papkaVisochkaA2Next', 0);
+        let laminatsiyaChk = document.getElementById('papkaLaminatsiyaEnabled');
+        let visochkaChk = document.getElementById('papkaVisochkaEnabled');
+        papkaConfig.laminatsiyaEnabled = laminatsiyaChk ? laminatsiyaChk.checked : papkaConfig.laminatsiyaEnabled;
+        papkaConfig.visochkaEnabled = visochkaChk ? visochkaChk.checked : papkaConfig.visochkaEnabled;
         papkaConfig.lak.a3.firstPrice = son('papkaLakA3First', 0);
         papkaConfig.lak.a3.nextPrice = son('papkaLakA3Next', 0);
         papkaConfig.lak.a2.firstPrice = son('papkaLakA2First', 0);
@@ -3751,17 +3748,18 @@
         }
         if (Array.isArray(saved.paperGsmOptions) && saved.paperGsmOptions.length > 0) cfg.paperGsmOptions = saved.paperGsmOptions;
         if (typeof saved.defaultGsm === 'number') cfg.defaultGsm = saved.defaultGsm;
-        if (saved.laminatsiya && ('a3' in saved.laminatsiya || 'a2' in saved.laminatsiya)) {
-            cfg.laminatsiya = { ...defaults.laminatsiya, ...saved.laminatsiya };
+        // Eski saqlangan ma'lumotda laminatsiya/visochka narxlari alohida bo'lgan bo'lishi
+        // mumkin edi — endi ular umumiy ofsetFinishingServices'dan olinadi, shuning uchun
+        // bu yerda faqat yoqilgan/o'chirilgan bayrog'i o'qiladi (mavjud bo'lmasa — standart true,
+        // ya'ni avvalgi "har doim yoqilgan" xatti-harakat saqlanadi).
+        if (typeof saved.laminatsiyaEnabled === 'boolean') cfg.laminatsiyaEnabled = saved.laminatsiyaEnabled;
+        if (typeof saved.visochkaEnabled === 'boolean') cfg.visochkaEnabled = saved.visochkaEnabled;
+        if (saved.lak && saved.lak.a3 && saved.lak.a2) {
+            cfg.lak = {
+                a3: { ...defaults.lak.a3, ...saved.lak.a3 },
+                a2: { ...defaults.lak.a2, ...saved.lak.a2 }
+            };
         }
-        ['visochka', 'lak'].forEach(key => {
-            if (saved[key] && saved[key].a3 && saved[key].a2) {
-                cfg[key] = {
-                    a3: { ...defaults[key].a3, ...saved[key].a3 },
-                    a2: { ...defaults[key].a2, ...saved[key].a2 }
-                };
-            }
-        });
         if (saved.tisneniya && saved.tisneniya.a3 && saved.tisneniya.a2) {
             cfg.tisneniya = {
                 a3: { ...defaults.tisneniya.a3, ...saved.tisneniya.a3 },
@@ -4276,26 +4274,23 @@
     // avtomatik, mijozga ko'rsatilmaydigan, tiered narx (Papka'dagi bilan bir xil naqsh).
     let doorhangerConfig = {
         paperType: 'Karton',
-        visochka: { a3: { firstQty: 1000, firstPrice: 120000, nextPrice: 120 } }
+        // Narxi endi "Ofset pechat kalkulyatori" admin bo'limidagi umumiy Visochka
+        // sozlamasidan (ofsetFinishingServices.visochka.a3) olinadi — bu yerda faqat
+        // Doorhanger shu xizmatdan foydalanadimi-yo'qmi belgilanadi.
+        visochkaEnabled: true
     };
 
     function renderAdminDoorhangerConfig() {
         let q = id => document.getElementById(id);
-        if (q('doorhangerVisochkaFirst')) q('doorhangerVisochkaFirst').value = doorhangerConfig.visochka.a3.firstPrice;
-        if (q('doorhangerVisochkaNext')) q('doorhangerVisochkaNext').value = doorhangerConfig.visochka.a3.nextPrice;
+        if (q('doorhangerVisochkaEnabled')) q('doorhangerVisochkaEnabled').checked = !!doorhangerConfig.visochkaEnabled;
     }
 
     function saveDoorhangerConfig() {
-        let son = (id, fallback) => {
-            let el = document.getElementById(id);
-            let v = el ? parseFloat(el.value) : NaN;
-            return isNaN(v) ? fallback : v;
-        };
-        doorhangerConfig.visochka.a3.firstPrice = son('doorhangerVisochkaFirst', 0);
-        doorhangerConfig.visochka.a3.nextPrice = son('doorhangerVisochkaNext', 0);
+        let chk = document.getElementById('doorhangerVisochkaEnabled');
+        doorhangerConfig.visochkaEnabled = chk ? chk.checked : doorhangerConfig.visochkaEnabled;
         localStorage.setItem('erp_doorhanger_config', JSON.stringify(doorhangerConfig));
         if (typeof logAudit === 'function') {
-            logAudit("Doorhanger sozlamalari o'zgartirildi", `Visochka: ${doorhangerConfig.visochka.a3.firstPrice.toLocaleString()} so'm / ${doorhangerConfig.visochka.a3.nextPrice.toLocaleString()} so'm`);
+            logAudit("Doorhanger sozlamalari o'zgartirildi", `Visochka ishlatiladi: ${doorhangerConfig.visochkaEnabled ? 'ha' : 'yo\'q'}`);
         }
         showToast("💾 Doorhanger sozlamalari saqlandi!");
     }
@@ -4359,7 +4354,7 @@
             details = `⚠️ ${paperTypeName} ${g.gsm}gr uchun Ofset A3 bazasi topilmadi — admin panelda tekshiring.`;
         }
 
-        let visochkaTotal = papkaTieredTotal(qty, doorhangerConfig.visochka.a3);
+        let visochkaTotal = doorhangerConfig.visochkaEnabled ? papkaTieredTotal(qty, ofsetFinishingServices.visochka.a3) : 0;
         if (visochkaTotal > 0) {
             unit += visochkaTotal / qty;
             costItems.push({ label: 'Visochka', qty: `${qty} dona`, total: Math.round(visochkaTotal) });
@@ -7832,6 +7827,55 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
         printA1Base: 1000000, printA1Step: 150000
     };
 
+    // Visochka (osish uchun teshik) va Laminatsiya — Poligrafiya bo'limidagi ko'plab
+    // mahsulotlarda (Papka, Doorhanger, Kalendar va h.k.) takrorlanadigan xizmatlar.
+    // Narxi endi har bir mahsulotda ALOHIDA kiritilmaydi — bitta umumiy joyda (mashina
+    // formati bo'yicha: A3/A2/A1) admin tomonidan kiritiladi, har bir mahsulot esa
+    // faqat "yoqilgan/o'chirilgan" belgisiga ega — yoqilgan bo'lsa, shu umumiy narx
+    // (mos mashina formatiga qarab) avtomatik hisoblanadi.
+    let ofsetFinishingServices = {
+        visochka: {
+            a3: { firstQty: 1000, firstPrice: 120000, nextPrice: 120 },
+            a2: { firstQty: 1000, firstPrice: 200000, nextPrice: 200 },
+            a1: { firstQty: 1000, firstPrice: 0, nextPrice: 0 }
+        },
+        laminatsiya: { a3: 550, a2: 1100, a1: 0 }
+    };
+
+    function renderOfsetFinishingServicesAdmin() {
+        let q = id => document.getElementById(id);
+        let f = ofsetFinishingServices;
+        if (q('finVisochkaA3First')) q('finVisochkaA3First').value = f.visochka.a3.firstPrice;
+        if (q('finVisochkaA3Next')) q('finVisochkaA3Next').value = f.visochka.a3.nextPrice;
+        if (q('finVisochkaA2First')) q('finVisochkaA2First').value = f.visochka.a2.firstPrice;
+        if (q('finVisochkaA2Next')) q('finVisochkaA2Next').value = f.visochka.a2.nextPrice;
+        if (q('finVisochkaA1First')) q('finVisochkaA1First').value = f.visochka.a1.firstPrice;
+        if (q('finVisochkaA1Next')) q('finVisochkaA1Next').value = f.visochka.a1.nextPrice;
+        if (q('finLaminatsiyaA3')) q('finLaminatsiyaA3').value = f.laminatsiya.a3;
+        if (q('finLaminatsiyaA2')) q('finLaminatsiyaA2').value = f.laminatsiya.a2;
+        if (q('finLaminatsiyaA1')) q('finLaminatsiyaA1').value = f.laminatsiya.a1;
+    }
+
+    function saveOfsetFinishingServices() {
+        let son = (id, fallback) => {
+            let el = document.getElementById(id);
+            let v = el ? parseFloat(el.value) : NaN;
+            return isNaN(v) ? fallback : v;
+        };
+        ofsetFinishingServices.visochka.a3.firstPrice = son('finVisochkaA3First', 0);
+        ofsetFinishingServices.visochka.a3.nextPrice = son('finVisochkaA3Next', 0);
+        ofsetFinishingServices.visochka.a2.firstPrice = son('finVisochkaA2First', 0);
+        ofsetFinishingServices.visochka.a2.nextPrice = son('finVisochkaA2Next', 0);
+        ofsetFinishingServices.visochka.a1.firstPrice = son('finVisochkaA1First', 0);
+        ofsetFinishingServices.visochka.a1.nextPrice = son('finVisochkaA1Next', 0);
+        ofsetFinishingServices.laminatsiya.a3 = son('finLaminatsiyaA3', 0);
+        ofsetFinishingServices.laminatsiya.a2 = son('finLaminatsiyaA2', 0);
+        ofsetFinishingServices.laminatsiya.a1 = son('finLaminatsiyaA1', 0);
+        localStorage.setItem('erp_ofset_finishing_services', JSON.stringify(ofsetFinishingServices));
+        if (typeof logAudit === 'function') logAudit("Visochka/Laminatsiya (umumiy) narxlari o'zgartirildi", '');
+        showToast("💾 Visochka/Laminatsiya narxlari saqlandi!");
+    }
+
     let selectedOfsetPaperType = 'Ofset';
     let selectedOfsetGsm = 80;
     let selectedOfsetMachine = 'AUTO';
@@ -9445,6 +9489,21 @@ renderCustomProductsAdminSection();
             ofsetMachineSettings = { ...ofsetMachineSettings, ...JSON.parse(savedOfsetMachineSettings) };
         }
 
+        let savedFinishingServices = localStorage.getItem('erp_ofset_finishing_services');
+        if (savedFinishingServices) {
+            try {
+                let parsed = JSON.parse(savedFinishingServices);
+                if (parsed.visochka) {
+                    ['a3', 'a2', 'a1'].forEach(m => {
+                        if (parsed.visochka[m]) ofsetFinishingServices.visochka[m] = { ...ofsetFinishingServices.visochka[m], ...parsed.visochka[m] };
+                    });
+                }
+                if (parsed.laminatsiya) ofsetFinishingServices.laminatsiya = { ...ofsetFinishingServices.laminatsiya, ...parsed.laminatsiya };
+            } catch (e) {
+                console.warn('Visochka/Laminatsiya sozlamalarini o\'qishda xato:', e);
+            }
+        }
+
         let savedPoligrafiyaSizeLabels = localStorage.getItem('erp_poligrafiya_size_labels');
         if (savedPoligrafiyaSizeLabels) {
             poligrafiyaSizeLabels = { ...poligrafiyaSizeLabels, ...JSON.parse(savedPoligrafiyaSizeLabels) };
@@ -9487,16 +9546,6 @@ renderCustomProductsAdminSection();
             }
         }
 
-        // Bir martalik migratsiya: Laminatsiya uchun standart narx (A3-550, A2-1100 so'm)
-        // qo'yiladi — admin keyinchalik o'zgartirishi mumkin, shundan keyin bu bayroq bilan
-        // qayta ustidan yozilmaydi.
-        if (!localStorage.getItem('erp_papka_laminatsiya_v2_seeded')) {
-            papkaConfig.laminatsiya.a3 = 550;
-            papkaConfig.laminatsiya.a2 = 1100;
-            localStorage.setItem('erp_papka_config', JSON.stringify(papkaConfig));
-            localStorage.setItem('erp_papka_laminatsiya_v2_seeded', '1');
-        }
-
         let savedKalendar = localStorage.getItem('erp_kalendar_config');
         if (savedKalendar) {
             try {
@@ -9518,9 +9567,10 @@ renderCustomProductsAdminSection();
         if (savedDoorhanger) {
             try {
                 let parsed = JSON.parse(savedDoorhanger);
-                if (parsed.visochka && parsed.visochka.a3) {
-                    doorhangerConfig.visochka.a3 = { ...doorhangerConfig.visochka.a3, ...parsed.visochka.a3 };
-                }
+                // Eski saqlangan ma'lumotda visochka narxi alohida bo'lgan bo'lishi mumkin edi —
+                // endi u umumiy ofsetFinishingServices'dan olinadi, bu yerda faqat
+                // yoqilgan/o'chirilgan bayrog'i o'qiladi (mavjud bo'lmasa — standart true).
+                if (typeof parsed.visochkaEnabled === 'boolean') doorhangerConfig.visochkaEnabled = parsed.visochkaEnabled;
                 if (parsed.paperType) doorhangerConfig.paperType = parsed.paperType;
             } catch (e) {
                 console.warn('Doorhanger sozlamalarini o\'qishda xato:', e);
@@ -10399,6 +10449,7 @@ renderCustomProductsAdminSection();
         if (isOfset) {
             renderAdminOfsetPapersMatrix();
             loadOfsetMachineSettingsToUI();
+            renderOfsetFinishingServicesAdmin();
             return;
         }
         if (isDigital) {
