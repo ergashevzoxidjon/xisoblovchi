@@ -1860,6 +1860,32 @@
 
             </div>
 
+            <!-- DOORHANGER — QO'SHIMCHA (VISOCHKA) ADMIN PANEL BLOKI -->
+            <div id="doorhangerVisochkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📎 Visochka (osish uchun teshik)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Doorhanger FAQAT A3 ofsetda, ikki tomonlama (Chujoy — old/orqa uchun alohida forma)
+                        hisoblanadi, qog'oz turi: Karton. Visochka barcha buyurtmalarga avtomatik qo'shiladi,
+                        mijoz/menejerga ko'rsatilmaydi — tiered: birinchi ko'rsatilgan donagacha qat'iy summa,
+                        undan oshgan har bir donaga qo'shimcha narx.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Visochka — 1000tagacha (so'm):</label>
+                            <input type="number" min="0" id="doorhangerVisochkaFirst" value="120000">
+                        </div>
+                        <div class="form-group">
+                            <label>Visochka — 1000dan keyin (so'm/dona):</label>
+                            <input type="number" min="0" id="doorhangerVisochkaNext" value="120">
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button class="btn btn-success" onclick="saveDoorhangerConfig()">💾 Saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- REKLAMA STEND (Roll Up / Pauk / PopUp / PromoStoyka) ADMIN PANEL BLOKI -->
             <div id="reklamaStendAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom: 16px;">
@@ -2650,7 +2676,7 @@
     let poligrafiyaSizeLabels = {
         flayer: "97x210mm",
         listovka: "148x210mm",
-        doorhanger: "90x200mm",
+        doorhanger: "95x210mm",
         buklet: "210x297mm",
         bloknot: "105x148mm",
         paket: "250x350mm",
@@ -4192,6 +4218,107 @@
             logAudit("Kalendar sozlamalari o'zgartirildi", `${kalendarConfig.subtypes.length} ta pastki tur yangilandi`);
         }
         showToast("💾 Kalendar sozlamalari saqlandi!");
+    }
+
+    // ====================== DOORHANGER (poligrafiya, FAQAT A3 ofset, majburiy CHUJOY) ======================
+    // O'lchami (95x210mm) — ilgak/kesim joylashuvi sabab bosma plastinasini "aylantirib"
+    // (SVOY) bosib bo'lmaydi, garchi bitta A3 varoqqa 6 dona (juft son) sig'sa ham — shuning
+    // uchun old/orqa tomon uchun har doim ALOHIDA forma/bosma (CHUJOY) majburiy qilinadi
+    // (calculateOfsetForMachine'ning forceChujoy parametri orqali). Qog'oz grammaji tanlovi
+    // (poligrafiyaGsmDatabase.doorhanger) o'zgarishsiz — admin mavjud "Ruxsat etilgan Qog'oz
+    // Grammajlari" panelida boshqaradi. Visochka (osish uchun teshik) — barcha buyurtmalarga
+    // avtomatik, mijozga ko'rsatilmaydigan, tiered narx (Papka'dagi bilan bir xil naqsh).
+    let doorhangerConfig = {
+        paperType: 'Karton',
+        visochka: { a3: { firstQty: 1000, firstPrice: 120000, nextPrice: 120 } }
+    };
+
+    function renderAdminDoorhangerConfig() {
+        let q = id => document.getElementById(id);
+        if (q('doorhangerVisochkaFirst')) q('doorhangerVisochkaFirst').value = doorhangerConfig.visochka.a3.firstPrice;
+        if (q('doorhangerVisochkaNext')) q('doorhangerVisochkaNext').value = doorhangerConfig.visochka.a3.nextPrice;
+    }
+
+    function saveDoorhangerConfig() {
+        let son = (id, fallback) => {
+            let el = document.getElementById(id);
+            let v = el ? parseFloat(el.value) : NaN;
+            return isNaN(v) ? fallback : v;
+        };
+        doorhangerConfig.visochka.a3.firstPrice = son('doorhangerVisochkaFirst', 0);
+        doorhangerConfig.visochka.a3.nextPrice = son('doorhangerVisochkaNext', 0);
+        localStorage.setItem('erp_doorhanger_config', JSON.stringify(doorhangerConfig));
+        if (typeof logAudit === 'function') {
+            logAudit("Doorhanger sozlamalari o'zgartirildi", `Visochka: ${doorhangerConfig.visochka.a3.firstPrice.toLocaleString()} so'm / ${doorhangerConfig.visochka.a3.nextPrice.toLocaleString()} so'm`);
+        }
+        showToast("💾 Doorhanger sozlamalari saqlandi!");
+    }
+
+    // Doorhanger uchun mavjud generic poligrafiya HTML shabloni ishlatilmaydi — chunki
+    // Pechat usuli (Ofset/Raqamli) va Bosma tomoni (1/2) tanlovlari umuman ko'rsatilmasligi
+    // kerak (ikkalasi ham qat'iy belgilangan: faqat Ofset, faqat Chujoy).
+    function buildDoorhangerForm() {
+        let gsmList = poligrafiyaGsmDatabase.doorhanger || [];
+        let defaultIdx = gsmList.findIndex(g => g.isDefault);
+        selectedPoligrafiyaGsmIndex = defaultIdx >= 0 ? defaultIdx : 0;
+        return `
+            <div class="poli-calc">
+                <div class="poli-spec-row">
+                    <div class="poli-spec-icon">📐</div>
+                    <div>
+                        <div class="poli-spec-label">Standart o'lcham</div>
+                        <div class="poli-spec-value">${poligrafiyaSizeLabels.doorhanger}</div>
+                    </div>
+                </div>
+                <div class="step-title">Qog'oz grammaji</div>
+                <div class="poli-paper-grid" id="poligrafiyaGsmGroup"></div>
+                <div class="poli-spec-row poli-spec-row-muted">
+                    <div class="poli-spec-icon">🖨️</div>
+                    <div>
+                        <div class="poli-spec-label">Pechat usuli</div>
+                        <div class="poli-spec-value">Faqat Ofset (A3, ikki tomonlama — Chujoy)</div>
+                    </div>
+                </div>
+                <div class="form-group poli-qty-group">
+                    <label>Adad (dona)</label>
+                    <input type="number" id="inpQuantity" value="1000" min="1" oninput="calculate()">
+                </div>
+            </div>
+        `;
+    }
+
+    function calculateDoorhanger(qty) {
+        qty = Math.max(parseInt(qty) || 1, 1);
+        let gsmList = poligrafiyaGsmDatabase.doorhanger || [];
+        let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList.find(x => x.isDefault) || gsmList[0];
+        let costItems = [];
+        let unit = 0;
+        let details;
+
+        if (!g) {
+            return { details: '⚠️ Doorhanger uchun grammaj bazasi topilmadi — admin panelda tekshiring.', baseUnitPrice: 0, costItems: [] };
+        }
+
+        let size = parsePoligrafiyaSizeLabel(poligrafiyaSizeLabels.doorhanger);
+        let r = size ? calculateOfsetForMachine('A3', size.w, size.h, qty, 2, doorhangerConfig.paperType, g.gsm, true) : null;
+
+        if (r) {
+            unit += r.perPieceCostRaw;
+            costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPaperCost) });
+            costItems.push({ label: 'Forma (klishe, Chujoy — 8 plastina)', qty: `${r.totalPlates} plastina`, total: Math.round(r.totalPlateCost) });
+            costItems.push({ label: 'Bosma (pechat, Chujoy)', qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPrintCost) });
+            details = `Doorhanger chop etish (${poligrafiyaSizeLabels.doorhanger}) | ${g.gsm}gr ${doorhangerConfig.paperType} | Ofset A3 | Chujoy (ikki tomonlama)`;
+        } else {
+            details = `⚠️ ${g.gsm}gr ${doorhangerConfig.paperType} uchun Ofset A3 bazasi topilmadi — admin panelda tekshiring.`;
+        }
+
+        let visochkaTotal = papkaTieredTotal(qty, doorhangerConfig.visochka.a3);
+        if (visochkaTotal > 0) {
+            unit += visochkaTotal / qty;
+            costItems.push({ label: 'Visochka', qty: `${qty} dona`, total: Math.round(visochkaTotal) });
+        }
+
+        return { details, baseUnitPrice: unit, costItems };
     }
 
     function selectPoligrafiyaGsm(index) {
@@ -7977,7 +8104,7 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
         }
     }
 
-    function calculateOfsetForMachine(machName, w, h, tiraj, side, paperType, gsm) {
+    function calculateOfsetForMachine(machName, w, h, tiraj, side, paperType, gsm, forceChujoy) {
         let bestVariant = null;
         let minPerPieceCost = Infinity;
 
@@ -8035,7 +8162,11 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
                     let multiplier = Math.max(0, thousandsUnits - 1);
                     totalPrintCost = basePrintCost + (multiplier * stepPrintCost);
                 } else {
-                    if (fit.count >= 2 && fit.count % 2 === 0) {
+                    // forceChujoy — ba'zi mahsulotlarda (masalan Doorhanger, kesim/teshik
+                    // joylashuvi tufayli) juft son sig'sa ham, varoqni "aylantirib" (SVOY)
+                    // bosib bo'lmaydi — ikkala tomon uchun har doim ALOHIDA forma/bosma
+                    // (CHUJOY) kerak bo'ladi. Bu holatda juftlik tekshiruvi o'tkazib yuboriladi.
+                    if (!forceChujoy && fit.count >= 2 && fit.count % 2 === 0) {
                         oborotType = "SVOY";
                         totalPlates = 4;
                         let totalImpressions = totalWorkingSheets * 2;
@@ -9326,6 +9457,26 @@ renderCustomProductsAdminSection();
             }
         }
 
+        let savedDoorhanger = localStorage.getItem('erp_doorhanger_config');
+        if (savedDoorhanger) {
+            try {
+                let parsed = JSON.parse(savedDoorhanger);
+                if (parsed.visochka && parsed.visochka.a3) {
+                    doorhangerConfig.visochka.a3 = { ...doorhangerConfig.visochka.a3, ...parsed.visochka.a3 };
+                }
+                if (parsed.paperType) doorhangerConfig.paperType = parsed.paperType;
+            } catch (e) {
+                console.warn('Doorhanger sozlamalarini o\'qishda xato:', e);
+            }
+        }
+
+        // Doorhanger 400gr Karton ishlatadi — bu grammaj hali Ofset bazasida yo'q edi,
+        // shuning uchun bir martalik (idempotent) qatorni narxi 0 bilan qo'shib qo'yamiz.
+        if (!ofsetRawPapers.some(p => p.name === 'Karton' && p.gsm === 400)) {
+            ofsetRawPapers.push({ name: 'Karton', gsm: 400, prices: { "sra3": 0, "620x880": 0, "620x940": 0, "700x1000": 0 } });
+            localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
+        }
+
         // Bir martalik migratsiya: Kalendar moduli uchun kerakli Melovka/Karton grammajlari
         // Ofset bazasida mavjud bo'lmasa, narxi 0 bilan qo'shib qo'yamiz (admin keyin narxni
         // to'g'rilaydi) — admin keyinchalik shu qatorlarni o'chirsa, qayta paydo bo'lmasligi
@@ -10165,6 +10316,10 @@ renderCustomProductsAdminSection();
         document.getElementById('reklamaStendAdminBox').style.display = isReklamaStend ? 'block' : 'none';
         document.getElementById('bayroqAdminBox').style.display = isBayroq ? 'block' : 'none';
 
+        let isDoorhanger = (key === 'doorhanger');
+        document.getElementById('doorhangerVisochkaAdminBox').style.display = isDoorhanger ? 'block' : 'none';
+        if (isDoorhanger) renderAdminDoorhangerConfig();
+
         // Tisneniya uchun bir martalik Klishe narxi — hozircha faqat Yejidnevnikda
         let hasKlisheFee = klisheFeeProductTypes.includes(key);
         document.getElementById('klisheFeeAdminBox').style.display = hasKlisheFee ? 'block' : 'none';
@@ -10412,6 +10567,9 @@ function generateForm(type) {
     else if (type === 'kalendar') {
         html = buildKalendarForm();
     }
+    else if (type === 'doorhanger') {
+        html = buildDoorhangerForm();
+    }
     else if (typeof isCustomProductKey === 'function' && isCustomProductKey(type)) {
         html = generateFormHtml_custom(type);
     }
@@ -10523,6 +10681,12 @@ function calculate() {
         else if (activeProductType === 'kalendar') {
             let res = calculateKalendar(qty);
             baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+        }
+        else if (activeProductType === 'doorhanger') {
+            let res = calculateDoorhanger(qty);
+            baseUnitPrice = res.baseUnitPrice;
             details = res.details;
             costItems = res.costItems || [];
         }
