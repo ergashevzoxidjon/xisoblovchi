@@ -3613,9 +3613,9 @@
         if (result) {
             unit = result.perPieceCostRaw;
             ofsetInfo = ` (${result.machine} mashina, ${result.itemsPerSheet} dona/varoq)`;
-            costItems.push({ label: `Qog'oz (${result.paperName} ${result.paperGsm}gr, ${result.rawName})`, qty: `${result.totalSheets} varoq`, total: Math.round(result.totalPaperCost) });
+            costItems.push({ label: `Qog'oz (${result.paperName} ${result.paperGsm}gr, ${result.rawName})`, qty: `${result.totalSheets} xom varoq`, total: Math.round(result.totalPaperCost) });
             costItems.push({ label: 'Forma (klishe)', qty: `${result.totalPlates} plastina`, total: Math.round(result.totalPlateCost) });
-            costItems.push({ label: 'Bosma (pechat)', qty: `${result.totalSheets} varoq`, total: Math.round(result.totalPrintCost) });
+            costItems.push({ label: 'Bosma (pechat)', qty: `${result.totalWorkingSheets} ta ${result.machine} varoq`, total: Math.round(result.totalPrintCost) });
         } else {
             showToast(`⚠️ Karton ${gsm}gr uchun ${v.machine} ofset bazasi topilmadi — admin panelda tekshiring.`);
         }
@@ -4042,9 +4042,9 @@
                 unit += blockUnit * listCount;
                 qismlar.push(`Blok: ${listCount} varaq × ${s.blockW}×${s.blockH}mm, Melovka ${kalendarSelected.blockGsm}gr (${blockInfo})`);
                 if (blockResult) {
-                    costItems.push({ label: `Blok qog'ozi (${blockResult.paperName} ${blockResult.paperGsm}gr, ${blockResult.rawName})`, qty: `${blockResult.totalSheets} varoq`, total: Math.round(blockResult.totalPaperCost) });
+                    costItems.push({ label: `Blok qog'ozi (${blockResult.paperName} ${blockResult.paperGsm}gr, ${blockResult.rawName})`, qty: `${blockResult.totalSheets} xom varoq`, total: Math.round(blockResult.totalPaperCost) });
                     costItems.push({ label: 'Blok forma (klishe)', qty: `${blockResult.totalPlates} plastina`, total: Math.round(blockResult.totalPlateCost) });
-                    costItems.push({ label: 'Blok bosma (pechat)', qty: `${blockResult.totalSheets} varoq`, total: Math.round(blockResult.totalPrintCost) });
+                    costItems.push({ label: 'Blok bosma (pechat)', qty: `${blockResult.totalWorkingSheets} ta ${blockResult.machine} varoq`, total: Math.round(blockResult.totalPrintCost) });
                 } else {
                     costItems.push({ label: `Blok (${blockInfo}, ${listCount} varaq/nusxa)`, qty: `${qty} nusxa`, total: Math.round(blockUnit * listCount * qty) });
                 }
@@ -4068,9 +4068,9 @@
                     unit += cr.perPieceCostRaw;
                     let coverLabel = s.fixedListCount != null ? 'Asos' : 'Muqova';
                     qismlar.push(`${coverLabel}: Karton ${kalendarSelected.coverGsm}gr (Ofset ${cr.machine})`);
-                    costItems.push({ label: `${coverLabel} qog'ozi (${cr.paperName} ${cr.paperGsm}gr, ${cr.rawName})`, qty: `${cr.totalSheets} varoq`, total: Math.round(cr.totalPaperCost) });
+                    costItems.push({ label: `${coverLabel} qog'ozi (${cr.paperName} ${cr.paperGsm}gr, ${cr.rawName})`, qty: `${cr.totalSheets} xom varoq`, total: Math.round(cr.totalPaperCost) });
                     costItems.push({ label: `${coverLabel} forma (klishe)`, qty: `${cr.totalPlates} plastina`, total: Math.round(cr.totalPlateCost) });
-                    costItems.push({ label: `${coverLabel} bosma (pechat)`, qty: `${cr.totalSheets} varoq`, total: Math.round(cr.totalPrintCost) });
+                    costItems.push({ label: `${coverLabel} bosma (pechat)`, qty: `${cr.totalWorkingSheets} ta ${cr.machine} varoq`, total: Math.round(cr.totalPrintCost) });
                 } else {
                     showToast(`⚠️ ${s.fixedListCount != null ? 'Asos' : 'Muqova'} uchun ${kalendarSelected.coverGsm}gr Karton bazasi topilmadi — admin panelda tekshiring.`);
                 }
@@ -4080,9 +4080,9 @@
             if (r) {
                 unit += r.perPieceCostRaw;
                 qismlar.push(`${s.name}: ${s.w}×${s.h}mm, Melovka ${kalendarSelected.gsm}gr (Ofset ${r.machine}, ${r.itemsPerSheet} dona/varoq)`);
-                costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPaperCost) });
+                costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} xom varoq`, total: Math.round(r.totalPaperCost) });
                 costItems.push({ label: 'Forma (klishe)', qty: `${r.totalPlates} plastina`, total: Math.round(r.totalPlateCost) });
-                costItems.push({ label: 'Bosma (pechat)', qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPrintCost) });
+                costItems.push({ label: 'Bosma (pechat)', qty: `${r.totalWorkingSheets} ta ${r.machine} varoq`, total: Math.round(r.totalPrintCost) });
             } else {
                 showToast(`⚠️ ${kalendarSelected.gsm}gr Melovka uchun ${s.machine} ofset bazasi topilmadi — admin panelda tekshiring.`);
             }
@@ -4091,9 +4091,9 @@
             if (r) {
                 unit += r.perPieceCostRaw;
                 qismlar.push(`${s.name}: ${s.w}×${s.h}mm, Melovka ${kalendarSelected.gsm}gr (Ofset A3, ${r.itemsPerSheet} dona/varoq — optimal joylashtirilgan)`);
-                costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPaperCost) });
+                costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} xom varoq`, total: Math.round(r.totalPaperCost) });
                 costItems.push({ label: 'Forma (klishe)', qty: `${r.totalPlates} plastina`, total: Math.round(r.totalPlateCost) });
-                costItems.push({ label: 'Bosma (pechat)', qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPrintCost) });
+                costItems.push({ label: 'Bosma (pechat)', qty: `${r.totalWorkingSheets} ta ${r.machine} varoq`, total: Math.round(r.totalPrintCost) });
             } else {
                 showToast(`⚠️ ${kalendarSelected.gsm}gr Melovka uchun A3 ofset bazasi topilmadi — admin panelda tekshiring.`);
             }
@@ -4346,9 +4346,9 @@
 
         if (r) {
             unit += r.perPieceCostRaw;
-            costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPaperCost) });
+            costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} xom varoq`, total: Math.round(r.totalPaperCost) });
             costItems.push({ label: 'Forma (klishe, Chujoy — 8 plastina)', qty: `${r.totalPlates} plastina`, total: Math.round(r.totalPlateCost) });
-            costItems.push({ label: 'Bosma (pechat, Chujoy)', qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPrintCost) });
+            costItems.push({ label: 'Bosma (pechat, Chujoy)', qty: `${r.totalWorkingSheets} ta A3 varoq`, total: Math.round(r.totalPrintCost) });
             details = `Doorhanger chop etish (${poligrafiyaSizeLabels.doorhanger}) | ${paperTypeName} ${g.gsm}gr | Ofset A3 | Chujoy (ikki tomonlama)`;
         } else {
             details = `⚠️ ${paperTypeName} ${g.gsm}gr uchun Ofset A3 bazasi topilmadi — admin panelda tekshiring.`;
@@ -4529,9 +4529,9 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                         let r = results[0];
                         baseUnitPrice = r.perPieceCostRaw;
                         priceFound = true;
-                        costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPaperCost) });
+                        costItems.push({ label: `Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, qty: `${r.totalSheets} xom varoq`, total: Math.round(r.totalPaperCost) });
                         costItems.push({ label: 'Forma (klishe)', qty: `${r.totalPlates} plastina`, total: Math.round(r.totalPlateCost) });
-                        costItems.push({ label: 'Bosma (pechat)', qty: `${r.totalSheets} varoq`, total: Math.round(r.totalPrintCost) });
+                        costItems.push({ label: 'Bosma (pechat)', qty: `${r.totalWorkingSheets} ta ${r.machine} varoq`, total: Math.round(r.totalPrintCost) });
                     }
                 }
             } else {
@@ -8289,9 +8289,13 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
                         baseTotalCost, perPieceCostRaw,
                         fitData: fit, oborotType, totalPlates,
                         // To'liq hisob-kitob modali uchun — qog'oz/forma/bosma xarajatlarini
-                        // alohida-alohida ko'rsatish imkonini beradi.
+                        // alohida-alohida ko'rsatish imkonini beradi. MUHIM: totalSheets — XOM
+                        // (katta) varoq soni (shundan qog'oz narxi hisoblanadi), totalWorkingSheets
+                        // esa bosishga tayyor, HAQIQIY mashina-o'lchamidagi (A3/A2/A1) varoq soni
+                        // (shundan bosma narxi hisoblanadi) — bittasi ikkinchisidan `divisor` marta
+                        // katta bo'ladi, ikkalasini bir-biriga aralashtirib bo'lmaydi.
                         paperName: paperObj.name, paperGsm: gsm, pricePerRawSheet: price,
-                        totalPaperCost, totalPlateCost, totalPrintCost
+                        totalPaperCost, totalPlateCost, totalPrintCost, totalWorkingSheets
                     };
                 }
             }
