@@ -2318,7 +2318,7 @@
                                 <label>Rasm Yuklash (Lokal):</label>
                                 <div class="image-upload-row">
                                     <div class="image-upload-preview" id="bayroqImagePreviewBox">
-                                        <img id="bayroqImagePreview" alt="" style="display:none;">
+                                        <img id="bayroqImagePreview" alt="" style="display:none;" onerror="this.src=placeholderImg('Rasm yo\'q', 150, 150)">
                                         <span id="bayroqImagePreviewPlaceholder">🚩</span>
                                     </div>
                                     <input type="file" id="bayroqFileInput" accept="image/*" onchange="previewBayroqImage(this)">
@@ -2395,7 +2395,7 @@
                             <label>Rasm Yuklash (Lokal):</label>
                             <div class="image-upload-row">
                                 <div class="image-upload-preview" id="newPenImagePreviewBox">
-                                    <img id="newPenImagePreview" alt="" style="display:none;">
+                                    <img id="newPenImagePreview" alt="" style="display:none;" onerror="this.src=placeholderImg('Rasm yo\'q', 150, 150)">
                                     <span id="newPenImagePreviewPlaceholder">🖼️</span>
                                 </div>
                                 <input type="file" id="newPenFile" accept="image/*" onchange="previewPenImage(this)">
@@ -5358,7 +5358,7 @@ function renderBayroqPicker() {
     if (countEl) countEl.textContent = bayroqDatabase.length;
     grid.innerHTML = list.length > 0 ? list.map(item => `
         <div class="bayroq-card ${activeItem && activeItem.id === item.id ? 'active' : ''}" id="bayroq-card-${item.id}" onclick="selectBayroqItem('${item.id}')">
-            <img src="${item.imageUrl || 'https://via.placeholder.com/100x75?text=Bayroq'}" alt="${bayroqShortName(item)}" onerror="this.src='https://via.placeholder.com/100x75?text=No+Img'">
+            <img src="${item.imageUrl || placeholderImg('Bayroq', 100, 75)}" alt="${bayroqShortName(item)}" onerror="this.src='${placeholderImg('No Img', 100, 75)}'">
             <div class="bayroq-card-name" title="${(item.name || '').replace(/"/g, '&quot;')}">${bayroqShortName(item)}</div>
             <div class="bayroq-card-price">${(item.price || 0).toLocaleString()} so'm</div>
         </div>
@@ -5440,7 +5440,7 @@ function renderBayroqAdminGrid() {
         <div class="model-card">
             <div class="model-card-top">
                 <div class="model-card-thumb">
-                    <img src="${item.imageUrl || 'https://via.placeholder.com/80?text=No+Img'}" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
+                    <img src="${item.imageUrl || placeholderImg('No Img', 80, 80)}" onerror="this.src='${placeholderImg('No Img', 80, 80)}'">
                 </div>
                 <div class="model-card-head">
                     <div class="model-card-name" title="${(item.name || '').replace(/"/g, '&quot;')}">${bayroqShortName(item)}</div>
@@ -5705,7 +5705,7 @@ function saveBayroqDeliveryFee() {
                     name: `${catName} Model ${i}`,
                     basePrice: sampleBase,
                     tiers: sampleTiers,
-                    image: 'https://via.placeholder.com/150?text=' + encodeURIComponent(catName + ' ' + i),
+                    image: placeholderImg(`${catName} ${i}`, 150, 150),
                     allowUv: true,
                     allowSifravoy: key !== 'naborlar',
                     allowDtf: true,
@@ -5861,7 +5861,7 @@ function saveBayroqDeliveryFee() {
                 <div class="model-card" data-search="${searchKey}">
                     <div class="model-card-top">
                         <div class="model-card-thumb">
-                            <img src="${p.image}" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
+                            <img src="${p.image}" onerror="this.src='${placeholderImg('No Img', 80, 80)}'">
                         </div>
                         <div class="model-card-head">
                             <div class="model-card-name" title="${(p.name || '').replace(/"/g, '&quot;')}">${p.name}</div>
@@ -5907,6 +5907,17 @@ function saveBayroqDeliveryFee() {
         } else if (emptyEl) {
             emptyEl.remove();
         }
+    }
+
+    // via.placeholder.com xizmati yopilgan/ishonchsiz bo'lgani uchun (rasm o'rniga bo'sh
+    // qutича chiqishiga sabab bo'lgan) — tashqi xizmatga bog'liq bo'lmagan, doim ishlaydigan
+    // mahalliy SVG rasm-o'rnbosar. Internet/xizmat holatidan qat'iy nazar har doim ko'rinadi.
+    function placeholderImg(text, w, h) {
+        w = w || 150; h = h || 150;
+        let label = (text || "Rasm yo'q").toString();
+        let fontSize = Math.max(10, Math.floor(Math.min(w, h) / 8));
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#e2e8f0"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="${fontSize}" fill="#94a3b8" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`;
+        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
     }
 
     // Fayl tanlanganida rasm ko'rinishini (preview) darhol ko'rsatadi
@@ -5994,7 +6005,7 @@ function saveBayroqDeliveryFee() {
         container.innerHTML = lentaChipsState.length > 0
             ? lentaChipsState.map((l, idx) => `
                 <div class="lenta-chip-row">
-                    <img src="${l.image || 'https://via.placeholder.com/150?text=Lenta'}" alt="Lenta" onerror="this.src='https://via.placeholder.com/150?text=Lenta'">
+                    <img src="${l.image || placeholderImg('Lenta', 150, 150)}" alt="Lenta" onerror="this.src='${placeholderImg('Lenta', 150, 150)}'">
                     <input type="file" accept="image/*" onchange="updateLentaImage(${idx}, this)">
                     <input type="text" value="${(l.name || '').replace(/"/g, '&quot;')}" placeholder="Lenta nomi" oninput="updateLenta(${idx}, 'name', this.value)">
                     <input type="number" value="${l.price || 0}" placeholder="Narxi (so'm)" oninput="updateLenta(${idx}, 'price', this.value)">
@@ -6374,6 +6385,44 @@ function saveBayroqDeliveryFee() {
         return changed;
     }
 
+    // via.placeholder.com xizmati yopilib qolgani uchun avval saqlangan modellar/lentalarda
+    // shu manzilga ishora qiluvchi rasm maydonlari endi hech qachon yuklanmaydi (bo'sh quti
+    // ko'rinadi). Bir martalik migratsiya bilan ularni mahalliy (hech qachon buzilmaydigan)
+    // SVG rasm-o'rnbosarga almashtiramiz.
+    function migrateDeadPlaceholderImages() {
+        let changed = false;
+        souvenirKeys.forEach(key => {
+            let list = pensDatabase[key];
+            if (!Array.isArray(list)) return;
+            list.forEach(pen => {
+                if (!pen) return;
+                if (typeof pen.image === 'string' && pen.image.includes('via.placeholder.com')) {
+                    pen.image = placeholderImg(pen.name || 'Model', 150, 150);
+                    changed = true;
+                }
+                (pen.lentas || []).forEach(l => {
+                    if (l && typeof l.image === 'string' && l.image.includes('via.placeholder.com')) {
+                        l.image = placeholderImg(l.name || 'Lenta', 150, 150);
+                        changed = true;
+                    }
+                });
+            });
+        });
+        if (changed) localStorage.setItem('erp_pens_db_v3', JSON.stringify(pensDatabase));
+
+        if (Array.isArray(bayroqDatabase)) {
+            let bayroqChanged = false;
+            bayroqDatabase.forEach(item => {
+                if (item && typeof item.imageUrl === 'string' && item.imageUrl.includes('via.placeholder.com')) {
+                    item.imageUrl = placeholderImg(bayroqShortName(item) || 'Bayroq', 100, 75);
+                    bayroqChanged = true;
+                }
+            });
+            if (bayroqChanged) localStorage.setItem('erp_bayroq_db', JSON.stringify(bayroqDatabase));
+        }
+        return changed;
+    }
+
     function updateTier(idx, field, value) {
         if (!tierChipsState[idx]) return;
         tierChipsState[idx][field] = (field === 'basePrice') ? (parseFloat(value) || 0) : (parseInt(value) || 0);
@@ -6424,7 +6473,7 @@ function saveBayroqDeliveryFee() {
                     id: l.id || ('LENTA-' + Math.random().toString(36).slice(2)),
                     name: (l.name && l.name.trim()) ? l.name.trim() : 'Lenta',
                     price: parseFloat(l.price) || 0,
-                    image: l.image || 'https://via.placeholder.com/150?text=Lenta'
+                    image: l.image || placeholderImg('Lenta', 150, 150)
                 }))
             : [];
 
@@ -6470,7 +6519,7 @@ function saveBayroqDeliveryFee() {
         } else if (editIdx >= 0 && pensDatabase[currentManagingProduct][editIdx]) {
             image = pensDatabase[currentManagingProduct][editIdx].image;
         } else {
-            image = 'https://via.placeholder.com/150?text=Model';
+            image = placeholderImg('Model', 150, 150);
         }
 
         // basePrice / printPrices maydonlari eski kod va hisobotlar uchun saqlanadi,
@@ -6615,7 +6664,7 @@ function saveBayroqDeliveryFee() {
         if (!grid) return;
         grid.innerHTML = activeDb.map(pen => `
             <div class="pen-card ${selectedPen && selectedPen.id === pen.id ? 'active' : ''}" id="pen-card-${pen.id}" onclick="selectPenModel('${pen.id}')">
-                <img src="${pen.image}" alt="${pen.name}" onerror="this.src='https://via.placeholder.com/100x75?text=No+Img'">
+                <img src="${pen.image}" alt="${pen.name}" onerror="this.src='${placeholderImg('No Img', 100, 75)}'">
                 <span class="pen-id">${pen.id}</span>
                 <span class="pen-name" title="${pen.name}">${pen.name}</span>
             </div>
@@ -6729,7 +6778,7 @@ function saveBayroqDeliveryFee() {
 
         container.innerHTML = lentas.map(l => `
             <div class="lenta-card ${selectedLenta === l.id ? 'active' : ''}" onclick="selectLenta('${l.id.replace(/'/g, "\\'")}')" title="${l.name}">
-                <img src="${l.image}" alt="${l.name}" onerror="this.src='https://via.placeholder.com/150?text=Lenta'">
+                <img src="${l.image}" alt="${l.name}" onerror="this.src='${placeholderImg('Lenta', 150, 150)}'">
                 <span class="lenta-name">${l.name}</span>
                 <span class="lenta-price">+${(l.price || 0).toLocaleString()} so'm</span>
             </div>
@@ -6819,7 +6868,7 @@ function generateForm_suvenir(type, form, rightCol) {
                         <h3 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;">Hisob-kitob Natijasi</h3>
                         <div class="card-preview-header" id="previewCardBox" style="display: none;">
                             <div class="card-preview-img">
-                                <img id="previewProductImg" src="" alt="Mahsulot rasmi" onerror="this.src='https://via.placeholder.com/50?text=Foto'">
+                                <img id="previewProductImg" src="" alt="Mahsulot rasmi" onerror="this.src='${placeholderImg('Foto', 50, 50)}'">
                             </div>
                             <div class="card-preview-text">
                                 <span>Tanlangan model:</span>
@@ -9172,6 +9221,13 @@ renderCustomProductsAdminSection();
                 if (Array.isArray(parsed)) bayroqDatabase = parsed;
             } catch (e) {}
         }
+
+        // O'chib qolgan via.placeholder.com xizmatiga ishora qiluvchi eski rasmlarni
+        // mahalliy SVG rasm-o'rnbosarga almashtirish. Alohida bayroq emas — barcha
+        // saqlangan model/lenta rasmlarini tozalaydi; tekshiruv o'zi idempotent
+        // (faqat hali tuzatilmagan yozuvlarga tegadi), shuning uchun alohida bayroq shart emas.
+        migrateDeadPlaceholderImages();
+
         let savedBayroqFee = localStorage.getItem('erp_bayroq_delivery_fee');
         if (savedBayroqFee !== null) {
             try {
