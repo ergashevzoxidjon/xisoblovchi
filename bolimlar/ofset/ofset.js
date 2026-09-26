@@ -50,8 +50,23 @@
             a2: { firstQty: 1000, firstPrice: 200000, nextPrice: 200 },
             a1: { firstQty: 1000, firstPrice: 0, nextPrice: 0 }
         },
-        laminatsiya: { a3: 550, a2: 1100, a1: 0 }
+        laminatsiya: { a3: 550, a2: 1100, a1: 0 },
+        // Lak — pog'onali: birinchi firstQty donagacha qat'iy summa, keyin har donaga (Papka, Paket)
+        lak: {
+            a3: { firstQty: 1000, firstPrice: 500000, nextPrice: 500 },
+            a2: { firstQty: 1000, firstPrice: 750000, nextPrice: 750 },
+            a1: { firstQty: 1000, firstPrice: 1000000, nextPrice: 1000 }
+        },
+        // Tisneniya — har donaga narx + bir martalik klishe (Papka, Paket)
+        tisneniya: {
+            a3: { pricePerUnit: 1000, klishePrice: 500000 },
+            a2: { pricePerUnit: 2000, klishePrice: 1000000 },
+            a1: { pricePerUnit: 2000, klishePrice: 1000000 }
+        }
     };
+    // Lak/Tisneniya umumiy narxlari localStorage'da allaqachon saqlanganmi? (yo'q bo'lsa — Papka'ning
+    // eski alohida narxlaridan bir marta ko'chiriladi, poligrafiya.js init() ga qarang)
+    let ofsetLakTisSaqlangan = false;
 
     function renderOfsetFinishingServicesAdmin() {
         let q = id => document.getElementById(id);
@@ -65,6 +80,13 @@
         if (q('finLaminatsiyaA3')) q('finLaminatsiyaA3').value = f.laminatsiya.a3;
         if (q('finLaminatsiyaA2')) q('finLaminatsiyaA2').value = f.laminatsiya.a2;
         if (q('finLaminatsiyaA1')) q('finLaminatsiyaA1').value = f.laminatsiya.a1;
+        ['a3', 'a2', 'a1'].forEach(m => {
+            let M = m.toUpperCase();
+            if (q(`finLak${M}First`)) q(`finLak${M}First`).value = f.lak[m].firstPrice;
+            if (q(`finLak${M}Next`)) q(`finLak${M}Next`).value = f.lak[m].nextPrice;
+            if (q(`finTis${M}Unit`)) q(`finTis${M}Unit`).value = f.tisneniya[m].pricePerUnit;
+            if (q(`finTis${M}Klishe`)) q(`finTis${M}Klishe`).value = f.tisneniya[m].klishePrice;
+        });
     }
 
     function saveOfsetFinishingServices() {
@@ -82,9 +104,17 @@
         ofsetFinishingServices.laminatsiya.a3 = son('finLaminatsiyaA3', 0);
         ofsetFinishingServices.laminatsiya.a2 = son('finLaminatsiyaA2', 0);
         ofsetFinishingServices.laminatsiya.a1 = son('finLaminatsiyaA1', 0);
+        ['a3', 'a2', 'a1'].forEach(m => {
+            let M = m.toUpperCase();
+            ofsetFinishingServices.lak[m].firstPrice = son(`finLak${M}First`, 0);
+            ofsetFinishingServices.lak[m].nextPrice = son(`finLak${M}Next`, 0);
+            ofsetFinishingServices.tisneniya[m].pricePerUnit = son(`finTis${M}Unit`, 0);
+            ofsetFinishingServices.tisneniya[m].klishePrice = son(`finTis${M}Klishe`, 0);
+        });
+        ofsetLakTisSaqlangan = true;
         localStorage.setItem('erp_ofset_finishing_services', JSON.stringify(ofsetFinishingServices));
-        if (typeof logAudit === 'function') logAudit("Visochka/Laminatsiya (umumiy) narxlari o'zgartirildi", '');
-        showToast("💾 Visochka/Laminatsiya narxlari saqlandi!");
+        if (typeof logAudit === 'function') logAudit("Pardozlash (umumiy) narxlari o'zgartirildi", 'Visochka, Laminatsiya, Lak, Tisneniya');
+        showToast("💾 Pardozlash xizmatlari narxlari saqlandi!");
     }
 
     let selectedOfsetPaperType = 'Ofset';
@@ -858,6 +888,13 @@ function calculate_ofset() {
                         });
                     }
                     if (parsed.laminatsiya) ofsetFinishingServices.laminatsiya = { ...ofsetFinishingServices.laminatsiya, ...parsed.laminatsiya };
+                    ['lak', 'tisneniya'].forEach(xizmat => {
+                        if (!parsed[xizmat]) return;
+                        ofsetLakTisSaqlangan = true;
+                        ['a3', 'a2', 'a1'].forEach(m => {
+                            if (parsed[xizmat][m]) ofsetFinishingServices[xizmat][m] = { ...ofsetFinishingServices[xizmat][m], ...parsed[xizmat][m] };
+                        });
+                    });
                 } catch (e) {
                     console.warn('Visochka/Laminatsiya sozlamalarini o\'qishda xato:', e);
                 }

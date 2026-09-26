@@ -152,29 +152,64 @@
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">📎 Visochka va 🧴 Laminatsiya (umumiy xizmatlar)</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Bu ikkala xizmat Poligrafiya bo'limidagi ko'plab mahsulotlarda (Papka, Doorhanger
-                        va boshqalar) takrorlanadi — narxi shu yerda BIR MARTA, mashina formati (A3/A2/A1)
-                        bo'yicha kiritiladi. Har bir mahsulotning o'z admin bo'limida esa faqat shu xizmatdan
-                        foydalanadimi-yo'qmi (yoqilgan/o'chirilgan) belgilanadi — narx har doim shu yerdan olinadi.
-                    </p>
-                    <div class="form-row" style="gap: 12px;">
-                        <div class="form-group"><label>Visochka A3 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA3First" value="120000"></div>
-                        <div class="form-group"><label>Visochka A3 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA3Next" value="120"></div>
-                        <div class="form-group"><label>Laminatsiya A3 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA3" value="550"></div>
+                    <div class="add-pen-card-title">✂️ Pardozlash xizmatlari (umumiy): Visochka, Laminatsiya, Lak, Tisneniya</div>
+                    <p class="admin-hint">Bu xizmatlar Poligrafiya bo'limidagi mahsulotlarda (Papka, Paket, Doorhanger...) takrorlanadi —
+                        narxi shu yerda <b>BIR MARTA</b>, ofset mashinasi formati (A3/A2/A1) bo'yicha kiritiladi. Mahsulot hisobi qaysi
+                        mashinada chiqsa, o'sha qatordagi narx olinadi. Visochka va Lak — pog'onali: 1000 donagacha qat'iy summa,
+                        undan keyin har donaga. Tisneniya — har donaga + bir martalik klishe.</p>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:980px;">
+                            <thead>
+                                <tr>
+                                    <th>Mashina</th>
+                                    <th>Visochka: 1000 gacha</th>
+                                    <th>Visochka: keyin (dona)</th>
+                                    <th>Laminatsiya (dona)</th>
+                                    <th>Lak: 1000 gacha</th>
+                                    <th>Lak: keyin (dona)</th>
+                                    <th>Tisneniya (dona)</th>
+                                    <th>Tisneniya klishe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight:700;">A3</td>
+                                    <td><input type="number" min="0" id="finVisochkaA3First"></td>
+                                    <td><input type="number" min="0" id="finVisochkaA3Next"></td>
+                                    <td><input type="number" min="0" id="finLaminatsiyaA3"></td>
+                                    <td><input type="number" min="0" id="finLakA3First"></td>
+                                    <td><input type="number" min="0" id="finLakA3Next"></td>
+                                    <td><input type="number" min="0" id="finTisA3Unit"></td>
+                                    <td><input type="number" min="0" id="finTisA3Klishe"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A2</td>
+                                    <td><input type="number" min="0" id="finVisochkaA2First"></td>
+                                    <td><input type="number" min="0" id="finVisochkaA2Next"></td>
+                                    <td><input type="number" min="0" id="finLaminatsiyaA2"></td>
+                                    <td><input type="number" min="0" id="finLakA2First"></td>
+                                    <td><input type="number" min="0" id="finLakA2Next"></td>
+                                    <td><input type="number" min="0" id="finTisA2Unit"></td>
+                                    <td><input type="number" min="0" id="finTisA2Klishe"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A1</td>
+                                    <td><input type="number" min="0" id="finVisochkaA1First"></td>
+                                    <td><input type="number" min="0" id="finVisochkaA1Next"></td>
+                                    <td><input type="number" min="0" id="finLaminatsiyaA1"></td>
+                                    <td><input type="number" min="0" id="finLakA1First"></td>
+                                    <td><input type="number" min="0" id="finLakA1Next"></td>
+                                    <td><input type="number" min="0" id="finTisA1Unit"></td>
+                                    <td><input type="number" min="0" id="finTisA1Klishe"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
                     </div>
-                    <div class="form-row" style="gap: 12px;">
-                        <div class="form-group"><label>Visochka A2 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA2First" value="200000"></div>
-                        <div class="form-group"><label>Visochka A2 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA2Next" value="200"></div>
-                        <div class="form-group"><label>Laminatsiya A2 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA2" value="1100"></div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveOfsetFinishingServices()">💾 Pardozlash narxlarini saqlash</button>
                     </div>
-                    <div class="form-row" style="gap: 12px;">
-                        <div class="form-group"><label>Visochka A1 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA1First" value="0"></div>
-                        <div class="form-group"><label>Visochka A1 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA1Next" value="0"></div>
-                        <div class="form-group"><label>Laminatsiya A1 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA1" value="0"></div>
-                    </div>
-                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveOfsetFinishingServices()">💾 Visochka/Laminatsiya narxlarini saqlash</button>
                 </div>
             </div>
 

@@ -801,44 +801,47 @@
     //     • ikki tomoni HAR XIL dizayn  → Ofsetga adad bo'lak (200 + 100 = 300), va qog'oz, forma, pechat
     //       xarajati ×2 (har tomon uchun alohida).
     //   Laminatsiya, Visochka (majburiy), Lak, Tisneniya (ixtiyoriy) — 2 × adad bo'lak uchun, hisob qaysi
-    //   ofset mashinasida (A3/A2/A1) chiqsa, o'sha mashina narxi bilan. Laminatsiya/Visochka narxi —
-    //   Ofset admin bo'limidagi umumiy sozlamadan (ofsetFinishingServices), Lak/Tisneniya — shu yerdan.
+    //   ofset mashinasida (A3/A2/A1) chiqsa, o'sha mashina narxi bilan. Barchasining narxi — Ofset admin
+    //   bo'limidagi umumiy "Pardozlash xizmatlari" (ofsetFinishingServices) dan; Lenta — shu yerdan.
     //   + Yig'ish (paket turi bo'yicha, so'm/paket), + Lenta (ixtiyoriy, so'm/paket).
     //   O'lcham tanlangan turning tayyor o'lchamlariga mos kelmasa — shu tur uchun bir martalik pichoq narxi.
     let paketConfig = {
         turlar: [
-            { key: 'a5', name: 'A5', pichoqNarxi: 500000,  yigishNarxi: 1500,
+            // standartGsm — shu turdagi paket uchun avtomatik tanlanadigan karton (qalinroq/yupqaroq
+            // kerak bo'lsa menejer ro'yxatdan boshqasini tanlaydi)
+            { key: 'a5', name: 'A5', pichoqNarxi: 500000,  yigishNarxi: 1500, standartGsm: 190,
               olchamlar: [{ x: 240, y: 180, z: 80 }, { x: 220, y: 160, z: 70 }] },
-            { key: 'a4', name: 'A4', pichoqNarxi: 1000000, yigishNarxi: 2000, isDefault: true,
+            { key: 'a4', name: 'A4', pichoqNarxi: 1000000, yigishNarxi: 2000, standartGsm: 210, isDefault: true,
               olchamlar: [{ x: 330, y: 250, z: 100 }, { x: 320, y: 240, z: 90 }] },
-            { key: 'a3', name: 'A3', pichoqNarxi: 1300000, yigishNarxi: 2500,
+            { key: 'a3', name: 'A3', pichoqNarxi: 1300000, yigishNarxi: 2500, standartGsm: 230,
               olchamlar: [{ x: 450, y: 330, z: 120 }, { x: 420, y: 300, z: 100 }] },
-            { key: 'a2', name: 'A2', pichoqNarxi: 1700000, yigishNarxi: 3500,
+            { key: 'a2', name: 'A2', pichoqNarxi: 1700000, yigishNarxi: 3500, standartGsm: 250,
               olchamlar: [{ x: 600, y: 450, z: 150 }, { x: 550, y: 400, z: 120 }] }
         ],
-        // Paket FAQAT Kartondan tayyorlanadi — admin faqat karton grammajlarini belgilaydi,
-        // narxi Ofset bo'limidagi Karton bazasidan olinadi.
+        // Paket FAQAT Kartondan — menejer tanlay oladigan karton grammajlari (narxi Ofset bo'limidagi
+        // Karton bazasidan). Har turning standart kartoni ham shu ro'yxatda bo'lishi kerak.
         qogozlar: [
-            { paperType: 'Karton', gsm: 250, isDefault: false },
-            { paperType: 'Karton', gsm: 300, isDefault: true },
-            { paperType: 'Karton', gsm: 350, isDefault: false }
+            { paperType: 'Karton', gsm: 190 },
+            { paperType: 'Karton', gsm: 210 },
+            { paperType: 'Karton', gsm: 230 },
+            { paperType: 'Karton', gsm: 250 },
+            { paperType: 'Karton', gsm: 300 },
+            { paperType: 'Karton', gsm: 350 }
         ],
-        lentaNarxi: 5000, // lentali paket — har bir paketga qo'shimcha xizmat (so'm)
-        // Ixtiyoriy LAK — mashina bo'yicha pog'onali: birinchi firstQty bo'lakkacha qat'iy summa, keyin har bo'lakka
-        lak: {
-            a3: { firstQty: 1000, firstPrice: 500000,  nextPrice: 500 },
-            a2: { firstQty: 1000, firstPrice: 750000,  nextPrice: 750 },
-            a1: { firstQty: 1000, firstPrice: 1000000, nextPrice: 1000 }
-        },
-        // Ixtiyoriy Tisneniya — har bir bo'lakka narx + bir martalik klishe (har xil dizaynda 2 ta klishe)
-        tisneniya: {
-            a3: { pricePerUnit: 1000, klishePrice: 500000 },
-            a2: { pricePerUnit: 1500, klishePrice: 600000 },
-            a1: { pricePerUnit: 2000, klishePrice: 700000 }
-        }
+        lentaNarxi: 5000 // lentali paket — har bir paketga qo'shimcha xizmat (so'm)
+        // Laminatsiya, Visochka, Lak, Tisneniya narxlari — umumiy ofsetFinishingServices dan
+        // (Ofset admin → Pardozlash xizmatlari), mashina bo'yicha.
     };
 
-    let paketSelected = { tur: 'a4', qogozIndex: 0, dizayn: 'bir', lenta: false, lak: false, tisneniya: false };
+    let paketSelected = { tur: 'a4', gsm: 210, dizayn: 'bir', lenta: false, lak: false, tisneniya: false };
+
+    // Turning standart kartoni (ro'yxatda bo'lmasa — ro'yxatdagi eng yaqini)
+    function paketStandartGsm(tur) {
+        let list = paketConfig.qogozlar.map(g => g.gsm);
+        if (list.length === 0) return 0;
+        let s = parseInt(tur && tur.standartGsm) || list[0];
+        return list.reduce((eng, g) => Math.abs(g - s) < Math.abs(eng - s) ? g : eng, list[0]);
+    }
 
     function paketTuri(key) {
         return paketConfig.turlar.find(t => t.key === key) || paketConfig.turlar[0] || null;
@@ -856,8 +859,7 @@
 
     function buildPaketForm() {
         let def = paketConfig.turlar.find(t => t.isDefault) || paketConfig.turlar[0];
-        let defQogoz = paketConfig.qogozlar.findIndex(q => q.isDefault);
-        paketSelected = { tur: def ? def.key : 'a4', qogozIndex: defQogoz >= 0 ? defQogoz : 0, dizayn: 'bir', lenta: false, lak: false, tisneniya: false };
+        paketSelected = { tur: def ? def.key : 'a4', gsm: paketStandartGsm(def), dizayn: 'bir', lenta: false, lak: false, tisneniya: false };
         let o = (def && def.olchamlar && def.olchamlar[0]) || { x: '', y: '', z: '' };
         return `
             <div class="poli-calc paket-calc">
@@ -883,7 +885,7 @@
                 </div>
                 <div id="paketBichishInfo" class="paket-bichish-info"></div>
 
-                <div class="step-title">3. Karton grammaji</div>
+                <div class="step-title">3. Karton grammaji <span class="paket-step-hint">(★ — shu tur uchun standart; qalinroq/yupqaroq kerak bo'lsa boshqasini tanlang)</span></div>
                 <div class="options-group" id="paketQogozGroup"></div>
 
                 <div class="step-title">4. Ikki tomonining dizayni</div>
@@ -921,8 +923,9 @@
             <button type="button" class="opt-btn ${t.key === paketSelected.tur ? 'active' : ''}" onclick="selectPaketTur('${t.key}')">${t.name}</button>
         `).join('');
         renderPaketOlchamChips();
-        document.getElementById('paketQogozGroup').innerHTML = paketConfig.qogozlar.map((q, i) => `
-            <button type="button" class="opt-btn ${i === paketSelected.qogozIndex ? 'active' : ''}" onclick="selectPaketQogoz(${i})">Karton ${q.gsm}gr</button>
+        let standart = paketStandartGsm(paketTuri(paketSelected.tur));
+        document.getElementById('paketQogozGroup').innerHTML = paketConfig.qogozlar.map(q => `
+            <button type="button" class="opt-btn ${q.gsm === paketSelected.gsm ? 'active' : ''}" onclick="selectPaketQogoz(${q.gsm})">${q.gsm === standart ? '★ ' : ''}${q.gsm}gr</button>
         `).join('');
         document.getElementById('paketDizaynGroup').innerHTML = `
             <button type="button" class="opt-btn ${paketSelected.dizayn === 'bir' ? 'active' : ''}" onclick="selectPaketDizayn('bir')">Bir xil</button>
@@ -937,6 +940,7 @@
 
     function selectPaketTur(key) {
         paketSelected.tur = key;
+        paketSelected.gsm = paketStandartGsm(paketTuri(key)); // turga mos standart karton
         let o = (paketTuri(key).olchamlar || [])[0];
         if (o) paketOlchamniQoy(o);
         renderPaketOptions();
@@ -957,7 +961,7 @@
         calculate();
     }
 
-    function selectPaketQogoz(i) { paketSelected.qogozIndex = i; renderPaketOptions(); calculate(); }
+    function selectPaketQogoz(gsm) { paketSelected.gsm = gsm; renderPaketOptions(); calculate(); }
     function selectPaketDizayn(d) { paketSelected.dizayn = d; renderPaketOptions(); calculate(); }
     function togglePaketExtra(name) { paketSelected[name] = !paketSelected[name]; renderPaketOptions(); calculate(); }
 
@@ -977,11 +981,11 @@
 
         // Bitta tomonning bichish (yoyilgan) o'lchami
         let w = x + z + 3, h = y + z + 3;
-        let qogoz = paketConfig.qogozlar[paketSelected.qogozIndex] || paketConfig.qogozlar[0];
-        if (!qogoz) {
-            return { unitPrice: 0, details: "⚠️ Paket uchun qog'oz kiritilmagan — Admin panelda kiriting.", costItems: [], hisobYaroqsiz: true };
+        let gsm = paketSelected.gsm || paketStandartGsm(tur);
+        if (!gsm) {
+            return { unitPrice: 0, details: "⚠️ Paket uchun karton grammaji kiritilmagan — Admin panelda kiriting.", costItems: [], hisobYaroqsiz: true };
         }
-        qogoz = { ...qogoz, paperType: 'Karton' }; // paket faqat Kartondan
+        let qogoz = { paperType: 'Karton', gsm }; // paket faqat Kartondan
         let harXil = paketSelected.dizayn === 'har';
         let k = harXil ? 2 : 1;                     // qog'oz/forma/pechat necha marta hisoblanadi
         let ofsetTiraj = harXil ? qty : qty * 2;    // Ofsetga yuboriladigan bo'lak (zapasni Ofset o'zi qo'shadi)
@@ -996,7 +1000,10 @@
         let pichoqKerak = tayyorIdx < 0;
 
         if (!r) {
-            paketInfo(`<div class="paket-xato">⚠️ Bichish o'lchami ${w}×${h} mm — ${qogoz.paperType} ${qogoz.gsm}gr bilan hech bir ofset mashinasiga (A3/A2/A1) sig'madi yoki bu qog'ozning narxi Ofset bazasida yo'q.</div>`);
+            let narxBor = ofsetRawPapers.some(p => p.name === 'Karton' && p.gsm === qogoz.gsm && Object.values(p.prices || {}).some(v => v > 0));
+            paketInfo(`<div class="paket-xato">⚠️ ${narxBor
+                ? `Bichish o'lchami ${w}×${h} mm hech bir ofset mashinasiga (A3/A2/A1) sig'madi.`
+                : `Karton ${qogoz.gsm}gr narxi Ofset bo'limida kiritilmagan — admin <b>Ofset pechat → Karton qog'ozi</b> jadvalida narxini kiritishi kerak.`}</div>`);
             return { unitPrice: 0, details: `⚠️ ${w}×${h} mm bichish o'lchami ofset mashinalariga sig'madi yoki ${qogoz.paperType} ${qogoz.gsm}gr narxi yo'q`, costItems: [], hisobYaroqsiz: true };
         }
 
@@ -1027,9 +1034,9 @@
 
         // 4) Ixtiyoriy: lenta, lak, tisneniya
         if (paketSelected.lenta) qosh('Lenta', `${qty} paket`, (parseFloat(paketConfig.lentaNarxi) || 0) * qty);
-        if (paketSelected.lak) qosh(`Lak (${r.machine})`, `${bolaklar} bo'lak`, papkaTieredTotal(bolaklar, paketConfig.lak[mKey]));
+        if (paketSelected.lak) qosh(`Lak (${r.machine})`, `${bolaklar} bo'lak`, papkaTieredTotal(bolaklar, ofsetFinishingServices.lak[mKey]));
         if (paketSelected.tisneniya) {
-            let tis = paketConfig.tisneniya[mKey] || {};
+            let tis = ofsetFinishingServices.tisneniya[mKey] || {};
             qosh(`Tisneniya (${r.machine})`, `${bolaklar} bo'lak`, (parseFloat(tis.pricePerUnit) || 0) * bolaklar);
             qosh('Tisneniya klishesi (bir martalik)', `${k} ta`, (parseFloat(tis.klishePrice) || 0) * k);
         }
@@ -1068,6 +1075,7 @@
                 <td style="font-weight:700;">${esc(t.name)}</td>
                 <td><input type="number" id="pkTur_pichoq_${i}" value="${t.pichoqNarxi || 0}" min="0"></td>
                 <td><input type="number" id="pkTur_yigish_${i}" value="${t.yigishNarxi || 0}" min="0"></td>
+                <td><select id="pkTur_gsm_${i}">${paketConfig.qogozlar.map(g => `<option value="${g.gsm}" ${g.gsm === paketStandartGsm(t) ? 'selected' : ''}>Karton ${g.gsm}gr</option>`).join('')}</select></td>
                 <td style="text-align:center;"><input type="radio" name="pkTurDefault" id="pkTur_def_${i}" ${t.isDefault ? 'checked' : ''}></td>
             </tr>
         `).join('');
@@ -1094,19 +1102,12 @@
             <tr>
                 <td style="font-weight:600;">Karton</td>
                 <td><div class="input-unit"><input type="number" id="pkQ_gsm_${i}" value="${g.gsm}" min="1"><span>gr</span></div></td>
-                <td style="text-align:center;"><input type="radio" name="pkQDefault" id="pkQ_def_${i}" ${g.isDefault ? 'checked' : ''}></td>
+                <td>${paketConfig.turlar.filter(t => paketStandartGsm(t) === g.gsm).map(t => `<span class="paket-std-badge">${t.name} standarti</span>`).join(' ')}</td>
                 <td style="text-align:right;"><button type="button" class="btn btn-danger" style="height:30px; padding:0 10px;" title="O'chirish" onclick="deletePaketQogoz(${i})">✕</button></td>
             </tr>
         `).join('');
 
         q('paketLentaNarxi').value = paketConfig.lentaNarxi || 0;
-        ['a3', 'a2', 'a1'].forEach(m => {
-            q(`pkLak_${m}_first`).value = paketConfig.lak[m].firstQty;
-            q(`pkLak_${m}_firstPrice`).value = paketConfig.lak[m].firstPrice;
-            q(`pkLak_${m}_next`).value = paketConfig.lak[m].nextPrice;
-            q(`pkTis_${m}_unit`).value = paketConfig.tisneniya[m].pricePerUnit;
-            q(`pkTis_${m}_klishe`).value = paketConfig.tisneniya[m].klishePrice;
-        });
     }
 
     // Formadagi (hali saqlanmagan) qiymatlarni paketConfig ga o'qib oladi
@@ -1118,19 +1119,16 @@
             ...t,
             pichoqNarxi: son(`pkTur_pichoq_${i}`),
             yigishNarxi: son(`pkTur_yigish_${i}`),
+            standartGsm: q(`pkTur_gsm_${i}`) ? (parseInt(q(`pkTur_gsm_${i}`).value) || t.standartGsm) : t.standartGsm,
             isDefault: !!q(`pkTur_def_${i}`)?.checked,
             olchamlar: (t.olchamlar || []).map((o, oi) => q(`pkOl_${i}_${oi}_x`) ? {
                 x: son(`pkOl_${i}_${oi}_x`), y: son(`pkOl_${i}_${oi}_y`), z: son(`pkOl_${i}_${oi}_z`)
             } : o)
         }));
         paketConfig.qogozlar = paketConfig.qogozlar.map((g, i) => q(`pkQ_gsm_${i}`) ? {
-            paperType: 'Karton', gsm: son(`pkQ_gsm_${i}`, 1), isDefault: q(`pkQ_def_${i}`).checked
+            paperType: 'Karton', gsm: son(`pkQ_gsm_${i}`, 1)
         } : g);
         paketConfig.lentaNarxi = son('paketLentaNarxi');
-        ['a3', 'a2', 'a1'].forEach(m => {
-            paketConfig.lak[m] = { firstQty: son(`pkLak_${m}_first`), firstPrice: son(`pkLak_${m}_firstPrice`), nextPrice: son(`pkLak_${m}_next`) };
-            paketConfig.tisneniya[m] = { pricePerUnit: son(`pkTis_${m}_unit`), klishePrice: son(`pkTis_${m}_klishe`) };
-        });
     }
 
     function addPaketOlcham(ti) {
@@ -1152,17 +1150,18 @@
 
     function addPaketQogoz() {
         collectPaketFromUI();
-        paketConfig.qogozlar.push({ paperType: 'Karton', gsm: 300, isDefault: paketConfig.qogozlar.length === 0 });
+        let oxirgi = paketConfig.qogozlar.length ? paketConfig.qogozlar[paketConfig.qogozlar.length - 1].gsm : 250;
+        paketConfig.qogozlar.push({ paperType: 'Karton', gsm: oxirgi + 20 });
         renderAdminPaket();
     }
 
     function deletePaketQogoz(i) {
         collectPaketFromUI();
         let g = paketConfig.qogozlar[i];
-        if (!g || !confirm(`Karton ${g.gsm}gr ni o'chirasizmi?`)) return;
-        let wasDefault = g.isDefault;
+        let foydalanadi = paketConfig.turlar.filter(t => paketStandartGsm(t) === g.gsm).map(t => t.name);
+        if (foydalanadi.length) { showToast(`⚠️ Karton ${g.gsm}gr — ${foydalanadi.join(', ')} turining standarti. Avval turning standart kartonini o'zgartiring.`); return; }
+        if (!confirm(`Karton ${g.gsm}gr ni o'chirasizmi?`)) return;
         paketConfig.qogozlar.splice(i, 1);
-        if (wasDefault && paketConfig.qogozlar.length > 0) paketConfig.qogozlar[0].isDefault = true;
         renderAdminPaket();
     }
 
@@ -1171,11 +1170,12 @@
         let xato = paketConfig.turlar.some(t => (t.olchamlar || []).some(o => !(o.x > 0 && o.y > 0 && o.z > 0)));
         if (xato) { showToast("⚠️ Tayyor o'lchamlarda X, Y, Z 0 dan katta bo'lishi kerak!"); return; }
         if (paketConfig.qogozlar.length === 0) { showToast("⚠️ Kamida bitta karton grammajini kiriting!"); return; }
-        if (!paketConfig.qogozlar.some(g => g.isDefault)) paketConfig.qogozlar[0].isDefault = true;
+        // takroriy grammajlarni olib tashlab, o'sish tartibida saqlaymiz
+        paketConfig.qogozlar = [...new Map(paketConfig.qogozlar.map(g => [g.gsm, g])).values()].sort((a, b) => a.gsm - b.gsm);
         if (!paketConfig.turlar.some(t => t.isDefault)) paketConfig.turlar[0].isDefault = true;
         localStorage.setItem('erp_paket_config', JSON.stringify(paketConfig));
         if (typeof logAudit === 'function') logAudit("Paket sozlamalari o'zgartirildi",
-            paketConfig.turlar.map(t => `${t.name}: pichoq ${t.pichoqNarxi}, yig'ish ${t.yigishNarxi}, ${t.olchamlar.length} o'lcham`).join('; ') + `; lenta ${paketConfig.lentaNarxi}`);
+            paketConfig.turlar.map(t => `${t.name}: karton ${t.standartGsm}gr, pichoq ${t.pichoqNarxi}, yig'ish ${t.yigishNarxi}, ${t.olchamlar.length} o'lcham`).join('; ') + `; lenta ${paketConfig.lentaNarxi}`);
         renderAdminPaket();
         showToast("💾 Paket sozlamalari saqlandi!");
     }
@@ -1192,15 +1192,13 @@
         }
         // Paket faqat Kartondan: eski saqlangan Melovka va boshqa qatorlar tashlab yuboriladi
         let kartonlar = Array.isArray(saved.qogozlar) ? saved.qogozlar.filter(g => g && g.paperType === 'Karton' && g.gsm > 0) : [];
+        let eskiFormat = Array.isArray(saved.turlar) && !saved.turlar.some(t => t && t.standartGsm);
+        if (eskiFormat) kartonlar = kartonlar.concat(defaults.qogozlar); // turlarning standart kartonlari ro'yxatda bo'lsin
         if (kartonlar.length > 0) {
-            if (!kartonlar.some(g => g.isDefault)) kartonlar[0].isDefault = true;
-            cfg.qogozlar = kartonlar;
+            cfg.qogozlar = [...new Map(kartonlar.map(g => [g.gsm, { paperType: 'Karton', gsm: g.gsm }])).values()].sort((x, y) => x.gsm - y.gsm);
         }
         if (typeof saved.lentaNarxi === 'number') cfg.lentaNarxi = saved.lentaNarxi;
-        ['a3', 'a2', 'a1'].forEach(m => {
-            if (saved.lak && saved.lak[m]) cfg.lak[m] = { ...cfg.lak[m], ...saved.lak[m] };
-            if (saved.tisneniya && saved.tisneniya[m]) cfg.tisneniya[m] = { ...cfg.tisneniya[m], ...saved.tisneniya[m] };
-        });
+        // Eski saqlangan lak/tisneniya maydonlari e'tiborga olinmaydi — narx umumiy joydan.
         return cfg;
     }
 
@@ -1424,16 +1422,8 @@
         // faqat Papka shu xizmatlardan foydalanadimi-yo'qmi belgilanadi.
         laminatsiyaEnabled: true,
         visochkaEnabled: true,
-        // Ixtiyoriy, mijoz/menejer tanlaydi (tiered: 1000tagacha qat'iy summa).
-        lak: {
-            a3: { firstQty: 1000, firstPrice: 500000, nextPrice: 500 },
-            a2: { firstQty: 1000, firstPrice: 750000, nextPrice: 750 }
-        },
-        // Ixtiyoriy, mijoz/menejer tanlaydi (so'm/dona + bir martalik klishe).
-        tisneniya: {
-            a3: { pricePerUnit: 1000, klishePrice: 500000 },
-            a2: { pricePerUnit: 2000, klishePrice: 1000000 }
-        },
+        // Lak va Tisneniya (ixtiyoriy, mijoz/menejer tanlaydi) — narxi umumiy
+        // ofsetFinishingServices.lak / .tisneniya dan (Ofset admin → Pardozlash xizmatlari).
         minQty: 100,
         infoText: "Papka Karton qog'ozidan, faqat ofset usulida tayyorlanadi."
     };
@@ -1511,8 +1501,8 @@
         if (papkaConfig.infoText) qatorlar.push(papkaConfig.infoText);
         qatorlar.push(`<b>${v.name}</b> yoyilgan o'lchami: ${v.flatW}×${v.flatH} mm`);
         qatorlar.push(`Material: <b>Karton ${gsm}gr</b> | Mashina: <b>${v.machine}</b> | Pechat: <b>faqat Ofset</b>`);
-        if (papkaSelected.tisneniya && papkaConfig.tisneniya[machineKey].klishePrice > 0) {
-            qatorlar.push(`Tisneniya klishesi: <b>${papkaConfig.tisneniya[machineKey].klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
+        if (papkaSelected.tisneniya && ofsetFinishingServices.tisneniya[machineKey].klishePrice > 0) {
+            qatorlar.push(`Tisneniya klishesi: <b>${ofsetFinishingServices.tisneniya[machineKey].klishePrice.toLocaleString('ru-RU')} so'm</b> (bir martalik, adadga bo'linadi)`);
         }
         let qty = parseInt(document.getElementById('inpQuantity')?.value) || 0;
         if (qty > 0 && qty < papkaConfig.minQty) {
@@ -1587,12 +1577,12 @@
 
         // --- Ixtiyoriy, mijoz/menejer tanlaydigan xizmatlar ---
         if (papkaSelected.lak) {
-            let lakTotal = papkaTieredTotal(effectiveQty, papkaConfig.lak[machineKey]);
+            let lakTotal = papkaTieredTotal(effectiveQty, ofsetFinishingServices.lak[machineKey]);
             unit += lakTotal / effectiveQty;
             costItems.push({ label: 'LAK', qty: `${effectiveQty} dona`, total: Math.round(lakTotal) });
         }
         if (papkaSelected.tisneniya) {
-            let tis = papkaConfig.tisneniya[machineKey];
+            let tis = ofsetFinishingServices.tisneniya[machineKey];
             unit += (tis.pricePerUnit || 0);
             if (tis.pricePerUnit > 0) costItems.push({ label: 'Tisneniya', qty: `${effectiveQty} dona`, total: Math.round(tis.pricePerUnit * effectiveQty) });
             if (tis.klishePrice > 0) {
@@ -1628,14 +1618,6 @@
         let q = id => document.getElementById(id);
         if (q('papkaLaminatsiyaEnabled')) q('papkaLaminatsiyaEnabled').checked = !!papkaConfig.laminatsiyaEnabled;
         if (q('papkaVisochkaEnabled')) q('papkaVisochkaEnabled').checked = !!papkaConfig.visochkaEnabled;
-        if (q('papkaLakA3First')) q('papkaLakA3First').value = papkaConfig.lak.a3.firstPrice;
-        if (q('papkaLakA3Next')) q('papkaLakA3Next').value = papkaConfig.lak.a3.nextPrice;
-        if (q('papkaLakA2First')) q('papkaLakA2First').value = papkaConfig.lak.a2.firstPrice;
-        if (q('papkaLakA2Next')) q('papkaLakA2Next').value = papkaConfig.lak.a2.nextPrice;
-        if (q('papkaTisneniyaA3Price')) q('papkaTisneniyaA3Price').value = papkaConfig.tisneniya.a3.pricePerUnit;
-        if (q('papkaTisneniyaA3Klishe')) q('papkaTisneniyaA3Klishe').value = papkaConfig.tisneniya.a3.klishePrice;
-        if (q('papkaTisneniyaA2Price')) q('papkaTisneniyaA2Price').value = papkaConfig.tisneniya.a2.pricePerUnit;
-        if (q('papkaTisneniyaA2Klishe')) q('papkaTisneniyaA2Klishe').value = papkaConfig.tisneniya.a2.klishePrice;
         if (q('papkaMinQty')) q('papkaMinQty').value = papkaConfig.minQty;
     }
 
@@ -1654,14 +1636,6 @@
         let visochkaChk = document.getElementById('papkaVisochkaEnabled');
         papkaConfig.laminatsiyaEnabled = laminatsiyaChk ? laminatsiyaChk.checked : papkaConfig.laminatsiyaEnabled;
         papkaConfig.visochkaEnabled = visochkaChk ? visochkaChk.checked : papkaConfig.visochkaEnabled;
-        papkaConfig.lak.a3.firstPrice = son('papkaLakA3First', 0);
-        papkaConfig.lak.a3.nextPrice = son('papkaLakA3Next', 0);
-        papkaConfig.lak.a2.firstPrice = son('papkaLakA2First', 0);
-        papkaConfig.lak.a2.nextPrice = son('papkaLakA2Next', 0);
-        papkaConfig.tisneniya.a3.pricePerUnit = son('papkaTisneniyaA3Price', 0);
-        papkaConfig.tisneniya.a3.klishePrice = son('papkaTisneniyaA3Klishe', 0);
-        papkaConfig.tisneniya.a2.pricePerUnit = son('papkaTisneniyaA2Price', 0);
-        papkaConfig.tisneniya.a2.klishePrice = son('papkaTisneniyaA2Klishe', 0);
         papkaConfig.minQty = Math.max(1, son('papkaMinQty', 100));
         localStorage.setItem('erp_papka_config', JSON.stringify(papkaConfig));
         if (typeof logAudit === 'function') {
@@ -1698,18 +1672,8 @@
         // ya'ni avvalgi "har doim yoqilgan" xatti-harakat saqlanadi).
         if (typeof saved.laminatsiyaEnabled === 'boolean') cfg.laminatsiyaEnabled = saved.laminatsiyaEnabled;
         if (typeof saved.visochkaEnabled === 'boolean') cfg.visochkaEnabled = saved.visochkaEnabled;
-        if (saved.lak && saved.lak.a3 && saved.lak.a2) {
-            cfg.lak = {
-                a3: { ...defaults.lak.a3, ...saved.lak.a3 },
-                a2: { ...defaults.lak.a2, ...saved.lak.a2 }
-            };
-        }
-        if (saved.tisneniya && saved.tisneniya.a3 && saved.tisneniya.a2) {
-            cfg.tisneniya = {
-                a3: { ...defaults.tisneniya.a3, ...saved.tisneniya.a3 },
-                a2: { ...defaults.tisneniya.a2, ...saved.tisneniya.a2 }
-            };
-        }
+        // Lak/Tisneniya narxlari endi umumiy (ofsetFinishingServices) — eski saqlangan qiymatlar
+        // init() da bir marta o'sha yerga ko'chiriladi, bu yerda o'qilmaydi.
         if (typeof saved.minQty === 'number') cfg.minQty = saved.minQty;
         if (typeof saved.infoText === 'string') cfg.infoText = saved.infoText;
         return cfg;
@@ -2648,7 +2612,18 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
             let savedPapka = localStorage.getItem('erp_papka_config');
             if (savedPapka) {
                 try {
-                    papkaConfig = migratePapkaConfig(JSON.parse(savedPapka), papkaConfig);
+                    let eski = JSON.parse(savedPapka);
+                    // Bir martalik ko'chirish: Papka'ning alohida Lak/Tisneniya narxlari (A3/A2) umumiy
+                    // pardozlash xizmatlariga — agar umumiy narxlar hali saqlanmagan bo'lsa.
+                    if (!ofsetLakTisSaqlangan && eski && (eski.lak || eski.tisneniya)) {
+                        ['a3', 'a2'].forEach(m => {
+                            if (eski.lak && eski.lak[m] && typeof eski.lak[m] === 'object') ofsetFinishingServices.lak[m] = { ...ofsetFinishingServices.lak[m], ...eski.lak[m] };
+                            if (eski.tisneniya && eski.tisneniya[m] && typeof eski.tisneniya[m] === 'object') ofsetFinishingServices.tisneniya[m] = { ...ofsetFinishingServices.tisneniya[m], ...eski.tisneniya[m] };
+                        });
+                        ofsetLakTisSaqlangan = true;
+                        localStorage.setItem('erp_ofset_finishing_services', JSON.stringify(ofsetFinishingServices));
+                    }
+                    papkaConfig = migratePapkaConfig(eski, papkaConfig);
                 } catch (e) {
                     console.warn('Papka sozlamalarini o\'qishda xato:', e);
                 }
@@ -2690,6 +2665,21 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
             if (!ofsetRawPapers.some(p => p.name === 'Karton' && p.gsm === 400)) {
                 ofsetRawPapers.push({ name: 'Karton', gsm: 400, prices: { "sra3": 0, "620x880": 0, "620x940": 0, "700x1000": 0 } });
                 localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
+            }
+
+            // Bir martalik: Paket turlarining standart kartonlari (190/210/230/250) Ofset bazasida bo'lmasa —
+            // narxi 0 bilan qo'shiladi (admin Ofset bo'limida narxini kiritadi). Admin keyin o'chirsa,
+            // qayta paydo bo'lmasligi uchun bayroq bilan himoyalangan.
+            if (!localStorage.getItem('erp_paket_karton_seeded')) {
+                let qoshildi = false;
+                [190, 210, 230, 250].forEach(g => {
+                    if (!ofsetRawPapers.some(p => p.name === 'Karton' && p.gsm === g)) {
+                        ofsetRawPapers.push({ name: 'Karton', gsm: g, prices: { "sra3": 0, "620x880": 0, "620x940": 0, "700x1000": 0 } });
+                        qoshildi = true;
+                    }
+                });
+                if (qoshildi) localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
+                localStorage.setItem('erp_paket_karton_seeded', '1');
             }
 
             // Bir martalik migratsiya: Kalendar moduli uchun kerakli Melovka/Karton grammajlari

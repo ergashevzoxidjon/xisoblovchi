@@ -62,7 +62,11 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 - **Ofset minimal tiraji** (`poligrafiyaMahsulotSozlama`, `POLI_DVIGATEL_TURLARI` — Flayer, Listovka, Buklet,
   Konvert, Otkritka): adad kam bo'lsa Ofset tugmasi `disabled`, hisob Raqamli pechatda. Admin → mahsulot →
   "⚙️ Mahsulot sozlamalari" (bichish o'lchami, qo'shimcha ishlov narxi ham shu yerda).
-- **Paket** (`paketConfig`, `calculatePaket`) — FAQAT Karton: tur (A5–A2) → tayyor o'lcham (X bo'yi, Y eni, Z kengligi — majburiy).
+- **Pardozlash narxlari — bitta umumiy joy**: `ofsetFinishingServices` (visochka, laminatsiya, lak, tisneniya ×
+  A3/A2/A1), admin: Ofset pechat → "✂️ Pardozlash xizmatlari". Papka va Paket shundan oladi — mahsulotda alohida
+  lak/tisneniya narxi YOZMANG.
+- **Paket** (`paketConfig`, `calculatePaket`) — FAQAT Karton, har turning `standartGsm` i (A5 190, A4 210, A3 230,
+  A2 250); menejer ro'yxatdan boshqa grammaj tanlashi mumkin. Tur (A5–A2) → tayyor o'lcham (X bo'yi, Y eni, Z kengligi — majburiy).
   Bichish (1 tomon) = (X+Z+3)×(Y+Z+3) → Ofset (A3/A2/A1, eng arzon pechat). Bir xil dizayn: ofsetga 2×adad;
   har xil: adad, qog'oz/forma/pechat ×2 (zapasni `calculateOfsetForMachine` o'zi qo'shadi, +100). Laminatsiya,
   visochka (ofsetFinishingServices), lak, tisneniya — 2×adad bo'lak, mashina narxida. Yig'ish, lenta — har paketga.

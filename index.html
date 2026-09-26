@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: b417501124443b96 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 9e672877b5611d52 -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <title>Bosmaxona ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="umumiy/core.css?v=90b7ab14">
+    <link rel="stylesheet" href="umumiy/core.css?v=4d675cfe">
     <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=3e6ee534">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
     <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
@@ -419,29 +419,64 @@
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">📎 Visochka va 🧴 Laminatsiya (umumiy xizmatlar)</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Bu ikkala xizmat Poligrafiya bo'limidagi ko'plab mahsulotlarda (Papka, Doorhanger
-                        va boshqalar) takrorlanadi — narxi shu yerda BIR MARTA, mashina formati (A3/A2/A1)
-                        bo'yicha kiritiladi. Har bir mahsulotning o'z admin bo'limida esa faqat shu xizmatdan
-                        foydalanadimi-yo'qmi (yoqilgan/o'chirilgan) belgilanadi — narx har doim shu yerdan olinadi.
-                    </p>
-                    <div class="form-row" style="gap: 12px;">
-                        <div class="form-group"><label>Visochka A3 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA3First" value="120000"></div>
-                        <div class="form-group"><label>Visochka A3 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA3Next" value="120"></div>
-                        <div class="form-group"><label>Laminatsiya A3 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA3" value="550"></div>
+                    <div class="add-pen-card-title">✂️ Pardozlash xizmatlari (umumiy): Visochka, Laminatsiya, Lak, Tisneniya</div>
+                    <p class="admin-hint">Bu xizmatlar Poligrafiya bo'limidagi mahsulotlarda (Papka, Paket, Doorhanger...) takrorlanadi —
+                        narxi shu yerda <b>BIR MARTA</b>, ofset mashinasi formati (A3/A2/A1) bo'yicha kiritiladi. Mahsulot hisobi qaysi
+                        mashinada chiqsa, o'sha qatordagi narx olinadi. Visochka va Lak — pog'onali: 1000 donagacha qat'iy summa,
+                        undan keyin har donaga. Tisneniya — har donaga + bir martalik klishe.</p>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:980px;">
+                            <thead>
+                                <tr>
+                                    <th>Mashina</th>
+                                    <th>Visochka: 1000 gacha</th>
+                                    <th>Visochka: keyin (dona)</th>
+                                    <th>Laminatsiya (dona)</th>
+                                    <th>Lak: 1000 gacha</th>
+                                    <th>Lak: keyin (dona)</th>
+                                    <th>Tisneniya (dona)</th>
+                                    <th>Tisneniya klishe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight:700;">A3</td>
+                                    <td><input type="number" min="0" id="finVisochkaA3First"></td>
+                                    <td><input type="number" min="0" id="finVisochkaA3Next"></td>
+                                    <td><input type="number" min="0" id="finLaminatsiyaA3"></td>
+                                    <td><input type="number" min="0" id="finLakA3First"></td>
+                                    <td><input type="number" min="0" id="finLakA3Next"></td>
+                                    <td><input type="number" min="0" id="finTisA3Unit"></td>
+                                    <td><input type="number" min="0" id="finTisA3Klishe"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A2</td>
+                                    <td><input type="number" min="0" id="finVisochkaA2First"></td>
+                                    <td><input type="number" min="0" id="finVisochkaA2Next"></td>
+                                    <td><input type="number" min="0" id="finLaminatsiyaA2"></td>
+                                    <td><input type="number" min="0" id="finLakA2First"></td>
+                                    <td><input type="number" min="0" id="finLakA2Next"></td>
+                                    <td><input type="number" min="0" id="finTisA2Unit"></td>
+                                    <td><input type="number" min="0" id="finTisA2Klishe"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A1</td>
+                                    <td><input type="number" min="0" id="finVisochkaA1First"></td>
+                                    <td><input type="number" min="0" id="finVisochkaA1Next"></td>
+                                    <td><input type="number" min="0" id="finLaminatsiyaA1"></td>
+                                    <td><input type="number" min="0" id="finLakA1First"></td>
+                                    <td><input type="number" min="0" id="finLakA1Next"></td>
+                                    <td><input type="number" min="0" id="finTisA1Unit"></td>
+                                    <td><input type="number" min="0" id="finTisA1Klishe"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
                     </div>
-                    <div class="form-row" style="gap: 12px;">
-                        <div class="form-group"><label>Visochka A2 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA2First" value="200000"></div>
-                        <div class="form-group"><label>Visochka A2 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA2Next" value="200"></div>
-                        <div class="form-group"><label>Laminatsiya A2 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA2" value="1100"></div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveOfsetFinishingServices()">💾 Pardozlash narxlarini saqlash</button>
                     </div>
-                    <div class="form-row" style="gap: 12px;">
-                        <div class="form-group"><label>Visochka A1 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA1First" value="0"></div>
-                        <div class="form-group"><label>Visochka A1 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA1Next" value="0"></div>
-                        <div class="form-group"><label>Laminatsiya A1 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA1" value="0"></div>
-                    </div>
-                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveOfsetFinishingServices()">💾 Visochka/Laminatsiya narxlarini saqlash</button>
                 </div>
             </div>
 
@@ -533,8 +568,8 @@
                         visochka narxi <b>Ofset pechat kalkulyatori</b> admin bo'limidagi mashina narxlaridan olinadi.</p>
                     <div class="table-card" style="margin-bottom:0;">
                         <div class="table-scroll">
-                        <table class="admin-table" style="min-width:520px;">
-                            <thead><tr><th>Tur</th><th>Pichoq (bir martalik, so'm)</th><th>Yig'ish (so'm/paket)</th><th style="text-align:center;">Standart</th></tr></thead>
+                        <table class="admin-table" style="min-width:680px;">
+                            <thead><tr><th>Tur</th><th>Pichoq (bir martalik, so'm)</th><th>Yig'ish (so'm/paket)</th><th>Standart karton</th><th style="text-align:center;">Birinchi ochiladi</th></tr></thead>
                             <tbody id="paketTurlarBody"></tbody>
                         </table>
                         </div>
@@ -549,11 +584,13 @@
 
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title">📄 Karton grammajlari</div>
-                    <p class="admin-hint">Paket faqat <b>Kartondan</b> tayyorlanadi. Narx Ofset bo'limidagi Karton bazasidan olinadi — shu grammaj u yerda narxlangan bo'lishi kerak.</p>
+                    <p class="admin-hint">Paket faqat <b>Kartondan</b> tayyorlanadi. Menejer qalinroq/yupqaroq paket uchun shu ro'yxatdan tanlaydi;
+                        har turning standart kartoni yuqoridagi jadvalda belgilanadi. Narx Ofset bo'limidagi Karton bazasidan olinadi —
+                        grammaj u yerda narxlangan bo'lishi kerak.</p>
                     <div class="table-card" style="margin-bottom:12px;">
                         <div class="table-scroll">
                         <table class="admin-table" style="min-width:420px;">
-                            <thead><tr><th>Material</th><th>Grammaj</th><th style="text-align:center;">Standart</th><th></th></tr></thead>
+                            <thead><tr><th>Material</th><th>Grammaj</th><th>Qaysi turning standarti</th><th></th></tr></thead>
                             <tbody id="paketQogozlarBody"></tbody>
                         </table>
                         </div>
@@ -564,46 +601,13 @@
                 </div>
 
                 <div class="add-pen-card">
-                    <div class="add-pen-card-title">✨ Lenta, Lak va Tisneniya</div>
-                    <p class="admin-hint">Lak va Tisneniya — ixtiyoriy, har bir paketning 2 bo'lagi uchun, hisob chiqqan mashina (A3/A2/A1) narxi bilan.
-                        Lak: birinchi N bo'lakkacha qat'iy summa, keyin har bo'lakka. Tisneniya klishesi — bir martalik (har xil dizaynda 2 ta).</p>
+                    <div class="add-pen-card-title">🎀 Lenta</div>
+                    <p class="admin-hint">Lentali paket — har bir paketga qo'shimcha xizmat. Laminatsiya, Visochka, Lak va Tisneniya narxlari —
+                        umumiy: <b>Ofset pechat kalkulyatori → ✂️ Pardozlash xizmatlari</b> (paket hisobi chiqqan mashina bo'yicha, 2 × adad bo'lak).</p>
                     <div class="admin-form-grid">
                         <div class="form-group">
                             <label>Lenta narxi</label>
                             <div class="input-unit"><input type="number" id="paketLentaNarxi" min="0"><span>so'm/paket</span></div>
-                        </div>
-                    </div>
-                    <div class="table-card" style="margin-bottom:14px;">
-                        <div class="table-scroll">
-                        <table class="admin-table" style="min-width:760px;">
-                            <thead><tr><th>Mashina</th><th>Lak: birinchi (bo'lak)</th><th>Lak: birinchi narxi</th><th>Lak: keyingi (so'm/bo'lak)</th><th>Tisneniya (so'm/bo'lak)</th><th>Tisneniya klishe</th></tr></thead>
-                            <tbody>
-                                <tr>
-                                    <td style="font-weight:700;">A3</td>
-                                    <td><input type="number" id="pkLak_a3_first" min="0"></td>
-                                    <td><input type="number" id="pkLak_a3_firstPrice" min="0"></td>
-                                    <td><input type="number" id="pkLak_a3_next" min="0"></td>
-                                    <td><input type="number" id="pkTis_a3_unit" min="0"></td>
-                                    <td><input type="number" id="pkTis_a3_klishe" min="0"></td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight:700;">A2</td>
-                                    <td><input type="number" id="pkLak_a2_first" min="0"></td>
-                                    <td><input type="number" id="pkLak_a2_firstPrice" min="0"></td>
-                                    <td><input type="number" id="pkLak_a2_next" min="0"></td>
-                                    <td><input type="number" id="pkTis_a2_unit" min="0"></td>
-                                    <td><input type="number" id="pkTis_a2_klishe" min="0"></td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight:700;">A1</td>
-                                    <td><input type="number" id="pkLak_a1_first" min="0"></td>
-                                    <td><input type="number" id="pkLak_a1_firstPrice" min="0"></td>
-                                    <td><input type="number" id="pkLak_a1_next" min="0"></td>
-                                    <td><input type="number" id="pkTis_a1_unit" min="0"></td>
-                                    <td><input type="number" id="pkTis_a1_klishe" min="0"></td>
-                                </tr>
-                            </tbody>
-                        </table>
                         </div>
                     </div>
                     <div class="admin-card-actions">
@@ -868,50 +872,8 @@
                     </div>
                 </div>
 
-                <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">✨ LAK va 🔨 Tisneniya</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Ixtiyoriy — mijoz/menejer tanlaydi, ikkalasi ham bir vaqtda tanlanishi mumkin.
-                        LAK tiered: birinchi ko'rsatilgan donagacha qat'iy summa, undan oshgan har bir
-                        donaga qo'shimcha narx qo'shiladi.
-                    </p>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>LAK A3 — 1000tagacha (so'm):</label>
-                            <input type="number" min="0" id="papkaLakA3First" value="500000">
-                        </div>
-                        <div class="form-group">
-                            <label>LAK A3 — 1000dan keyin (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaLakA3Next" value="500">
-                        </div>
-                        <div class="form-group">
-                            <label>LAK A2 — 1000tagacha (so'm):</label>
-                            <input type="number" min="0" id="papkaLakA2First" value="750000">
-                        </div>
-                        <div class="form-group">
-                            <label>LAK A2 — 1000dan keyin (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaLakA2Next" value="750">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tisneniya A3 (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaTisneniyaA3Price" value="1000">
-                        </div>
-                        <div class="form-group">
-                            <label>Tisneniya A3 klishesi (bir martalik):</label>
-                            <input type="number" min="0" id="papkaTisneniyaA3Klishe" value="500000">
-                        </div>
-                        <div class="form-group">
-                            <label>Tisneniya A2 (so'm/dona):</label>
-                            <input type="number" min="0" id="papkaTisneniyaA2Price" value="2000">
-                        </div>
-                        <div class="form-group">
-                            <label>Tisneniya A2 klishesi (bir martalik):</label>
-                            <input type="number" min="0" id="papkaTisneniyaA2Klishe" value="1000000">
-                        </div>
-                    </div>
-                </div>
+                <div class="admin-link-hint">✨ Lak va 🔨 Tisneniya narxlari — umumiy: <b>Ofset pechat kalkulyatori → ✂️ Pardozlash xizmatlari</b>
+                    (mashina formati bo'yicha). Mijoz/menejer ularni kalkulyatorda ixtiyoriy tanlaydi.</div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">📦 Eng kam buyurtma (MOQ)</div>
@@ -1453,9 +1415,9 @@
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
 <script src="umumiy/yordamchi.js?v=d3583ade"></script>
 <script src="umumiy/core.js?v=8b3ad0ba"></script>
-<script src="bolimlar/ofset/ofset.js?v=2861ab3f"></script>
+<script src="bolimlar/ofset/ofset.js?v=7a6efdc0"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=e17039af"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=73d2d562"></script>
 <script src="bolimlar/textile/textile.js?v=37fee0b3"></script>
 <script src="bolimlar/suvenir/suvenir.js?v=c4324465"></script>
 <script src="bolimlar/reklama/reklama.js?v=960069e0"></script>

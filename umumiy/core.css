@@ -1349,11 +1349,23 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 .paket-pichoq { color: #9a3412; font-weight: 600; }
 .paket-pichoq-bor { color: #047857; font-weight: 600; }
 .paket-xato { color: #b91c1c; font-weight: 600; }
-.paket-admin-olchamlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.paket-admin-olchamlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
 .paket-admin-olcham-tur { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: #fafaf8; }
 .paket-admin-olcham-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .paket-admin-olcham-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 6px; margin-bottom: 6px; }
-.paket-admin-olcham-row .input-unit input { width: 100%; }
+.paket-admin-olcham-row .input-unit input { width: 100%; min-width: 0; padding-left: 8px !important; padding-right: 4px !important; font-variant-numeric: tabular-nums; }
+.paket-admin-olcham-row .input-unit span { padding: 0 7px; }
+/* O'lcham maydonlarida strelka (spinner) joy egallab, raqamni qirqmasin */
+.paket-admin-olcham-row input[type="number"]::-webkit-inner-spin-button,
+.paket-admin-olcham-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.paket-admin-olcham-row input[type="number"] { -moz-appearance: textfield; }
+.paket-std-badge { display: inline-block; font-size: 0.72rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 2px 8px; }
 @media (max-width: 720px) {
     .paket-olcham-row { grid-template-columns: 1fr; }
+}
+
+/* Admin: boshqa bo'limdagi umumiy sozlamaga yo'naltiruvchi izoh */
+.admin-link-hint {
+    background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid var(--primary);
+    color: #1e3a8a; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.82rem; line-height: 1.5;
 }
