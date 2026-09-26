@@ -1,5 +1,5 @@
     let defaultPrices = {
-        flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000,
+        flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000, konvert: 1500, otkritka: 2000,
         futbolka: 45000, kepka: 25000, svitshot: 75000, xudi: 95000, jiletka: 85000, shoper: 20000,
         ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000,
         baner: 35000, orakal: 45000, setka_orakal: 50000, tumanka: 40000, xolst: 85000,
@@ -19,7 +19,9 @@
             { key: 'paket', name: 'Paket', icon: '🛍️' },
             { key: 'kalendar', name: 'Kalendar', icon: '📅' },
             { key: 'papka', name: 'Papka', icon: '📁' },
-            { key: 'kubarik', name: 'Kubarik', icon: '🧊' }
+            { key: 'kubarik', name: 'Kubarik', icon: '🧊' },
+            { key: 'konvert', name: 'Konvert', icon: '✉️' },
+            { key: 'otkritka', name: 'Otkritka', icon: '💌' }
         ],
         textile: [
             { key: 'futbolka', name: 'Futbolka', icon: '👕' },
@@ -275,6 +277,8 @@
     let previousScreenId = 'selectionScreen';
 
     function showScreen(screenId) {
+        // Admin panelda saqlanmagan o'zgarish bo'lsa — chiqishdan oldin so'raladi (admin-ux.js)
+        if (typeof adminEkranidanChiqishMumkinmi === 'function' && !adminEkranidanChiqishMumkinmi(screenId)) return;
         if (screenId !== currentScreenId) {
             previousScreenId = currentScreenId;
             currentScreenId = screenId;
@@ -948,6 +952,7 @@
         }
         try {
             openProductManagerIchki(key, name);
+            if (typeof adminUxMahsulotOchildi === 'function') adminUxMahsulotOchildi(key, name);
         } catch (e) {
             console.error(`"${key}" admin bazasini ochishda xato:`, e);
             showToast("⚠️ Bu mahsulot bazasini ochishda xato: " + e.message);
@@ -966,7 +971,8 @@
         let isBloknot = (key === 'bloknot');
         let isPapka = (key === 'papka');
         let isKalendar = (key === 'kalendar');
-        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar;
+        let isKubarik = (key === 'kubarik');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik;
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
         let isReklamaStend = reklamaStendTypes.includes(key);
@@ -977,6 +983,9 @@
         document.getElementById('bloknotAdminBox').style.display = isBloknot ? 'block' : 'none';
         document.getElementById('papkaAdminBox').style.display = isPapka ? 'block' : 'none';
         document.getElementById('kalendarAdminBox').style.display = isKalendar ? 'block' : 'none';
+        document.getElementById('kubarikAdminBox').style.display = isKubarik ? 'block' : 'none';
+        // Baner/Orakal/... — maksimal chop eni (reklama.js)
+        if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
         document.getElementById('reklamaStendAdminBox').style.display = isReklamaStend ? 'block' : 'none';
         document.getElementById('bayroqAdminBox').style.display = isBayroq ? 'block' : 'none';
@@ -992,7 +1001,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isPapka || isKalendar || isTextile || isReklamaStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isTextile || isReklamaStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1031,8 +1040,13 @@
             renderAdminKalendarTables();
             return;
         }
+        if (isKubarik) {
+            renderAdminKubarik();
+            return;
+        }
         if (isPoligrafiya) {
             renderAdminPoligrafiyaGsmTable();
+            renderAdminPoliMahsulotSozlama();
             return;
         }
 
@@ -1260,6 +1274,9 @@ function generateForm(type) {
     else if (type === 'kalendar') {
         html = buildKalendarForm();
     }
+    else if (type === 'kubarik') {
+        html = buildKubarikForm();
+    }
     else if (type === 'doorhanger') {
         html = buildDoorhangerForm();
     }
@@ -1291,6 +1308,11 @@ function generateForm(type) {
 
     if (type === 'kalendar') {
         renderKalendarOptions();
+        return;
+    }
+
+    if (type === 'kubarik') {
+        renderKubarikOptions();
         return;
     }
 
@@ -1387,6 +1409,12 @@ function calculateIchki() {
         }
         else if (activeProductType === 'kalendar') {
             let res = calculateKalendar(qty);
+            baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+        }
+        else if (activeProductType === 'kubarik') {
+            let res = calculateKubarik(qty);
             baseUnitPrice = res.unitPrice;
             details = res.details;
             costItems = res.costItems || [];

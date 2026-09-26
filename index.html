@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: cf58c1898dd68455 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 706e34d820293a7c -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -89,6 +89,8 @@
             <div class="product-card" onclick="openCalc('kalendar', 'Kalendar')"><div class="icon">📅</div><h3>Kalendar</h3></div>
             <div class="product-card" onclick="openCalc('papka', 'Papka')"><div class="icon">📁</div><h3>Papka</h3></div>
             <div class="product-card" onclick="openCalc('kubarik', 'Kubarik')"><div class="icon">🧊</div><h3>Kubarik</h3></div>
+            <div class="product-card" onclick="openCalc('konvert', 'Konvert')"><div class="icon">✉️</div><h3>Konvert</h3></div>
+            <div class="product-card" onclick="openCalc('otkritka', 'Otkritka')"><div class="icon">💌</div><h3>Otkritka</h3></div>
         </div>
 
         <div class="section-title">2. TEXTILE MAHSULOTLARI</div>
@@ -266,8 +268,17 @@
         </div>
 
         <div id="adminSpecificProductManager" style="display: none;">
-            <button class="btn btn-outline" style="margin-bottom: 20px;" onclick="closeProductManager()">⬅️ Mahsulotlar ro'yxatiga qaytish</button>
-            <h2 id="currentManagingTitle" style="margin-bottom: 20px; color: var(--primary);"></h2>
+            <!-- Yuqori panel (umumiy/admin-ux.js): yo'l, mahsulot almashtirish, saqlash holati -->
+            <div class="admin-toolbar">
+                <button class="btn btn-outline admin-toolbar-back" onclick="adminOrqaga()" title="Mahsulotlar ro'yxatiga qaytish">⬅️ Ro'yxat</button>
+                <div class="admin-toolbar-title">
+                    <div class="admin-breadcrumb" id="adminBreadcrumb">Admin panel</div>
+                    <h2 id="currentManagingTitle"></h2>
+                </div>
+                <select id="adminProductSwitcher" class="admin-product-switcher" data-ux-skip onchange="adminMahsulotAlmashtir(this.value)" title="Boshqa mahsulotga o'tish"></select>
+                <span id="adminSaveState" class="admin-save-state">✓ Hammasi saqlangan</span>
+            </div>
+            <div id="adminSectionNav" class="admin-section-nav" style="display:none;"></div>
 
             <!-- OFSET PECHAT ADMIN PANEL BLOKI -->
             <div id="ofsetAdminPanelBox" style="display: none; margin-bottom: 28px;">
@@ -466,6 +477,40 @@
 
             <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
             <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" id="poliMahsulotSozlamaCard" style="display:none; margin-bottom:16px;">
+                    <div class="add-pen-card-title">⚙️ Mahsulot sozlamalari</div>
+                    <p class="admin-hint">O'lcham, ofset minimal tiraji va qo'shimcha ishlov narxi. Adad minimal tirajdan kam bo'lsa,
+                        kalkulyatorda Ofset tugmasi o'chadi va narx Raqamli (Sifravoy) pechatda hisoblanadi. 0 — cheklov yo'q.</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>Tayyor o'lcham</label>
+                            <input type="text" id="poliSozTayyorOlcham" placeholder="110x220mm">
+                            <small>Mijozga ko'rsatiladi</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Bichish (yoyilgan) o'lcham</label>
+                            <input type="text" id="poliSozYoyilganOlcham" placeholder="bo'sh = tayyor o'lcham">
+                            <small>Narx shu o'lcham bo'yicha hisoblanadi</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Ofset minimal tiraji</label>
+                            <div class="input-unit"><input type="number" id="poliSozOfsetMin" min="0" step="50"><span>dona</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Qo'shimcha ishlov nomi</label>
+                            <input type="text" id="poliSozIshlovNomi" placeholder="Vyrubka + skleyka">
+                        </div>
+                        <div class="form-group">
+                            <label>Qo'shimcha ishlov narxi</label>
+                            <div class="input-unit"><input type="number" id="poliSozIshlovNarxi" min="0"><span>so'm/dona</span></div>
+                            <small>Marjasiz tannarx. 0 — qo'shilmaydi</small>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveAdminPoliMahsulotSozlama()">💾 Sozlamalarni saqlash</button>
+                    </div>
+                </div>
+
                 <div class="add-pen-card" id="poligrafiyaGsmPriceCard">
                     <div class="add-pen-card-title">⚖️ Ruxsat etilgan Qog'oz Grammajlari</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px;">Ushbu mahsulot uchun qaysi qog'oz grammajlari ishlatilishi mumkinligini belgilang — har biri alohida kartochka. Narx bu yerda kiritilmaydi: menejer kalkulyatorda grammajni tanlaganda, narx tanlangan Ofset yoki Raqamli (Sifravoy) Pechat bo'limidagi qog'oz bazasidan avtomatik olinadi. "★ Standart" belgilangan kartochka mijoz/menejer ekranida avtomatik tanlangan holda chiqadi.</p>
@@ -476,6 +521,62 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- KUBARIK ADMIN PANEL BLOKI -->
+            <div id="kubarikAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🧊 Kubarik — umumiy sozlamalar</div>
+                    <p class="admin-hint">Kubarik Bloknot kabi hisoblanadi: qog'oz narxi Ofset bo'limi bazasidan (A3 ofset) olinadi.
+                        Kerakli A3 varoq = adad × varaq soni ÷ 1 A3 dagi bo'lak + zapas.</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>O'lcham</label>
+                            <input type="text" id="kubarikOlcham" placeholder="90x90x90mm">
+                            <small>Mijozga ko'rsatiladi</small>
+                        </div>
+                        <div class="form-group">
+                            <label>1 A3 varaqdagi bo'lak</label>
+                            <div class="input-unit"><input type="number" id="kubarikA3Bolak" min="1"><span>dona</span></div>
+                            <small>90x90 uchun 12 (3 × 4)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Zapas (tirajga bir marta)</label>
+                            <div class="input-unit"><input type="number" id="kubarikZapas" min="0"><span>A3 varaq</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📋 Kubarik turlari</div>
+                    <p class="admin-hint">Har bir tur o'z qog'ozi, varaq soni va narxlariga ega. "Pechatli" belgilansa — har bir varaqqa
+                        1+0 ofset pechat (forma + bosma) qo'shiladi. Narxlar — marjasiz tannarx, so'm/dona.</p>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:1080px;">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:110px;">Nomi</th>
+                                    <th style="min-width:110px;">Qog'oz turi</th>
+                                    <th style="min-width:80px;">Grammaj</th>
+                                    <th style="min-width:90px;">Varaq soni</th>
+                                    <th style="text-align:center;">Pechatli</th>
+                                    <th style="min-width:140px;">Qo'shimcha nomi</th>
+                                    <th style="min-width:110px;">Qo'shimcha (so'm)</th>
+                                    <th style="min-width:110px;">Yig'ish (so'm)</th>
+                                    <th style="text-align:center;">Standart</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="kubarikTurlarBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn" style="background:#4f46e5;" onclick="addKubarikTur()">+ Yangi tur</button>
+                        <button class="btn btn-success" onclick="saveKubarikConfig()">💾 Kubarik sozlamalarini saqlash</button>
+                    </div>
+                </div>
             </div>
 
             <!-- DOORHANGER — QO'SHIMCHA (VISOCHKA) ADMIN PANEL BLOKI -->
@@ -753,6 +854,24 @@
                 </div>
                 <div style="display:flex; justify-content:flex-end;">
                     <button class="btn btn-success" onclick="saveKalendarConfig()">💾 Kalendar sozlamalarini saqlash</button>
+                </div>
+            </div>
+
+            <!-- BANER / ORAKAL / TUMANKA / SETKA / XOLST — MAKSIMAL CHOP ENI -->
+            <div id="reklamaBanAdminBox" style="display: none; margin-bottom: 16px;">
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📏 Maksimal chop eni (stanok)</div>
+                    <p class="admin-hint">Stanok bir bo'lakda (ulanishsiz) shu kenglikkacha chop etadi. Mijoz kiritgan o'lchamning
+                        ikkala tomoni ham shundan katta bo'lsa, kalkulyatorda "ulanish bilan bo'ladi" ogohlantirishi chiqadi. 0 — cheklov yo'q.</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>Maksimal eni</label>
+                            <div class="input-unit"><input type="number" id="reklamaMaxEniInput" min="0" step="0.1"><span>metr</span></div>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveReklamaMaxEni()">💾 Saqlash</button>
+                    </div>
                 </div>
             </div>
 
@@ -1253,6 +1372,7 @@
 <script src="bolimlar/reklama/reklama.js"></script>
 <script src="umumiy/custom-products.js"></script>
 <script src="umumiy/full-calc.js"></script>
+<script src="umumiy/admin-ux.js"></script>
 <script src="umumiy/ishga-tushirish.js"></script>
 </body>
 </html>

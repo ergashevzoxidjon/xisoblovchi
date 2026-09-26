@@ -211,8 +211,17 @@
         </div>
 
         <div id="adminSpecificProductManager" style="display: none;">
-            <button class="btn btn-outline" style="margin-bottom: 20px;" onclick="closeProductManager()">⬅️ Mahsulotlar ro'yxatiga qaytish</button>
-            <h2 id="currentManagingTitle" style="margin-bottom: 20px; color: var(--primary);"></h2>
+            <!-- Yuqori panel (umumiy/admin-ux.js): yo'l, mahsulot almashtirish, saqlash holati -->
+            <div class="admin-toolbar">
+                <button class="btn btn-outline admin-toolbar-back" onclick="adminOrqaga()" title="Mahsulotlar ro'yxatiga qaytish">⬅️ Ro'yxat</button>
+                <div class="admin-toolbar-title">
+                    <div class="admin-breadcrumb" id="adminBreadcrumb">Admin panel</div>
+                    <h2 id="currentManagingTitle"></h2>
+                </div>
+                <select id="adminProductSwitcher" class="admin-product-switcher" data-ux-skip onchange="adminMahsulotAlmashtir(this.value)" title="Boshqa mahsulotga o'tish"></select>
+                <span id="adminSaveState" class="admin-save-state">✓ Hammasi saqlangan</span>
+            </div>
+            <div id="adminSectionNav" class="admin-section-nav" style="display:none;"></div>
 
             <!-- @include ofset/admin -->
             <!-- @include sifravoy/admin -->
@@ -527,6 +536,7 @@
 <script src="bolimlar/reklama/reklama.js"></script>
 <script src="umumiy/custom-products.js"></script>
 <script src="umumiy/full-calc.js"></script>
+<script src="umumiy/admin-ux.js"></script>
 <script src="umumiy/ishga-tushirish.js"></script>
 </body>
 </html>

@@ -15,9 +15,10 @@ umumiy/
   core.js                   ← login, navigatsiya, init(), generateForm()/calculate() tarqatuvchilari
   custom-products.js        ← admin qo'shadigan "maxsus" mahsulotlar
   full-calc.js              ← 👁️ to'liq hisob-kitob modali
+  admin-ux.js               ← admin panel: yuqori panel, tez o'tish, saqlanmagan o'zgarishlar, Ctrl+S
   ishga-tushirish.js        ← oxirgi yuklanadi: init() ni chaqiradi
 bolimlar/<nomi>/<nomi>.html|.css|.js
-  poligrafiya  (Flayer, Listovka, Doorhanger, Buklet, Bloknot, Paket, Kalendar, Papka, Kubarik)
+  poligrafiya  (Flayer, Listovka, Doorhanger, Buklet, Bloknot, Paket, Kalendar, Papka, Kubarik, Konvert, Otkritka)
   textile      (Futbolka ... Shoper, Bayroqlar)
   suvenir      (Ruchka, Termos, ... Zontik)
   reklama      (Baner, Orakal, ..., Roll Up, Pauk, PopUp, PromoStoyka)
@@ -53,6 +54,25 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
   `xavfsizOl(() => ..., zaxira)` yoki `typeof fn === 'function'` bilan o'rang.
 - Bir nechta bo'lim ishlatadigan narsa (tiraj jadvali funksiyalari, `taxiNarxi` — yagona umumiy taxi narxi, klishe narxlari,
   `selectedPrintType`, `placeholderImg`, `convertBase64`) `umumiy/yordamchi.js` da turadi.
+
+## Muhim biznes qoidalari
+
+- **Ofset minimal tiraji** (`poligrafiyaMahsulotSozlama`, `POLI_DVIGATEL_TURLARI` — Flayer, Listovka, Buklet,
+  Konvert, Otkritka): adad kam bo'lsa Ofset tugmasi `disabled`, hisob Raqamli pechatda. Admin → mahsulot →
+  "⚙️ Mahsulot sozlamalari" (bichish o'lchami, qo'shimcha ishlov narxi ham shu yerda).
+- **Kubarik** (`kubarikConfig`): Bloknot kabi — qog'oz Ofset A3 bazasidan, turlar (Oq/Rangli/Kleyli/Pechatli) admin tahrirlaydi.
+- **Reklama maksimal chop eni** (`reklamaMaxEni`: baner 3.1, orakal/setka/tumanka 1.5 m): IKKALA tomon ham
+  kattaroq bo'lsa ogohlantirish (aylantirib sig'sa — yo'q).
+- **Taxi** — bitta umumiy `taxiNarxi`, har buyurtmaga bir marta, marja bilan. **Marja** — `marjaOl()`/`marjaQiymati()`
+  (0% ham to'g'ri; kiritilgan qiymat mahsulotlar orasida eslab qolinadi).
+- Admin panelda har qanday `save...` nomli tugma `admin-ux.js` tomonidan "saqlandi" deb hisoblanadi — yangi
+  saqlash tugmasi nomini ham `save` bilan boshlang.
+
+## Avto-push
+
+`avto-push.ps1` — Windows vazifasi ("Xisoblovchi avto-push", har 10 daqiqa, `AVTO-SOZLASH.bat`). Faqat haqiqiy
+o'zgarishni, fayllar 2 daqiqa tinch turgach, bitta ma'noli commit bilan yuklaydi; `avto-push.log` hech qachon commit
+qilinmaydi. Katta ishni qo'lda, tushunarli xabar bilan commit qilish afzal.
 
 ## Yangi mahsulot qo'shish
 

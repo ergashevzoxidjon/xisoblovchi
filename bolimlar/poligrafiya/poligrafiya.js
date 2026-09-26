@@ -7,12 +7,14 @@
         paket: "250x350mm",
         kalendar: "297x420mm",
         papka: "220x310mm",
-        kubarik: "90x90x90mm"
+        kubarik: "90x90x90mm",
+        konvert: "110x220mm",
+        otkritka: "100x150mm"
     };
 
     let poligrafiyaSideTypes = {
         flayer: 1.6, listovka: 1.6, doorhanger: 1.6, buklet: 1.6, bloknot: 1.6,
-        paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6
+        paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6, konvert: 1.6, otkritka: 1.6
     };
 
     // Bloknot narxi endi (deyarli) to'liq real ishlab chiqarish xarajatlaridan hisoblanadi:
@@ -115,6 +117,17 @@
             { gsm: 300, paperType: 'Karton', isDefault: true },
             { gsm: 350, paperType: 'Karton', isDefault: false },
             { gsm: 400, paperType: 'Karton', isDefault: false }
+        ],
+        konvert: [
+            { gsm: 80, paperType: 'Ofset', isDefault: false },
+            { gsm: 130, paperType: 'Melovka', isDefault: true },
+            { gsm: 150, paperType: 'Melovka', isDefault: false }
+        ],
+        otkritka: [
+            { gsm: 250, paperType: 'Melovka', isDefault: false },
+            { gsm: 300, paperType: 'Melovka', isDefault: true },
+            { gsm: 300, paperType: 'Karton', isDefault: false },
+            { gsm: 350, paperType: 'Karton', isDefault: false }
         ]
     };
     const POLIGRAFIYA_PAPER_TYPES = ['Ofset', 'Melovka', 'Karton', "Dizayn qog'ozi"];
@@ -125,6 +138,27 @@
     // qog'oz bazasidan hisoblanadi (pastda calculateResult_poligrafiya ichida).
     let selectedPoligrafiyaEngine = 'ofset';
     let selectedPoligrafiyaSides = 2;
+
+    // ====================== OFSET/RAQAMLI TANLANADIGAN MAHSULOTLAR SOZLAMASI ======================
+    // Flayer, Listovka, Buklet, Konvert, Otkritka — umumiy dvigatel (qog'oz grammaji + Ofset yoki
+    // Raqamli pechat). Har biri uchun admin belgilaydi:
+    //   ofsetMinTiraj  — ofsetda hisoblash uchun eng kam adad. Kiritilgan adad undan kam bo'lsa,
+    //                    Ofset tugmasi o'chadi va hisob avtomatik Raqamli (Sifravoy) pechatda bo'ladi.
+    //   yoyilganOlcham — bichish (yoyilgan) o'lchami, masalan Konvert 110x220 → 230x330mm.
+    //                    Bo'sh bo'lsa, tayyor o'lcham (poligrafiyaSizeLabels) bo'yicha hisoblanadi.
+    //   ishlovNomi/ishlovNarxi — qo'shimcha ishlov (vyrubka+skleyka, bigovka), so'm/dona, marjasiz.
+    const POLI_DVIGATEL_TURLARI = ['flayer', 'listovka', 'buklet', 'konvert', 'otkritka'];
+    let poligrafiyaMahsulotSozlama = {
+        flayer:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 },
+        listovka: { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 },
+        buklet:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: 'Bigovka (buklash)', ishlovNarxi: 0 },
+        konvert:  { ofsetMinTiraj: 1000, yoyilganOlcham: '230x330mm', ishlovNomi: 'Vyrubka + skleyka', ishlovNarxi: 300 },
+        otkritka: { ofsetMinTiraj: 1000, yoyilganOlcham: '200x150mm', ishlovNomi: 'Bigovka (buklash)', ishlovNarxi: 100 }
+    };
+
+    function poliSozlama(type) {
+        return poligrafiyaMahsulotSozlama[type] || { ofsetMinTiraj: 0, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 };
+    }
 
     function renderAdminPoligrafiyaGsmTable() {
         let grid = document.getElementById('adminPoligrafiyaGsmTableBody');
@@ -158,6 +192,52 @@
                 </div>
             </div>
         `).join('');
+    }
+
+    // ---- Admin: mahsulot sozlamalari (o'lcham, ofset minimal tiraji, qo'shimcha ishlov) ----
+    function renderAdminPoliMahsulotSozlama() {
+        let card = document.getElementById('poliMahsulotSozlamaCard');
+        if (!card) return;
+        let key = currentManagingProduct;
+        let dvigatelli = POLI_DVIGATEL_TURLARI.includes(key);
+        card.style.display = dvigatelli ? 'block' : 'none';
+        if (!dvigatelli) return;
+        let s = poliSozlama(key);
+        let q = id => document.getElementById(id);
+        q('poliSozTayyorOlcham').value = poligrafiyaSizeLabels[key] || '';
+        q('poliSozYoyilganOlcham').value = s.yoyilganOlcham || '';
+        q('poliSozOfsetMin').value = s.ofsetMinTiraj || 0;
+        q('poliSozIshlovNomi').value = s.ishlovNomi || '';
+        q('poliSozIshlovNarxi').value = s.ishlovNarxi || 0;
+    }
+
+    function saveAdminPoliMahsulotSozlama() {
+        let key = currentManagingProduct;
+        if (!POLI_DVIGATEL_TURLARI.includes(key)) return;
+        let q = id => document.getElementById(id);
+        let tayyor = q('poliSozTayyorOlcham').value.trim();
+        let yoyilgan = q('poliSozYoyilganOlcham').value.trim();
+        if (!parsePoligrafiyaSizeLabel(tayyor)) {
+            showToast("⚠️ Tayyor o'lchamni \"97x210mm\" ko'rinishida kiriting!");
+            return;
+        }
+        if (yoyilgan && !parsePoligrafiyaSizeLabel(yoyilgan)) {
+            showToast("⚠️ Bichish o'lchamini \"230x330mm\" ko'rinishida kiriting yoki bo'sh qoldiring!");
+            return;
+        }
+        poligrafiyaSizeLabels[key] = tayyor;
+        poligrafiyaMahsulotSozlama[key] = {
+            ofsetMinTiraj: Math.max(0, parseInt(q('poliSozOfsetMin').value) || 0),
+            yoyilganOlcham: yoyilgan,
+            ishlovNomi: q('poliSozIshlovNomi').value.trim(),
+            ishlovNarxi: Math.max(0, parseFloat(q('poliSozIshlovNarxi').value) || 0)
+        };
+        localStorage.setItem('erp_poligrafiya_size_labels', JSON.stringify(poligrafiyaSizeLabels));
+        localStorage.setItem('erp_poligrafiya_mahsulot_sozlama', JSON.stringify(poligrafiyaMahsulotSozlama));
+        let m = poligrafiyaMahsulotSozlama[key];
+        if (typeof logAudit === 'function') logAudit("Poligrafiya mahsulot sozlamasi o'zgartirildi",
+            `${key}: ${tayyor}${yoyilgan ? ' (bichish ' + yoyilgan + ')' : ''}, ofset min ${m.ofsetMinTiraj} dona, ${m.ishlovNomi || 'ishlov'} ${m.ishlovNarxi} so'm`);
+        showToast("💾 Mahsulot sozlamalari saqlandi!");
     }
 
     function addPoligrafiyaGsmRow() {
@@ -709,6 +789,201 @@
         // mahsulotlariga bir xil, bloknot uchun alohida emas).
 
         return { unitPrice: unit, details: qismlar.join(' | '), costItems };
+    }
+
+    // ====================== KUBARIK (poligrafiya, Bloknot kabi — Ofset qog'oz bazasidan) ======================
+    // Kubarik — kvadrat varaqlardan yig'ilgan blok (standart 90x90mm, balandligi 90mm). Turlari qog'oz/yelim
+    // bo'yicha farqlanadi (Oq, Rangli, Kleyli, Pechatli) — har birini admin tahrirlaydi. Hisob:
+    //   A3 varoqlar = ceil(adad × varaqSoni / a3dagiBolak) + zapasVaraq (tirajga bir marta)
+    //   Qog'oz narxi — Ofset bo'limi bazasidan (turning qog'oz turi/grammaji, A3 ofset).
+    //   Pechatli tur — qo'shimcha forma + bosma (1+0, A3 ofset).
+    //   + turning qo'shimcha narxi (rangli qog'oz ustamasi, yelim...) + yig'ish — so'm/dona, marjasiz.
+    let kubarikConfig = {
+        olcham: '90x90x90mm',
+        a3dagiBolak: 12,   // 1 A3 (297x420) varaqdan chiqadigan 90x90 bo'lak soni (3 × 4)
+        zapasVaraq: 50,    // tirajga bir marta qo'shiladigan zapas A3 varaq
+        turlar: [
+            { key: 'oq',       name: 'Oq',       paperType: 'Ofset', gsm: 80, varaqSoni: 900, pechatli: false, qoshimchaNomi: '',                       qoshimchaNarx: 0,    yigishNarxi: 3000, isDefault: true },
+            { key: 'rangli',   name: 'Rangli',   paperType: 'Ofset', gsm: 80, varaqSoni: 900, pechatli: false, qoshimchaNomi: "Rangli qog'oz ustamasi", qoshimchaNarx: 4000, yigishNarxi: 3000, isDefault: false },
+            { key: 'kleyli',   name: 'Kleyli',   paperType: 'Ofset', gsm: 80, varaqSoni: 500, pechatli: false, qoshimchaNomi: 'Yelim (kley) qatlami',   qoshimchaNarx: 5000, yigishNarxi: 3500, isDefault: false },
+            { key: 'pechatli', name: 'Pechatli', paperType: 'Ofset', gsm: 80, varaqSoni: 900, pechatli: true,  qoshimchaNomi: '',                       qoshimchaNarx: 0,    yigishNarxi: 3000, isDefault: false }
+        ]
+    };
+    let kubarikSelected = { turIndex: 0 };
+
+    function kubarikTuri() {
+        return kubarikConfig.turlar[kubarikSelected.turIndex] || kubarikConfig.turlar[0] || null;
+    }
+
+    function buildKubarikForm() {
+        let def = kubarikConfig.turlar.findIndex(t => t.isDefault);
+        kubarikSelected = { turIndex: def >= 0 ? def : 0 };
+        return `
+            <div class="poli-calc">
+                <div class="poli-spec-row">
+                    <div class="poli-spec-icon">📐</div>
+                    <div>
+                        <div class="poli-spec-label">Standart o'lcham</div>
+                        <div class="poli-spec-value">${kubarikConfig.olcham}</div>
+                    </div>
+                </div>
+                <div class="step-title">Kubarik turi</div>
+                <div class="options-group" id="kubarikTurGroup"></div>
+                <div id="kubarikInfoText" class="kubarik-info"></div>
+                <div class="form-group poli-qty-group">
+                    <label>Adad (dona)</label>
+                    <input type="number" id="inpQuantity" value="100" min="1" oninput="calculate()">
+                </div>
+            </div>
+        `;
+    }
+
+    function renderKubarikOptions() {
+        let group = document.getElementById('kubarikTurGroup');
+        if (!group) return;
+        if (kubarikConfig.turlar.length === 0) {
+            group.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">⚠️ Kubarik turlari kiritilmagan — Admin panelda kiriting.</p>`;
+            return;
+        }
+        group.innerHTML = kubarikConfig.turlar.map((t, i) => `
+            <button type="button" class="opt-btn ${i === kubarikSelected.turIndex ? 'active' : ''}" onclick="selectKubarikTur(${i})">${t.name}</button>
+        `).join('');
+        let t = kubarikTuri();
+        let info = document.getElementById('kubarikInfoText');
+        if (info && t) {
+            info.innerText = `${t.varaqSoni} varaq · ${t.paperType} ${t.gsm}gr`
+                + (t.pechatli ? ' · har bir varaqqa pechat (1+0)' : '')
+                + (t.qoshimchaNomi ? ` · ${t.qoshimchaNomi}` : '');
+        }
+    }
+
+    function selectKubarikTur(i) {
+        kubarikSelected.turIndex = i;
+        renderKubarikOptions();
+        calculate();
+    }
+
+    function calculateKubarik(qty) {
+        qty = Math.max(parseInt(qty) || 1, 1);
+        let t = kubarikTuri();
+        if (!t) return { unitPrice: 0, details: "⚠️ Kubarik turlari kiritilmagan — Admin panelda kiriting.", costItems: [] };
+
+        let unit = 0;
+        let costItems = [];
+        let qismlar = [`Kubarik ${t.name} (${kubarikConfig.olcham})`, `${t.varaqSoni} varaq`];
+
+        // 1) Qog'oz (+ pechatli turda forma va bosma) — Ofset A3
+        let bolak = Math.max(1, parseInt(kubarikConfig.a3dagiBolak) || 1);
+        let a3 = Math.ceil(qty * (parseInt(t.varaqSoni) || 0) / bolak) + (parseInt(kubarikConfig.zapasVaraq) || 0);
+        let r = calculateOfsetJobFixedSheets('A3', qty, 1, t.paperType, parseInt(t.gsm) || 0, a3, false);
+        if (r) {
+            unit += r.totalPaperCost / qty;
+            costItems.push({ label: `Qog'oz (${t.paperType} ${t.gsm}gr, ${r.rawName})`, qty: `${r.totalSheets} xom varoq (${a3} A3)`, total: Math.round(r.totalPaperCost) });
+            if (t.pechatli) {
+                unit += (r.totalPlateCost + r.totalPrintCost) / qty;
+                costItems.push({ label: 'Forma (klishe)', qty: `${r.totalPlates} plastina`, total: Math.round(r.totalPlateCost) });
+                costItems.push({ label: 'Bosma (pechat 1+0)', qty: `${r.totalWorkingSheets} ta A3 varoq`, total: Math.round(r.totalPrintCost) });
+                qismlar.push('pechat 1+0');
+            }
+        } else {
+            qismlar.push(`⚠️ ${t.paperType} ${t.gsm}gr uchun Ofset A3 bazasida narx topilmadi — admin panelda tekshiring`);
+        }
+
+        // 2) Turning qo'shimcha narxi (rangli qog'oz ustamasi, yelim...)
+        let qoshimcha = parseFloat(t.qoshimchaNarx) || 0;
+        if (qoshimcha > 0) {
+            unit += qoshimcha;
+            costItems.push({ label: t.qoshimchaNomi || "Qo'shimcha", qty: `${qty} dona`, total: Math.round(qoshimcha * qty) });
+            if (t.qoshimchaNomi) qismlar.push(t.qoshimchaNomi.toLowerCase());
+        }
+
+        // 3) Yig'ish
+        let yigish = parseFloat(t.yigishNarxi) || 0;
+        unit += yigish;
+        costItems.push({ label: "Yig'ish", qty: `${qty} dona`, total: Math.round(yigish * qty) });
+
+        return { unitPrice: unit, details: qismlar.join(' | '), costItems };
+    }
+
+    // ---- Admin: Kubarik ----
+    function renderAdminKubarik() {
+        let q = id => document.getElementById(id);
+        if (!q('kubarikTurlarBody')) return;
+        q('kubarikOlcham').value = kubarikConfig.olcham;
+        q('kubarikA3Bolak').value = kubarikConfig.a3dagiBolak;
+        q('kubarikZapas').value = kubarikConfig.zapasVaraq;
+        let esc = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        q('kubarikTurlarBody').innerHTML = kubarikConfig.turlar.length === 0
+            ? `<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:16px;">Hozircha tur yo'q — "+ Yangi tur" tugmasini bosing.</td></tr>`
+            : kubarikConfig.turlar.map((t, i) => `
+            <tr>
+                <td><input type="text" id="kubTur_name_${i}" value="${esc(t.name)}"></td>
+                <td><select id="kubTur_paper_${i}">${POLIGRAFIYA_PAPER_TYPES.map(p => `<option value="${p}" ${t.paperType === p ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+                <td><input type="number" id="kubTur_gsm_${i}" value="${t.gsm}" min="1"></td>
+                <td><input type="number" id="kubTur_varaq_${i}" value="${t.varaqSoni}" min="1"></td>
+                <td style="text-align:center;"><input type="checkbox" id="kubTur_pechat_${i}" ${t.pechatli ? 'checked' : ''}></td>
+                <td><input type="text" id="kubTur_qnomi_${i}" value="${esc(t.qoshimchaNomi)}" placeholder="masalan: Yelim"></td>
+                <td><input type="number" id="kubTur_qnarx_${i}" value="${t.qoshimchaNarx || 0}" min="0"></td>
+                <td><input type="number" id="kubTur_yigish_${i}" value="${t.yigishNarxi || 0}" min="0"></td>
+                <td style="text-align:center;"><input type="radio" name="kubTurDefault" id="kubTur_def_${i}" ${t.isDefault ? 'checked' : ''}></td>
+                <td style="text-align:right;"><button class="btn btn-danger" style="height:30px; padding:0 10px;" title="O'chirish" onclick="deleteKubarikTur(${i})">✕</button></td>
+            </tr>
+        `).join('');
+    }
+
+    // Jadvaldagi (hali saqlanmagan) qiymatlarni o'qib oladi — qator qo'shish/o'chirishda ular yo'qolmasligi uchun
+    function collectKubarikTurlarFromUI() {
+        return kubarikConfig.turlar.map((t, i) => {
+            let q = id => document.getElementById(id);
+            if (!q(`kubTur_name_${i}`)) return t;
+            return {
+                key: t.key || ('kub_' + Date.now().toString(36) + i),
+                name: q(`kubTur_name_${i}`).value.trim() || `Tur ${i + 1}`,
+                paperType: q(`kubTur_paper_${i}`).value,
+                gsm: Math.max(1, parseInt(q(`kubTur_gsm_${i}`).value) || 80),
+                varaqSoni: Math.max(1, parseInt(q(`kubTur_varaq_${i}`).value) || 1),
+                pechatli: q(`kubTur_pechat_${i}`).checked,
+                qoshimchaNomi: q(`kubTur_qnomi_${i}`).value.trim(),
+                qoshimchaNarx: Math.max(0, parseFloat(q(`kubTur_qnarx_${i}`).value) || 0),
+                yigishNarxi: Math.max(0, parseFloat(q(`kubTur_yigish_${i}`).value) || 0),
+                isDefault: q(`kubTur_def_${i}`).checked
+            };
+        });
+    }
+
+    function addKubarikTur() {
+        kubarikConfig.turlar = collectKubarikTurlarFromUI();
+        kubarikConfig.turlar.push({ key: 'kub_' + Date.now().toString(36), name: 'Yangi tur', paperType: 'Ofset', gsm: 80, varaqSoni: 900,
+            pechatli: false, qoshimchaNomi: '', qoshimchaNarx: 0, yigishNarxi: 3000, isDefault: kubarikConfig.turlar.length === 0 });
+        renderAdminKubarik();
+    }
+
+    function deleteKubarikTur(i) {
+        let turlar = collectKubarikTurlarFromUI();
+        if (!turlar[i] || !confirm(`"${turlar[i].name}" turini o'chirmoqchimisiz?`)) return;
+        let wasDefault = turlar[i].isDefault;
+        turlar.splice(i, 1);
+        if (wasDefault && turlar.length > 0) turlar[0].isDefault = true;
+        kubarikConfig.turlar = turlar;
+        renderAdminKubarik();
+    }
+
+    function saveKubarikConfig() {
+        let q = id => document.getElementById(id);
+        let olcham = q('kubarikOlcham').value.trim();
+        if (!olcham) { showToast("⚠️ O'lchamni kiriting!"); return; }
+        let turlar = collectKubarikTurlarFromUI();
+        if (turlar.length > 0 && !turlar.some(t => t.isDefault)) turlar[0].isDefault = true;
+        kubarikConfig = {
+            olcham,
+            a3dagiBolak: Math.max(1, parseInt(q('kubarikA3Bolak').value) || 1),
+            zapasVaraq: Math.max(0, parseInt(q('kubarikZapas').value) || 0),
+            turlar
+        };
+        localStorage.setItem('erp_kubarik_config', JSON.stringify(kubarikConfig));
+        if (typeof logAudit === 'function') logAudit("Kubarik sozlamalari o'zgartirildi", `${turlar.length} ta tur: ${turlar.map(t => t.name).join(', ')}`);
+        renderAdminKubarik();
+        showToast("💾 Kubarik sozlamalari saqlandi!");
     }
 
     // ====================== PAPKA (poligrafiya, FAQAT ofset, Karton) ======================
@@ -1630,6 +1905,10 @@
     // Menejer Ofset yoki Raqamli (Sifravoy) pechatni tanlaydi — narx shu bo'limning
     // haqiqiy qog'oz bazasidan hisoblanadi (calculateResult_poligrafiya ichida).
     function selectPoligrafiyaEngine(engine) {
+        // Adad ofset minimal tirajidan kam bo'lsa, Ofset tugmasi o'chirilgan — bosilsa ham hech narsa bo'lmaydi
+        let btn = document.querySelector(`#poligrafiyaEngineGroup [data-engine="${engine}"]`);
+        if (btn && btn.disabled) return;
+        poliAvtoRaqamli = false; // menejer o'zi tanladi
         selectedPoligrafiyaEngine = engine;
         document.querySelectorAll('#poligrafiyaEngineGroup .opt-btn').forEach(el => {
             el.classList.toggle('active', el.dataset.engine === engine);
@@ -1643,6 +1922,28 @@
             el.classList.toggle('active', parseInt(el.dataset.sides) === sides);
         });
         calculate();
+    }
+
+    // Ofset minimal tiraj tufayli avtomatik Raqamli pechatga o'tkazilganmi? (adad yetarli bo'lsa, qaytariladi)
+    let poliAvtoRaqamli = false;
+
+    // Ofset tugmasi holati va ogohlantirishni adadga moslaydi (calculateResult_poligrafiya chaqiradi)
+    function poliOfsetHolatiniYangila(ofsetMumkin, minTiraj, qty) {
+        let btn = document.querySelector('#poligrafiyaEngineGroup [data-engine="ofset"]');
+        if (btn) {
+            btn.disabled = !ofsetMumkin;
+            btn.classList.toggle('opt-btn-disabled', !ofsetMumkin);
+            btn.title = ofsetMumkin ? '' : `Ofset pechat uchun kamida ${minTiraj.toLocaleString()} dona kerak`;
+        }
+        document.querySelectorAll('#poligrafiyaEngineGroup .opt-btn').forEach(el => {
+            el.classList.toggle('active', el.dataset.engine === selectedPoligrafiyaEngine);
+        });
+        let box = document.getElementById('poliOfsetMinOgoh');
+        if (box) {
+            box.style.display = ofsetMumkin ? 'none' : 'block';
+            box.innerHTML = ofsetMumkin ? '' : `⚠️ Ofset pechat uchun eng kam adad — <b>${minTiraj.toLocaleString()} dona</b>. `
+                + `Siz ${qty.toLocaleString()} dona kiritdingiz, shuning uchun narx <b>Raqamli (Sifravoy) pechatda</b> hisoblandi.`;
+        }
     }
 
     // "97x210mm" kabi o'lcham yorlig'idan W x H (mm) raqamlarini ajratib oladi.
@@ -1694,6 +1995,7 @@ function generateFormHtml_poligrafiya(type) {
         let defaultIdx = gsmList.findIndex(g => g.isDefault);
         selectedPoligrafiyaGsmIndex = defaultIdx >= 0 ? defaultIdx : 0;
         selectedPoligrafiyaEngine = 'ofset';
+        poliAvtoRaqamli = false;
         selectedPoligrafiyaSides = (poligrafiyaSideTypes[type] === 1) ? 1 : 2;
         gsmHtml = `
             <div class="step-title">Qog'oz grammaji</div>
@@ -1704,6 +2006,7 @@ function generateFormHtml_poligrafiya(type) {
                 <button type="button" class="opt-btn active" data-engine="ofset" onclick="selectPoligrafiyaEngine('ofset')">🖨️ Ofset Pechat</button>
                 <button type="button" class="opt-btn" data-engine="raqamli" onclick="selectPoligrafiyaEngine('raqamli')">🖥️ Raqamli Pechat</button>
             </div>
+            <div id="poliOfsetMinOgoh" class="poli-ofset-min-ogoh" style="display:none;"></div>
 
             <div class="step-title">Bosma tomoni</div>
             <div class="options-group" id="poligrafiyaSidesGroup">
@@ -1764,8 +2067,24 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
         let g = gsmList[selectedPoligrafiyaGsmIndex] || gsmList[0];
         let paperTypeName = g.paperType || 'Melovka';
         let gsmLabel = ` | ${paperTypeName} ${g.gsm}gr`;
-        let size = parsePoligrafiyaSizeLabel(sizeLabel);
+        let sozlama = poliSozlama(activeProductType);
+        // Hisob bichish (yoyilgan) o'lchami bo'yicha — masalan Konvert yopishtirishdan oldingi shakl
+        let hisobOlcham = sozlama.yoyilganOlcham || sizeLabel;
+        let size = parsePoligrafiyaSizeLabel(hisobOlcham);
         let sides = (selectedPoligrafiyaSides === 1) ? 1 : 2;
+
+        // Ofset minimal tiraji: adad yetmasa — Raqamli pechatda hisoblanadi, Ofset tugmasi o'chadi
+        let minTiraj = parseInt(sozlama.ofsetMinTiraj) || 0;
+        let ofsetMumkin = !(minTiraj > 0 && qty < minTiraj);
+        if (!ofsetMumkin && selectedPoligrafiyaEngine === 'ofset') {
+            selectedPoligrafiyaEngine = 'raqamli';
+            poliAvtoRaqamli = true;
+        } else if (ofsetMumkin && poliAvtoRaqamli) {
+            selectedPoligrafiyaEngine = 'ofset';
+            poliAvtoRaqamli = false;
+        }
+        poliOfsetHolatiniYangila(ofsetMumkin, minTiraj, qty);
+
         let engine = (selectedPoligrafiyaEngine === 'raqamli') ? 'raqamli' : 'ofset';
         let engineLabel = engine === 'ofset' ? 'Ofset Pechat' : 'Raqamli Pechat';
         let priceFound = false;
@@ -1807,8 +2126,18 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
         }
 
         if (priceFound) {
-            details = (sizeLabel ? `Poligrafiya chop etish (${sizeLabel})` : "Poligrafiya chop etish")
+            details = (sizeLabel ? `Poligrafiya chop etish (${sizeLabel}${sozlama.yoyilganOlcham ? `, bichish ${sozlama.yoyilganOlcham}` : ''})` : "Poligrafiya chop etish")
                 + gsmLabel + ` | ${engineLabel} | ${sides === 1 ? 'Bir tomonlama' : 'Ikki tomonlama'}`;
+            if (!ofsetMumkin) details += ` (ofset uchun kamida ${minTiraj.toLocaleString()} dona)`;
+
+            // Qo'shimcha ishlov (vyrubka+skleyka, bigovka...) — so'm/dona
+            let ishlov = parseFloat(sozlama.ishlovNarxi) || 0;
+            if (ishlov > 0) {
+                let nomi = sozlama.ishlovNomi || "Qo'shimcha ishlov";
+                baseUnitPrice += ishlov;
+                costItems.push({ label: nomi, qty: `${qty} dona`, total: Math.round(ishlov * qty) });
+                details += ` | ${nomi}`;
+            }
         } else {
             baseUnitPrice = 0;
             details = `⚠️ ${paperTypeName} ${g.gsm}gr uchun ${engineLabel} bo'limida mos qog'oz topilmadi — administrator shu qog'ozni ${engineLabel} bo'limiga kiritishi kerak.`;
@@ -1852,6 +2181,33 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                 if (!Array.isArray(list)) return;
                 list.forEach(g => { if (!g.paperType) g.paperType = (key === 'doorhanger') ? 'Karton' : 'Melovka'; });
             });
+
+            let savedKubarik = localStorage.getItem('erp_kubarik_config');
+            if (savedKubarik) {
+                try {
+                    let parsed = JSON.parse(savedKubarik);
+                    if (parsed && typeof parsed === 'object') {
+                        kubarikConfig = {
+                            ...kubarikConfig, ...parsed,
+                            turlar: Array.isArray(parsed.turlar) ? parsed.turlar : kubarikConfig.turlar
+                        };
+                    }
+                } catch (e) {
+                    console.warn("Kubarik sozlamalarini o'qishda xato:", e);
+                }
+            }
+
+            let savedPoliSozlama = localStorage.getItem('erp_poligrafiya_mahsulot_sozlama');
+            if (savedPoliSozlama) {
+                try {
+                    let parsed = JSON.parse(savedPoliSozlama);
+                    Object.keys(parsed || {}).forEach(k => {
+                        poligrafiyaMahsulotSozlama[k] = { ...poliSozlama(k), ...parsed[k] };
+                    });
+                } catch (e) {
+                    console.warn("Poligrafiya mahsulot sozlamasini o'qishda xato:", e);
+                }
+            }
 
             let savedPoligrafiyaSideTypes = localStorage.getItem('erp_poligrafiya_side_types');
             if (savedPoligrafiyaSideTypes) {

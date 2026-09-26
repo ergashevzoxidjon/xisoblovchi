@@ -344,6 +344,45 @@
         xolst:         { xalqacha: false, reyka: true,  ustanovka: false, ploter: false }
     };
     let reklamaExtraPrices = { xalqacha: 1000, reyka: 5000, ustanovka: 50000, ploter: 3000 };
+
+    // ====================== MAKSIMAL CHOP ENI (stanok cheklovi) ======================
+    // Stanok bir bo'lakda (ulanishsiz) shu kenglikkacha chop etadi. Mahsulotning IKKALA tomoni ham
+    // shundan katta bo'lsa (ya'ni aylantirib ham sig'dirib bo'lmasa) — kalkulyatorda ogohlantirish
+    // chiqadi. 0 yoki yo'q — cheklov yo'q (masalan Xolst). Admin panelda o'zgartiriladi.
+    let reklamaMaxEni = { baner: 3.1, orakal: 1.5, setka_orakal: 1.5, tumanka: 1.5 };
+
+    function reklamaEniOgohlantirishi(type, w, h) {
+        let box = document.getElementById('reklamaEniOgoh');
+        if (!box) return false;
+        let max = parseFloat(reklamaMaxEni[type]) || 0;
+        let katta = max > 0 && w > max && h > max;
+        box.style.display = katta ? 'block' : 'none';
+        if (katta) {
+            let m = max.toLocaleString('ru-RU');
+            box.innerHTML = `⚠️ <b>Siz kiritgan o'lchamni to'liqligicha chop etishning iloji yo'q.</b> Maksimal ulanishsiz ${m} m chop etiladi, `
+                + `sizning o'lchamingiz ulanish bilan bo'ladi — shunga e'tiborli bo'ling. Qo'shimcha ma'lumotni mutaxassisdan oling.`;
+        }
+        return katta;
+    }
+
+    function renderAdminReklamaMaxEni(key) {
+        let box = document.getElementById('reklamaBanAdminBox');
+        if (!box) return;
+        let show = reklamaBanTypes.includes(key);
+        box.style.display = show ? 'block' : 'none';
+        if (show) document.getElementById('reklamaMaxEniInput').value = reklamaMaxEni[key] || 0;
+    }
+
+    function saveReklamaMaxEni() {
+        let key = currentManagingProduct;
+        let v = parseFloat(document.getElementById('reklamaMaxEniInput').value);
+        if (isNaN(v) || v < 0) { showToast("⚠️ 0 yoki undan katta son kiriting (metrda)!"); return; }
+        let eski = reklamaMaxEni[key] || 0;
+        reklamaMaxEni[key] = v;
+        localStorage.setItem('erp_reklama_max_eni', JSON.stringify(reklamaMaxEni));
+        if (typeof logAudit === 'function') logAudit("Maksimal chop eni o'zgartirildi", `${key}: ${eski} m → ${v} m`);
+        showToast("💾 Maksimal chop eni saqlandi!");
+    }
     function toggleReklamaExtra(name) {
         if (name === 'xalqacha') {
             let box = document.getElementById('xalqachaCountBox');
@@ -458,6 +497,8 @@ function generateFormHtml_reklama(type) {
                         <input type="number" id="inpHeight" value="1" min="0.1" step="0.1" oninput="calculate()">
                     </div>
                 </div>
+                ${(parseFloat(reklamaMaxEni[type]) || 0) > 0 ? `<div class="reklama-eni-hint">Ulanishsiz maksimal chop eni: <b>${reklamaMaxEni[type]} m</b></div>` : ''}
+                <div id="reklamaEniOgoh" class="reklama-eni-ogoh" style="display:none;"></div>
                 <div class="form-group" style="margin-bottom:12px;">
                     <label>Adad (dona):</label>
                     <input type="number" id="inpQuantity" value="1" min="1" oninput="calculate()">
@@ -476,6 +517,9 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
                 let sqMetr = w * h;
                 baseUnitPrice = sqMetr * baseCost;
                 details = `${w}m x ${h}m (${sqMetr.toFixed(2)} kv.m)`;
+                if (reklamaEniOgohlantirishi(activeProductType, w, h)) {
+                    details += ` | ⚠️ ulanish bilan (maks. ${reklamaMaxEni[activeProductType]} m)`;
+                }
 
                 let extraParts = [];
 
@@ -522,6 +566,13 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
     // xato faqat shu bo'limni o'chiradi, qolgan bo'limlar ishlayveradi.
     bolimRoyxatdan('reklama', {
         init: function () {
+            let savedMaxEni = localStorage.getItem('erp_reklama_max_eni');
+            if (savedMaxEni) {
+                try {
+                    reklamaMaxEni = { ...reklamaMaxEni, ...JSON.parse(savedMaxEni) };
+                } catch (e) {}
+            }
+
             let savedReklamaExtra = localStorage.getItem('erp_reklama_extra_prices');
             if (savedReklamaExtra) {
                 reklamaExtraPrices = { ...reklamaExtraPrices, ...JSON.parse(savedReklamaExtra) };

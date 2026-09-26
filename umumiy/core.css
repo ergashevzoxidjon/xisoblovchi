@@ -1173,3 +1173,164 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
     padding: 16px;
     font-size: 0.88rem;
 }
+
+/* ====================== KALKULYATOR OGOHLANTIRISHLARI ====================== */
+/* Ofset minimal tirajiga yetmaganda (poligrafiya) va stanok enidan katta o'lchamda (reklama) */
+.poli-ofset-min-ogoh,
+.reklama-eni-ogoh {
+    background: #fffbeb;
+    border: 1.5px solid #fcd34d;
+    border-left: 5px solid #f59e0b;
+    color: #78350f;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 4px 0 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.reklama-eni-hint { font-size: 0.78rem; color: var(--text-muted); margin: -4px 0 10px; }
+.opt-btn:disabled,
+.opt-btn.opt-btn-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    color: var(--text-muted);
+    border-color: var(--border);
+    pointer-events: none;
+}
+.kubarik-info { font-size: 0.8rem; color: var(--text-muted); margin: -2px 0 12px; }
+
+/* ====================== ADMIN: UMUMIY FORMA ELEMENTLARI ====================== */
+.admin-hint { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 14px; line-height: 1.5; }
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px 16px;
+    margin-bottom: 14px;
+}
+.admin-form-grid .form-group { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.admin-form-grid label { font-size: 0.8rem; font-weight: 600; color: var(--text-main); }
+.admin-form-grid small { font-size: 0.72rem; color: var(--text-muted); }
+.admin-form-grid input, .admin-form-grid select { width: 100%; box-sizing: border-box; }
+.input-unit { display: flex; align-items: stretch; }
+.input-unit input { flex: 1; min-width: 0; border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+.input-unit span {
+    display: flex; align-items: center; padding: 0 10px;
+    background: #f1f5f9; border: 1.5px solid var(--border); border-left: none;
+    border-radius: 0 8px 8px 0; font-size: 0.75rem; color: var(--text-muted); white-space: nowrap;
+}
+.admin-card-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+/* ====================== ADMIN: YUQORI PANEL VA NAVIGATSIYA (admin-ux.js) ====================== */
+.admin-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+.admin-toolbar-back { flex-shrink: 0; }
+.admin-toolbar-title { flex: 1; min-width: 180px; }
+.admin-breadcrumb { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.02em; }
+.admin-toolbar h2 { margin: 2px 0 0; font-size: 1.1rem; color: var(--primary); line-height: 1.25; }
+.admin-product-switcher {
+    height: 38px; min-width: 190px; max-width: 260px;
+    padding: 0 10px; border: 1.5px solid var(--border); border-radius: 8px;
+    background: #f8fafc; font-size: 0.85rem; cursor: pointer;
+}
+.admin-save-state {
+    font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 999px;
+    background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; white-space: nowrap;
+}
+.admin-save-state.is-dirty { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
+
+.admin-section-nav {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    margin: 0 0 16px; padding: 8px 10px;
+    background: #f8fafc; border: 1px dashed var(--border); border-radius: var(--radius);
+}
+.admin-section-nav-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-right: 4px; }
+.admin-section-chip {
+    border: 1px solid var(--border); background: #fff; border-radius: 999px;
+    padding: 5px 12px; font-size: 0.76rem; font-weight: 600; color: var(--text-main); cursor: pointer;
+}
+.admin-section-chip:hover { border-color: var(--primary); color: var(--primary); }
+/* Yopishqoq panel ostida sarlavha yashirinib qolmasin */
+#adminSpecificProductManager .add-pen-card,
+#adminSpecificProductManager .table-card { scroll-margin-top: 110px; }
+
+/* Saqlanmagan o'zgarishi bor blok */
+#adminScreen .add-pen-card.ux-dirty,
+#adminScreen .table-card.ux-dirty {
+    box-shadow: 0 0 0 2px #fb923c, 0 6px 18px rgba(251, 146, 60, 0.15);
+}
+#adminScreen .add-pen-card.ux-dirty > .add-pen-card-title::after {
+    content: "● saqlanmagan";
+    margin-left: 10px; font-size: 0.7rem; font-weight: 700; color: #c2410c;
+    background: #fff7ed; border: 1px solid #fdba74; border-radius: 999px; padding: 2px 8px; vertical-align: middle;
+}
+#adminScreen .ux-dirty button[onclick^="save"] { animation: saqlashEslatma 1.6s ease-in-out infinite; }
+@keyframes saqlashEslatma {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.0); }
+    50% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.28); }
+}
+
+/* ====================== ADMIN: FORMA VA JADVALLAR ====================== */
+#adminScreen input[type="text"],
+#adminScreen input[type="number"],
+#adminScreen select {
+    min-height: 38px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.88rem;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+#adminScreen input[type="text"]:focus,
+#adminScreen input[type="number"]:focus,
+#adminScreen select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 144, 212, 0.15);
+}
+#adminScreen .admin-table td input[type="text"],
+#adminScreen .admin-table td input[type="number"],
+#adminScreen .admin-table td select { width: 100%; min-width: 70px; box-sizing: border-box; }
+#adminScreen .admin-table thead th { position: sticky; top: 0; z-index: 1; }
+#adminScreen .add-pen-card { padding: 20px 22px; }
+#adminScreen .add-pen-card-title { display: flex; align-items: center; flex-wrap: wrap; }
+
+/* ====================== ADMIN: TELEFON (kichik ekran) ====================== */
+@media (max-width: 720px) {
+    .admin-toolbar { top: 0; padding: 8px 10px; gap: 8px; }
+    .admin-toolbar-title { order: -1; flex-basis: 100%; }
+    .admin-product-switcher { flex: 1; min-width: 0; max-width: none; }
+    .admin-save-state { flex-basis: 100%; text-align: center; }
+    .admin-section-nav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .admin-section-chip { white-space: nowrap; }
+    .admin-form-grid { grid-template-columns: 1fr; }
+    #adminScreen .add-pen-card { padding: 14px; }
+    /* iPhone kiritishda sahifani kattalashtirib yubormasligi uchun 16px */
+    #adminScreen input, #adminScreen select, #adminScreen textarea { font-size: 16px; }
+    #adminScreen .btn { min-height: 44px; }
+    .admin-card-actions .btn { flex: 1; }
+    #adminScreen .table-scroll { box-shadow: inset -12px 0 10px -10px rgba(0, 0, 0, 0.18); }
+}
+
+/* ====================== TELEFON: UMUMIY SARLAVHA ====================== */
+@media (max-width: 720px) {
+    .header { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
+    .header h1 { font-size: 1.15rem; gap: 8px; }
+    .header > div { flex-wrap: wrap; gap: 6px !important; width: 100%; }
+    .header > div .btn { flex: 1 1 auto; min-height: 40px; padding: 0 10px; font-size: 0.8rem; }
+    #currentUserBadge { order: -1; flex-basis: 100%; text-align: center; }
+}
