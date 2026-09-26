@@ -72,6 +72,14 @@ foreach ($m in [regex]::Matches($tana, '(?:src|href)="((?:umumiy|bolimlar)/[^"]+
     if (-not (Test-Path $p)) { Xato "index.html '$($m.Groups[1].Value)' fayliga havola qiladi, lekin u topilmadi." }
 }
 
+# 3b) Kesh: har bir havolaga fayl mazmunidan olingan versiya qo'shamiz (core.js?v=1a2b3c4d).
+#     Fayl o'zgarsa havola ham o'zgaradi - brauzer eski (keshdagi) JS/CSS ni ishlatib qolmaydi.
+$tana = [regex]::Replace($tana, '((?:src|href)=")((?:umumiy|bolimlar)/[^"?]+)(")', [System.Text.RegularExpressions.MatchEvaluator]{
+    param($m)
+    $p = Join-Path $root ($m.Groups[2].Value -replace '/', '\')
+    return $m.Groups[1].Value + $m.Groups[2].Value + '?v=' + (Xesh (Oqi $p)).Substring(0, 8) + $m.Groups[3].Value
+})
+
 # 4) Mavjud index.html qo'lda o'zgartirilmaganini tekshiramiz
 $sarlavhaNaqsh = '(?m)^<!-- DIQQAT: .*yigish-hash: ([0-9a-f]{16}) -->\n'
 if ((Test-Path $outPath) -and -not $Majburiy) {

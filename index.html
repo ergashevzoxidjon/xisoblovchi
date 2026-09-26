@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 706e34d820293a7c -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 33f6f3c67967108d -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -7,13 +7,13 @@
     <title>Bosmaxona ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="umumiy/core.css">
-    <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css">
-    <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css">
-    <link rel="stylesheet" href="bolimlar/textile/textile.css">
-    <link rel="stylesheet" href="bolimlar/sifravoy/sifravoy.css">
-    <link rel="stylesheet" href="bolimlar/ofset/ofset.css">
-    <link rel="stylesheet" href="bolimlar/reklama/reklama.css">
+    <link rel="stylesheet" href="umumiy/core.css?v=90b7ab14">
+    <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=3e6ee534">
+    <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
+    <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
+    <link rel="stylesheet" href="bolimlar/sifravoy/sifravoy.css?v=0813f0c4">
+    <link rel="stylesheet" href="bolimlar/ofset/ofset.css?v=4e4b736d">
+    <link rel="stylesheet" href="bolimlar/reklama/reklama.css?v=c12511e4">
 </head>
 <body>
 
@@ -521,6 +521,95 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- PAKET ADMIN PANEL BLOKI -->
+            <div id="paketAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🛍️ Paket turlari — pichoq va yig'ish</div>
+                    <p class="admin-hint">Kalkulyatorda kiritilgan o'lcham tanlangan turning tayyor o'lchamlaridan biriga aynan mos
+                        kelmasa, shu turning <b>bir martalik pichoq</b> narxi qo'shiladi. Yig'ish — har bir paketga (so'm).
+                        Hisob: bichish o'lchami (bo'yi+kengligi+3) × (eni+kengligi+3) Ofset bo'limiga yuboriladi; laminatsiya va
+                        visochka narxi <b>Ofset pechat kalkulyatori</b> admin bo'limidagi mashina narxlaridan olinadi.</p>
+                    <div class="table-card" style="margin-bottom:0;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:520px;">
+                            <thead><tr><th>Tur</th><th>Pichoq (bir martalik, so'm)</th><th>Yig'ish (so'm/paket)</th><th style="text-align:center;">Standart</th></tr></thead>
+                            <tbody id="paketTurlarBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📐 Tayyor o'lchamlar (pichog'i bor)</div>
+                    <p class="admin-hint">X — bo'yi, Y — eni, Z — kengligi (mm). Menejer o'lchamni bosganda bo'yi/eni/kengligi avtomatik qo'yiladi.</p>
+                    <div id="paketOlchamlarBody" class="paket-admin-olchamlar"></div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📄 Qog'ozlar</div>
+                    <p class="admin-hint">Narx Ofset bo'limi bazasidan olinadi — shu qog'oz turi va grammaji u yerda narxlangan bo'lishi kerak.</p>
+                    <div class="table-card" style="margin-bottom:12px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:420px;">
+                            <thead><tr><th>Qog'oz turi</th><th>Grammaj</th><th style="text-align:center;">Standart</th><th></th></tr></thead>
+                            <tbody id="paketQogozlarBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addPaketQogoz()">+ Qog'oz qo'shish</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">✨ Lenta, Lak va Tisneniya</div>
+                    <p class="admin-hint">Lak va Tisneniya — ixtiyoriy, har bir paketning 2 bo'lagi uchun, hisob chiqqan mashina (A3/A2/A1) narxi bilan.
+                        Lak: birinchi N bo'lakkacha qat'iy summa, keyin har bo'lakka. Tisneniya klishesi — bir martalik (har xil dizaynda 2 ta).</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>Lenta narxi</label>
+                            <div class="input-unit"><input type="number" id="paketLentaNarxi" min="0"><span>so'm/paket</span></div>
+                        </div>
+                    </div>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:760px;">
+                            <thead><tr><th>Mashina</th><th>Lak: birinchi (bo'lak)</th><th>Lak: birinchi narxi</th><th>Lak: keyingi (so'm/bo'lak)</th><th>Tisneniya (so'm/bo'lak)</th><th>Tisneniya klishe</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight:700;">A3</td>
+                                    <td><input type="number" id="pkLak_a3_first" min="0"></td>
+                                    <td><input type="number" id="pkLak_a3_firstPrice" min="0"></td>
+                                    <td><input type="number" id="pkLak_a3_next" min="0"></td>
+                                    <td><input type="number" id="pkTis_a3_unit" min="0"></td>
+                                    <td><input type="number" id="pkTis_a3_klishe" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A2</td>
+                                    <td><input type="number" id="pkLak_a2_first" min="0"></td>
+                                    <td><input type="number" id="pkLak_a2_firstPrice" min="0"></td>
+                                    <td><input type="number" id="pkLak_a2_next" min="0"></td>
+                                    <td><input type="number" id="pkTis_a2_unit" min="0"></td>
+                                    <td><input type="number" id="pkTis_a2_klishe" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A1</td>
+                                    <td><input type="number" id="pkLak_a1_first" min="0"></td>
+                                    <td><input type="number" id="pkLak_a1_firstPrice" min="0"></td>
+                                    <td><input type="number" id="pkLak_a1_next" min="0"></td>
+                                    <td><input type="number" id="pkTis_a1_unit" min="0"></td>
+                                    <td><input type="number" id="pkTis_a1_klishe" min="0"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="savePaketConfig()">💾 Paket sozlamalarini saqlash</button>
+                    </div>
+                </div>
             </div>
 
             <!-- KUBARIK ADMIN PANEL BLOKI -->
@@ -1362,17 +1451,17 @@
 </div>
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
-<script src="umumiy/yordamchi.js"></script>
-<script src="umumiy/core.js"></script>
-<script src="bolimlar/ofset/ofset.js"></script>
-<script src="bolimlar/sifravoy/sifravoy.js"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js"></script>
-<script src="bolimlar/textile/textile.js"></script>
-<script src="bolimlar/suvenir/suvenir.js"></script>
-<script src="bolimlar/reklama/reklama.js"></script>
-<script src="umumiy/custom-products.js"></script>
-<script src="umumiy/full-calc.js"></script>
-<script src="umumiy/admin-ux.js"></script>
-<script src="umumiy/ishga-tushirish.js"></script>
+<script src="umumiy/yordamchi.js?v=d3583ade"></script>
+<script src="umumiy/core.js?v=8b3ad0ba"></script>
+<script src="bolimlar/ofset/ofset.js?v=2861ab3f"></script>
+<script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=6f0ee582"></script>
+<script src="bolimlar/textile/textile.js?v=37fee0b3"></script>
+<script src="bolimlar/suvenir/suvenir.js?v=c4324465"></script>
+<script src="bolimlar/reklama/reklama.js?v=960069e0"></script>
+<script src="umumiy/custom-products.js?v=09afcfda"></script>
+<script src="umumiy/full-calc.js?v=4ef1771f"></script>
+<script src="umumiy/admin-ux.js?v=fea78040"></script>
+<script src="umumiy/ishga-tushirish.js?v=578cb326"></script>
 </body>
 </html>

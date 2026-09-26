@@ -71,6 +71,95 @@
 
             </div>
 
+            <!-- PAKET ADMIN PANEL BLOKI -->
+            <div id="paketAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🛍️ Paket turlari — pichoq va yig'ish</div>
+                    <p class="admin-hint">Kalkulyatorda kiritilgan o'lcham tanlangan turning tayyor o'lchamlaridan biriga aynan mos
+                        kelmasa, shu turning <b>bir martalik pichoq</b> narxi qo'shiladi. Yig'ish — har bir paketga (so'm).
+                        Hisob: bichish o'lchami (bo'yi+kengligi+3) × (eni+kengligi+3) Ofset bo'limiga yuboriladi; laminatsiya va
+                        visochka narxi <b>Ofset pechat kalkulyatori</b> admin bo'limidagi mashina narxlaridan olinadi.</p>
+                    <div class="table-card" style="margin-bottom:0;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:520px;">
+                            <thead><tr><th>Tur</th><th>Pichoq (bir martalik, so'm)</th><th>Yig'ish (so'm/paket)</th><th style="text-align:center;">Standart</th></tr></thead>
+                            <tbody id="paketTurlarBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📐 Tayyor o'lchamlar (pichog'i bor)</div>
+                    <p class="admin-hint">X — bo'yi, Y — eni, Z — kengligi (mm). Menejer o'lchamni bosganda bo'yi/eni/kengligi avtomatik qo'yiladi.</p>
+                    <div id="paketOlchamlarBody" class="paket-admin-olchamlar"></div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📄 Qog'ozlar</div>
+                    <p class="admin-hint">Narx Ofset bo'limi bazasidan olinadi — shu qog'oz turi va grammaji u yerda narxlangan bo'lishi kerak.</p>
+                    <div class="table-card" style="margin-bottom:12px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:420px;">
+                            <thead><tr><th>Qog'oz turi</th><th>Grammaj</th><th style="text-align:center;">Standart</th><th></th></tr></thead>
+                            <tbody id="paketQogozlarBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addPaketQogoz()">+ Qog'oz qo'shish</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">✨ Lenta, Lak va Tisneniya</div>
+                    <p class="admin-hint">Lak va Tisneniya — ixtiyoriy, har bir paketning 2 bo'lagi uchun, hisob chiqqan mashina (A3/A2/A1) narxi bilan.
+                        Lak: birinchi N bo'lakkacha qat'iy summa, keyin har bo'lakka. Tisneniya klishesi — bir martalik (har xil dizaynda 2 ta).</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>Lenta narxi</label>
+                            <div class="input-unit"><input type="number" id="paketLentaNarxi" min="0"><span>so'm/paket</span></div>
+                        </div>
+                    </div>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:760px;">
+                            <thead><tr><th>Mashina</th><th>Lak: birinchi (bo'lak)</th><th>Lak: birinchi narxi</th><th>Lak: keyingi (so'm/bo'lak)</th><th>Tisneniya (so'm/bo'lak)</th><th>Tisneniya klishe</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight:700;">A3</td>
+                                    <td><input type="number" id="pkLak_a3_first" min="0"></td>
+                                    <td><input type="number" id="pkLak_a3_firstPrice" min="0"></td>
+                                    <td><input type="number" id="pkLak_a3_next" min="0"></td>
+                                    <td><input type="number" id="pkTis_a3_unit" min="0"></td>
+                                    <td><input type="number" id="pkTis_a3_klishe" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A2</td>
+                                    <td><input type="number" id="pkLak_a2_first" min="0"></td>
+                                    <td><input type="number" id="pkLak_a2_firstPrice" min="0"></td>
+                                    <td><input type="number" id="pkLak_a2_next" min="0"></td>
+                                    <td><input type="number" id="pkTis_a2_unit" min="0"></td>
+                                    <td><input type="number" id="pkTis_a2_klishe" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;">A1</td>
+                                    <td><input type="number" id="pkLak_a1_first" min="0"></td>
+                                    <td><input type="number" id="pkLak_a1_firstPrice" min="0"></td>
+                                    <td><input type="number" id="pkLak_a1_next" min="0"></td>
+                                    <td><input type="number" id="pkTis_a1_unit" min="0"></td>
+                                    <td><input type="number" id="pkTis_a1_klishe" min="0"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="savePaketConfig()">💾 Paket sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- KUBARIK ADMIN PANEL BLOKI -->
             <div id="kubarikAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">

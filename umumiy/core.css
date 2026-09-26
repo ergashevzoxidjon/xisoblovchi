@@ -1334,3 +1334,26 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
     .header > div .btn { flex: 1 1 auto; min-height: 40px; padding: 0 10px; font-size: 0.8rem; }
     #currentUserBadge { order: -1; flex-basis: 100%; text-align: center; }
 }
+
+/* ====================== PAKET KALKULYATORI VA ADMIN ====================== */
+.paket-step-hint { font-size: 0.74rem; color: var(--text-muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
+.paket-olcham-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 8px; }
+.paket-olcham-row .form-group { margin: 0; display: flex; flex-direction: column; gap: 5px; }
+.paket-olcham-row label { font-size: 0.8rem; font-weight: 600; }
+.majburiy { color: #dc2626; }
+.paket-bichish-info {
+    font-size: 0.8rem; color: var(--text-main); background: #f8fafc; border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px; margin-bottom: 14px; line-height: 1.6;
+}
+.paket-bichish-info:empty { display: none; }
+.paket-pichoq { color: #9a3412; font-weight: 600; }
+.paket-pichoq-bor { color: #047857; font-weight: 600; }
+.paket-xato { color: #b91c1c; font-weight: 600; }
+.paket-admin-olchamlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.paket-admin-olcham-tur { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: #fafaf8; }
+.paket-admin-olcham-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.paket-admin-olcham-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 6px; margin-bottom: 6px; }
+.paket-admin-olcham-row .input-unit input { width: 100%; }
+@media (max-width: 720px) {
+    .paket-olcham-row { grid-template-columns: 1fr; }
+}

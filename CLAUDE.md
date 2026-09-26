@@ -32,7 +32,9 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
    `bolimlar/<nomi>/<nomi>.html` yoki `umumiy/index.template.html`, so'ng `yigish.bat`
    (yoki `powershell -NoProfile -ExecutionPolicy Bypass -File yigish.ps1`).
    `yigish.ps1` index.html qo'lda o'zgartirilganini sezsa to'xtaydi.
-2. **JS/CSS o'zgarishi yig'ishni talab qilmaydi** — index.html ularga `<script src>`/`<link>` orqali havola qiladi.
+2. JS/CSS alohida fayl sifatida yuklanadi, lekin `yigish.ps1` har bir havolaga fayl mazmunidan versiya qo'shadi
+   (`core.js?v=1a2b3c4d`) — brauzer keshdagi eski faylni ishlatmasligi uchun. Shuning uchun **JS/CSS o'zgargandan
+   keyin ham `yigish.bat`** ni ishga tushiring (avto-push buni o'zi qiladi).
 3. Bo'lim HTML fayli `<!-- @blok NOMI -->` ... `<!-- @/blok -->` bloklaridan iborat; shablondagi
    `<!-- @include bolim/NOMI -->` o'rniga qo'yiladi (grid — bosh sahifa kartochkalari,
    admin — admin panel bloklari, modal — qalqib chiquvchi oyna).
@@ -60,6 +62,11 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 - **Ofset minimal tiraji** (`poligrafiyaMahsulotSozlama`, `POLI_DVIGATEL_TURLARI` — Flayer, Listovka, Buklet,
   Konvert, Otkritka): adad kam bo'lsa Ofset tugmasi `disabled`, hisob Raqamli pechatda. Admin → mahsulot →
   "⚙️ Mahsulot sozlamalari" (bichish o'lchami, qo'shimcha ishlov narxi ham shu yerda).
+- **Paket** (`paketConfig`, `calculatePaket`): tur (A5–A2) → tayyor o'lcham (X bo'yi, Y eni, Z kengligi — majburiy).
+  Bichish (1 tomon) = (X+Z+3)×(Y+Z+3) → Ofset (A3/A2/A1, eng arzon pechat). Bir xil dizayn: ofsetga 2×adad;
+  har xil: adad, qog'oz/forma/pechat ×2 (zapasni `calculateOfsetForMachine` o'zi qo'shadi, +100). Laminatsiya,
+  visochka (ofsetFinishingServices), lak, tisneniya — 2×adad bo'lak, mashina narxida. Yig'ish, lenta — har paketga.
+  O'lcham tayyor ro'yxatda bo'lmasa — turning bir martalik pichoq narxi. Ma'lumot yetmasa `hisobYaroqsiz` → narx "—".
 - **Kubarik** (`kubarikConfig`): Bloknot kabi — qog'oz Ofset A3 bazasidan, turlar (Oq/Rangli/Kleyli/Pechatli) admin tahrirlaydi.
 - **Reklama maksimal chop eni** (`reklamaMaxEni`: baner 3.1, orakal/setka/tumanka 1.5 m): IKKALA tomon ham
   kattaroq bo'lsa ogohlantirish (aylantirib sig'sa — yo'q).

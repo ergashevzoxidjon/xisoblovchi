@@ -791,6 +791,413 @@
         return { unitPrice: unit, details: qismlar.join(' | '), costItems };
     }
 
+    // ====================== PAKET (poligrafiya — Ofset bazasidan, eng murakkab hisob) ======================
+    // Menejer paket turini (A5/A4/A3/A2) tanlaydi → admin kiritgan tayyor o'lchamlardan birini bosadi
+    // (bo'yi/eni/kengligi avtomatik to'ldiriladi) yoki o'zi kiritadi. Uchala o'lcham ham MAJBURIY.
+    //   Bo'yi = X, Eni = Y, Kengligi = Z (mm). Bitta tomonning bichish o'lchami: (X+Z+3) × (Y+Z+3).
+    //   Paketning 2 tomoni bor:
+    //     • ikki tomoni BIR XIL dizayn  → Ofsetga 2 × adad bo'lak yuboriladi (zapasni Ofset o'zi qo'shadi:
+    //       200 paket → 400 + 100 = 500 varoq).
+    //     • ikki tomoni HAR XIL dizayn  → Ofsetga adad bo'lak (200 + 100 = 300), va qog'oz, forma, pechat
+    //       xarajati ×2 (har tomon uchun alohida).
+    //   Laminatsiya, Visochka (majburiy), Lak, Tisneniya (ixtiyoriy) — 2 × adad bo'lak uchun, hisob qaysi
+    //   ofset mashinasida (A3/A2/A1) chiqsa, o'sha mashina narxi bilan. Laminatsiya/Visochka narxi —
+    //   Ofset admin bo'limidagi umumiy sozlamadan (ofsetFinishingServices), Lak/Tisneniya — shu yerdan.
+    //   + Yig'ish (paket turi bo'yicha, so'm/paket), + Lenta (ixtiyoriy, so'm/paket).
+    //   O'lcham tanlangan turning tayyor o'lchamlariga mos kelmasa — shu tur uchun bir martalik pichoq narxi.
+    let paketConfig = {
+        turlar: [
+            { key: 'a5', name: 'A5', pichoqNarxi: 500000,  yigishNarxi: 1500,
+              olchamlar: [{ x: 240, y: 180, z: 80 }, { x: 220, y: 160, z: 70 }] },
+            { key: 'a4', name: 'A4', pichoqNarxi: 1000000, yigishNarxi: 2000, isDefault: true,
+              olchamlar: [{ x: 330, y: 250, z: 100 }, { x: 320, y: 240, z: 90 }] },
+            { key: 'a3', name: 'A3', pichoqNarxi: 1300000, yigishNarxi: 2500,
+              olchamlar: [{ x: 450, y: 330, z: 120 }, { x: 420, y: 300, z: 100 }] },
+            { key: 'a2', name: 'A2', pichoqNarxi: 1700000, yigishNarxi: 3500,
+              olchamlar: [{ x: 600, y: 450, z: 150 }, { x: 550, y: 400, z: 120 }] }
+        ],
+        // Qog'ozlar — narxi Ofset bo'limi bazasidan (tur + grammaj bo'yicha)
+        qogozlar: [
+            { paperType: 'Melovka', gsm: 250, isDefault: true },
+            { paperType: 'Melovka', gsm: 300, isDefault: false },
+            { paperType: 'Karton',  gsm: 300, isDefault: false },
+            { paperType: 'Karton',  gsm: 350, isDefault: false }
+        ],
+        lentaNarxi: 5000, // lentali paket — har bir paketga qo'shimcha xizmat (so'm)
+        // Ixtiyoriy LAK — mashina bo'yicha pog'onali: birinchi firstQty bo'lakkacha qat'iy summa, keyin har bo'lakka
+        lak: {
+            a3: { firstQty: 1000, firstPrice: 500000,  nextPrice: 500 },
+            a2: { firstQty: 1000, firstPrice: 750000,  nextPrice: 750 },
+            a1: { firstQty: 1000, firstPrice: 1000000, nextPrice: 1000 }
+        },
+        // Ixtiyoriy Tisneniya — har bir bo'lakka narx + bir martalik klishe (har xil dizaynda 2 ta klishe)
+        tisneniya: {
+            a3: { pricePerUnit: 1000, klishePrice: 500000 },
+            a2: { pricePerUnit: 1500, klishePrice: 600000 },
+            a1: { pricePerUnit: 2000, klishePrice: 700000 }
+        }
+    };
+
+    let paketSelected = { tur: 'a4', qogozIndex: 0, dizayn: 'bir', lenta: false, lak: false, tisneniya: false };
+
+    function paketTuri(key) {
+        return paketConfig.turlar.find(t => t.key === key) || paketConfig.turlar[0] || null;
+    }
+
+    function paketOlchamlari() {
+        let v = id => parseFloat(document.getElementById(id)?.value) || 0;
+        return { x: v('paketX'), y: v('paketY'), z: v('paketZ') };
+    }
+
+    // Kiritilgan o'lcham tanlangan turning tayyor o'lchamlaridan biriga aynan mosmi (pichoq bor)?
+    function paketTayyorOlchamIndeksi(tur, x, y, z) {
+        return (tur && tur.olchamlar || []).findIndex(o => o.x === x && o.y === y && o.z === z);
+    }
+
+    function buildPaketForm() {
+        let def = paketConfig.turlar.find(t => t.isDefault) || paketConfig.turlar[0];
+        let defQogoz = paketConfig.qogozlar.findIndex(q => q.isDefault);
+        paketSelected = { tur: def ? def.key : 'a4', qogozIndex: defQogoz >= 0 ? defQogoz : 0, dizayn: 'bir', lenta: false, lak: false, tisneniya: false };
+        let o = (def && def.olchamlar && def.olchamlar[0]) || { x: '', y: '', z: '' };
+        return `
+            <div class="poli-calc paket-calc">
+                <div class="step-title">1. Paket turi</div>
+                <div class="options-group" id="paketTurGroup"></div>
+
+                <div class="step-title">2. Tayyor o'lchamlar <span class="paket-step-hint">(bosing — o'lchamlar avtomatik qo'yiladi)</span></div>
+                <div class="options-group" id="paketOlchamGroup"></div>
+
+                <div class="paket-olcham-row">
+                    <div class="form-group">
+                        <label>Bo'yi (X) <span class="majburiy">*</span></label>
+                        <div class="input-unit"><input type="number" id="paketX" min="1" value="${o.x}" oninput="renderPaketOlchamChips(); calculate()"><span>mm</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Eni (Y) <span class="majburiy">*</span></label>
+                        <div class="input-unit"><input type="number" id="paketY" min="1" value="${o.y}" oninput="renderPaketOlchamChips(); calculate()"><span>mm</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Kengligi (Z) <span class="majburiy">*</span></label>
+                        <div class="input-unit"><input type="number" id="paketZ" min="1" value="${o.z}" oninput="renderPaketOlchamChips(); calculate()"><span>mm</span></div>
+                    </div>
+                </div>
+                <div id="paketBichishInfo" class="paket-bichish-info"></div>
+
+                <div class="step-title">3. Qog'oz</div>
+                <div class="options-group" id="paketQogozGroup"></div>
+
+                <div class="step-title">4. Ikki tomonining dizayni</div>
+                <div class="options-group" id="paketDizaynGroup"></div>
+
+                <div class="step-title">5. Qo'shimcha</div>
+                <div class="options-group" id="paketExtraGroup"></div>
+
+                <div class="form-group poli-qty-group">
+                    <label>Adad (paket soni)</label>
+                    <input type="number" id="inpQuantity" value="500" min="1" oninput="calculate()">
+                </div>
+            </div>
+        `;
+    }
+
+    function renderPaketOlchamChips() {
+        let group = document.getElementById('paketOlchamGroup');
+        if (!group) return;
+        let tur = paketTuri(paketSelected.tur);
+        let { x, y, z } = paketOlchamlari();
+        let faol = paketTayyorOlchamIndeksi(tur, x, y, z);
+        let list = (tur && tur.olchamlar) || [];
+        group.innerHTML = list.length === 0
+            ? `<span class="paket-step-hint">Bu tur uchun tayyor o'lcham kiritilmagan — o'lchamni qo'lda kiriting.</span>`
+            : list.map((o, i) => `
+                <button type="button" class="opt-btn ${i === faol ? 'active' : ''}" onclick="selectPaketOlcham(${i})">${o.x}×${o.y}×${o.z}</button>
+            `).join('');
+    }
+
+    function renderPaketOptions() {
+        let turGroup = document.getElementById('paketTurGroup');
+        if (!turGroup) return;
+        turGroup.innerHTML = paketConfig.turlar.map(t => `
+            <button type="button" class="opt-btn ${t.key === paketSelected.tur ? 'active' : ''}" onclick="selectPaketTur('${t.key}')">${t.name}</button>
+        `).join('');
+        renderPaketOlchamChips();
+        document.getElementById('paketQogozGroup').innerHTML = paketConfig.qogozlar.map((q, i) => `
+            <button type="button" class="opt-btn ${i === paketSelected.qogozIndex ? 'active' : ''}" onclick="selectPaketQogoz(${i})">${q.paperType} ${q.gsm}gr</button>
+        `).join('');
+        document.getElementById('paketDizaynGroup').innerHTML = `
+            <button type="button" class="opt-btn ${paketSelected.dizayn === 'bir' ? 'active' : ''}" onclick="selectPaketDizayn('bir')">Bir xil</button>
+            <button type="button" class="opt-btn ${paketSelected.dizayn === 'har' ? 'active' : ''}" onclick="selectPaketDizayn('har')">Har xil</button>
+        `;
+        document.getElementById('paketExtraGroup').innerHTML = `
+            <button type="button" class="opt-btn ${paketSelected.lenta ? 'active' : ''}" onclick="togglePaketExtra('lenta')">🎀 Lenta</button>
+            <button type="button" class="opt-btn ${paketSelected.lak ? 'active' : ''}" onclick="togglePaketExtra('lak')">✨ Lak</button>
+            <button type="button" class="opt-btn ${paketSelected.tisneniya ? 'active' : ''}" onclick="togglePaketExtra('tisneniya')">🔨 Tisneniya</button>
+        `;
+    }
+
+    function selectPaketTur(key) {
+        paketSelected.tur = key;
+        let o = (paketTuri(key).olchamlar || [])[0];
+        if (o) paketOlchamniQoy(o);
+        renderPaketOptions();
+        calculate();
+    }
+
+    function paketOlchamniQoy(o) {
+        document.getElementById('paketX').value = o.x;
+        document.getElementById('paketY').value = o.y;
+        document.getElementById('paketZ').value = o.z;
+    }
+
+    function selectPaketOlcham(i) {
+        let o = (paketTuri(paketSelected.tur).olchamlar || [])[i];
+        if (!o) return;
+        paketOlchamniQoy(o);
+        renderPaketOlchamChips();
+        calculate();
+    }
+
+    function selectPaketQogoz(i) { paketSelected.qogozIndex = i; renderPaketOptions(); calculate(); }
+    function selectPaketDizayn(d) { paketSelected.dizayn = d; renderPaketOptions(); calculate(); }
+    function togglePaketExtra(name) { paketSelected[name] = !paketSelected[name]; renderPaketOptions(); calculate(); }
+
+    function paketInfo(html) {
+        let el = document.getElementById('paketBichishInfo');
+        if (el) el.innerHTML = html;
+    }
+
+    function calculatePaket(qty) {
+        qty = Math.max(parseInt(qty) || 1, 1);
+        let tur = paketTuri(paketSelected.tur);
+        let { x, y, z } = paketOlchamlari();
+        if (!tur || !(x > 0 && y > 0 && z > 0)) {
+            paketInfo(`<div class="paket-xato">⚠️ Bo'yi, eni va kengligini kiriting — uchalasi ham majburiy.</div>`);
+            return { unitPrice: 0, details: "⚠️ Paket o'lchamlari to'liq kiritilmagan (bo'yi, eni, kengligi majburiy)", costItems: [], hisobYaroqsiz: true };
+        }
+
+        // Bitta tomonning bichish (yoyilgan) o'lchami
+        let w = x + z + 3, h = y + z + 3;
+        let qogoz = paketConfig.qogozlar[paketSelected.qogozIndex] || paketConfig.qogozlar[0];
+        if (!qogoz) {
+            return { unitPrice: 0, details: "⚠️ Paket uchun qog'oz kiritilmagan — Admin panelda kiriting.", costItems: [], hisobYaroqsiz: true };
+        }
+        let harXil = paketSelected.dizayn === 'har';
+        let k = harXil ? 2 : 1;                     // qog'oz/forma/pechat necha marta hisoblanadi
+        let ofsetTiraj = harXil ? qty : qty * 2;    // Ofsetga yuboriladigan bo'lak (zapasni Ofset o'zi qo'shadi)
+        let bolaklar = qty * 2;                     // pardozlash (laminatsiya, visochka, lak, tisneniya) uchun
+
+        let natijalar = ['A3', 'A2', 'A1']
+            .map(m => calculateOfsetForMachine(m, w, h, ofsetTiraj, 1, qogoz.paperType, qogoz.gsm))
+            .filter(Boolean)
+            .sort((a, b) => a.perPieceCostRaw - b.perPieceCostRaw);
+        let r = natijalar[0];
+        let tayyorIdx = paketTayyorOlchamIndeksi(tur, x, y, z);
+        let pichoqKerak = tayyorIdx < 0;
+
+        if (!r) {
+            paketInfo(`<div class="paket-xato">⚠️ Bichish o'lchami ${w}×${h} mm — ${qogoz.paperType} ${qogoz.gsm}gr bilan hech bir ofset mashinasiga (A3/A2/A1) sig'madi yoki bu qog'ozning narxi Ofset bazasida yo'q.</div>`);
+            return { unitPrice: 0, details: `⚠️ ${w}×${h} mm bichish o'lchami ofset mashinalariga sig'madi yoki ${qogoz.paperType} ${qogoz.gsm}gr narxi yo'q`, costItems: [], hisobYaroqsiz: true };
+        }
+
+        let mKey = r.machine.toLowerCase(); // 'a3' | 'a2' | 'a1'
+        let costItems = [];
+        let jami = 0;
+        let qosh = (label, soni, summa) => { jami += summa; costItems.push({ label, qty: soni, total: Math.round(summa) }); };
+        let izohlar = [];
+
+        // 1) Ofset: qog'oz, forma, pechat (har xil dizaynda ×2)
+        // Har xil dizaynda: har tomon uchun son × 2 tomon (masalan "300 × 2 tomon" = jami 600)
+        let tomon = harXil ? ' × 2 tomon' : '';
+        qosh(`Qog'oz (${r.paperName} ${r.paperGsm}gr, ${r.rawName})`, `${r.totalSheets}${tomon} xom varoq`, r.totalPaperCost * k);
+        qosh('Forma (klishe)', `${r.totalPlates}${tomon} plastina`, r.totalPlateCost * k);
+        qosh('Bosma (pechat)', `${r.totalWorkingSheets}${tomon} ${r.machine} varoq`, r.totalPrintCost * k);
+
+        // 2) Laminatsiya va Visochka — majburiy, 2 × adad bo'lak, mashina narxi bo'yicha
+        let lamNarx = parseFloat(ofsetFinishingServices.laminatsiya[mKey]) || 0;
+        qosh(`Laminatsiya (${r.machine})`, `${bolaklar} bo'lak`, lamNarx * bolaklar);
+        let visTier = ofsetFinishingServices.visochka[mKey];
+        let visJami = papkaTieredTotal(bolaklar, visTier);
+        qosh(`Visochka (${r.machine})`, `${bolaklar} bo'lak`, visJami);
+        if (lamNarx <= 0) izohlar.push(`⚠️ ${r.machine} uchun laminatsiya narxi kiritilmagan`);
+        if (visJami <= 0) izohlar.push(`⚠️ ${r.machine} uchun visochka narxi kiritilmagan`);
+
+        // 3) Yig'ish (har bir paket)
+        qosh(`Yig'ish (${tur.name})`, `${qty} paket`, (parseFloat(tur.yigishNarxi) || 0) * qty);
+
+        // 4) Ixtiyoriy: lenta, lak, tisneniya
+        if (paketSelected.lenta) qosh('Lenta', `${qty} paket`, (parseFloat(paketConfig.lentaNarxi) || 0) * qty);
+        if (paketSelected.lak) qosh(`Lak (${r.machine})`, `${bolaklar} bo'lak`, papkaTieredTotal(bolaklar, paketConfig.lak[mKey]));
+        if (paketSelected.tisneniya) {
+            let tis = paketConfig.tisneniya[mKey] || {};
+            qosh(`Tisneniya (${r.machine})`, `${bolaklar} bo'lak`, (parseFloat(tis.pricePerUnit) || 0) * bolaklar);
+            qosh('Tisneniya klishesi (bir martalik)', `${k} ta`, (parseFloat(tis.klishePrice) || 0) * k);
+        }
+
+        // 5) Nostandart o'lcham — bir martalik pichoq
+        let pichoq = pichoqKerak ? (parseFloat(tur.pichoqNarxi) || 0) : 0;
+        if (pichoqKerak) qosh(`Pichoq yasatish (${tur.name}, bir martalik)`, '1 marta', pichoq);
+
+        paketInfo(`
+            <div>📐 Bichish (1 tomon): <b>${w}×${h} mm</b> → <b>${r.machine}</b> ofset, 1 varoqqa ${r.itemsPerSheet} dona ·
+                Ofsetga ${ofsetTiraj} bo'lak${harXil ? ' × 2 tomon' : ''} (+zapas)</div>
+            ${pichoqKerak
+                ? `<div class="paket-pichoq">✂️ Nostandart o'lcham — ${tur.name} uchun bir martalik pichoq: <b>${pichoq.toLocaleString()} so'm</b> qo'shildi</div>`
+                : `<div class="paket-pichoq-bor">✓ Tayyor pichoq bor — pichoq narxi qo'shilmaydi</div>`}
+        `);
+
+        let qismlar = [`Paket ${tur.name} ${x}×${y}×${z}mm (bichish ${w}×${h})`, `${qogoz.paperType} ${qogoz.gsm}gr`,
+            `${r.machine} ofset`, harXil ? 'ikki tomoni har xil' : 'ikki tomoni bir xil'];
+        if (paketSelected.lenta) qismlar.push('lenta');
+        if (paketSelected.lak) qismlar.push('lak');
+        if (paketSelected.tisneniya) qismlar.push('tisneniya');
+        if (pichoqKerak) qismlar.push('pichoq (bir martalik)');
+        qismlar = qismlar.concat(izohlar);
+
+        return { unitPrice: jami / qty, details: qismlar.join(' | '), costItems };
+    }
+
+    // ---- Admin: Paket ----
+    function renderAdminPaket() {
+        let q = id => document.getElementById(id);
+        if (!q('paketTurlarBody')) return;
+        let esc = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+        q('paketTurlarBody').innerHTML = paketConfig.turlar.map((t, i) => `
+            <tr>
+                <td style="font-weight:700;">${esc(t.name)}</td>
+                <td><input type="number" id="pkTur_pichoq_${i}" value="${t.pichoqNarxi || 0}" min="0"></td>
+                <td><input type="number" id="pkTur_yigish_${i}" value="${t.yigishNarxi || 0}" min="0"></td>
+                <td style="text-align:center;"><input type="radio" name="pkTurDefault" id="pkTur_def_${i}" ${t.isDefault ? 'checked' : ''}></td>
+            </tr>
+        `).join('');
+
+        q('paketOlchamlarBody').innerHTML = paketConfig.turlar.map((t, ti) => `
+            <div class="paket-admin-olcham-tur">
+                <div class="paket-admin-olcham-head">
+                    <b>${esc(t.name)}</b>
+                    <button type="button" class="btn btn-outline" style="height:30px; padding:0 10px; font-size:0.78rem;" onclick="addPaketOlcham(${ti})">+ O'lcham</button>
+                </div>
+                ${(t.olchamlar || []).length === 0 ? `<div class="paket-step-hint">Tayyor o'lcham yo'q — bu turda har doim pichoq narxi qo'shiladi.</div>` : ''}
+                ${(t.olchamlar || []).map((o, oi) => `
+                    <div class="paket-admin-olcham-row">
+                        <div class="input-unit"><input type="number" id="pkOl_${ti}_${oi}_x" value="${o.x}" min="1" title="Bo'yi (X)"><span>X</span></div>
+                        <div class="input-unit"><input type="number" id="pkOl_${ti}_${oi}_y" value="${o.y}" min="1" title="Eni (Y)"><span>Y</span></div>
+                        <div class="input-unit"><input type="number" id="pkOl_${ti}_${oi}_z" value="${o.z}" min="1" title="Kengligi (Z)"><span>Z</span></div>
+                        <button type="button" class="btn btn-danger" style="height:34px; padding:0 10px;" title="O'chirish" onclick="deletePaketOlcham(${ti}, ${oi})">✕</button>
+                    </div>
+                `).join('')}
+            </div>
+        `).join('');
+
+        q('paketQogozlarBody').innerHTML = paketConfig.qogozlar.map((g, i) => `
+            <tr>
+                <td><select id="pkQ_type_${i}">${POLIGRAFIYA_PAPER_TYPES.map(p => `<option value="${p}" ${g.paperType === p ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+                <td><div class="input-unit"><input type="number" id="pkQ_gsm_${i}" value="${g.gsm}" min="1"><span>gr</span></div></td>
+                <td style="text-align:center;"><input type="radio" name="pkQDefault" id="pkQ_def_${i}" ${g.isDefault ? 'checked' : ''}></td>
+                <td style="text-align:right;"><button type="button" class="btn btn-danger" style="height:30px; padding:0 10px;" title="O'chirish" onclick="deletePaketQogoz(${i})">✕</button></td>
+            </tr>
+        `).join('');
+
+        q('paketLentaNarxi').value = paketConfig.lentaNarxi || 0;
+        ['a3', 'a2', 'a1'].forEach(m => {
+            q(`pkLak_${m}_first`).value = paketConfig.lak[m].firstQty;
+            q(`pkLak_${m}_firstPrice`).value = paketConfig.lak[m].firstPrice;
+            q(`pkLak_${m}_next`).value = paketConfig.lak[m].nextPrice;
+            q(`pkTis_${m}_unit`).value = paketConfig.tisneniya[m].pricePerUnit;
+            q(`pkTis_${m}_klishe`).value = paketConfig.tisneniya[m].klishePrice;
+        });
+    }
+
+    // Formadagi (hali saqlanmagan) qiymatlarni paketConfig ga o'qib oladi
+    function collectPaketFromUI() {
+        let q = id => document.getElementById(id);
+        if (!q('paketTurlarBody')) return;
+        let son = (id, min) => Math.max(min || 0, parseFloat(q(id)?.value) || 0);
+        paketConfig.turlar = paketConfig.turlar.map((t, i) => ({
+            ...t,
+            pichoqNarxi: son(`pkTur_pichoq_${i}`),
+            yigishNarxi: son(`pkTur_yigish_${i}`),
+            isDefault: !!q(`pkTur_def_${i}`)?.checked,
+            olchamlar: (t.olchamlar || []).map((o, oi) => q(`pkOl_${i}_${oi}_x`) ? {
+                x: son(`pkOl_${i}_${oi}_x`), y: son(`pkOl_${i}_${oi}_y`), z: son(`pkOl_${i}_${oi}_z`)
+            } : o)
+        }));
+        paketConfig.qogozlar = paketConfig.qogozlar.map((g, i) => q(`pkQ_type_${i}`) ? {
+            paperType: q(`pkQ_type_${i}`).value, gsm: son(`pkQ_gsm_${i}`, 1), isDefault: q(`pkQ_def_${i}`).checked
+        } : g);
+        paketConfig.lentaNarxi = son('paketLentaNarxi');
+        ['a3', 'a2', 'a1'].forEach(m => {
+            paketConfig.lak[m] = { firstQty: son(`pkLak_${m}_first`), firstPrice: son(`pkLak_${m}_firstPrice`), nextPrice: son(`pkLak_${m}_next`) };
+            paketConfig.tisneniya[m] = { pricePerUnit: son(`pkTis_${m}_unit`), klishePrice: son(`pkTis_${m}_klishe`) };
+        });
+    }
+
+    function addPaketOlcham(ti) {
+        collectPaketFromUI();
+        let t = paketConfig.turlar[ti];
+        if (!t) return;
+        let oxirgi = (t.olchamlar || [])[t.olchamlar.length - 1] || { x: 300, y: 250, z: 100 };
+        t.olchamlar = (t.olchamlar || []).concat([{ ...oxirgi }]);
+        renderAdminPaket();
+    }
+
+    function deletePaketOlcham(ti, oi) {
+        collectPaketFromUI();
+        let t = paketConfig.turlar[ti];
+        if (!t || !confirm(`${t.name}: ${t.olchamlar[oi].x}×${t.olchamlar[oi].y}×${t.olchamlar[oi].z} o'lchamini o'chirasizmi?`)) return;
+        t.olchamlar.splice(oi, 1);
+        renderAdminPaket();
+    }
+
+    function addPaketQogoz() {
+        collectPaketFromUI();
+        paketConfig.qogozlar.push({ paperType: 'Melovka', gsm: 250, isDefault: paketConfig.qogozlar.length === 0 });
+        renderAdminPaket();
+    }
+
+    function deletePaketQogoz(i) {
+        collectPaketFromUI();
+        let g = paketConfig.qogozlar[i];
+        if (!g || !confirm(`${g.paperType} ${g.gsm}gr qog'ozini o'chirasizmi?`)) return;
+        let wasDefault = g.isDefault;
+        paketConfig.qogozlar.splice(i, 1);
+        if (wasDefault && paketConfig.qogozlar.length > 0) paketConfig.qogozlar[0].isDefault = true;
+        renderAdminPaket();
+    }
+
+    function savePaketConfig() {
+        collectPaketFromUI();
+        let xato = paketConfig.turlar.some(t => (t.olchamlar || []).some(o => !(o.x > 0 && o.y > 0 && o.z > 0)));
+        if (xato) { showToast("⚠️ Tayyor o'lchamlarda X, Y, Z 0 dan katta bo'lishi kerak!"); return; }
+        if (paketConfig.qogozlar.length === 0) { showToast("⚠️ Kamida bitta qog'oz kiriting!"); return; }
+        if (!paketConfig.qogozlar.some(g => g.isDefault)) paketConfig.qogozlar[0].isDefault = true;
+        if (!paketConfig.turlar.some(t => t.isDefault)) paketConfig.turlar[0].isDefault = true;
+        localStorage.setItem('erp_paket_config', JSON.stringify(paketConfig));
+        if (typeof logAudit === 'function') logAudit("Paket sozlamalari o'zgartirildi",
+            paketConfig.turlar.map(t => `${t.name}: pichoq ${t.pichoqNarxi}, yig'ish ${t.yigishNarxi}, ${t.olchamlar.length} o'lcham`).join('; ') + `; lenta ${paketConfig.lentaNarxi}`);
+        renderAdminPaket();
+        showToast("💾 Paket sozlamalari saqlandi!");
+    }
+
+    // Saqlangan sozlamani standart tuzilma ustiga xavfsiz qo'yadi (yangi maydonlar qo'shilsa ham buzilmaydi)
+    function migratePaketConfig(saved, defaults) {
+        let cfg = JSON.parse(JSON.stringify(defaults));
+        if (!saved || typeof saved !== 'object') return cfg;
+        if (Array.isArray(saved.turlar)) {
+            cfg.turlar = defaults.turlar.map(d => {
+                let s = saved.turlar.find(x => x && x.key === d.key);
+                return s ? { ...d, ...s, olchamlar: Array.isArray(s.olchamlar) ? s.olchamlar : d.olchamlar } : d;
+            });
+        }
+        if (Array.isArray(saved.qogozlar) && saved.qogozlar.length > 0) cfg.qogozlar = saved.qogozlar;
+        if (typeof saved.lentaNarxi === 'number') cfg.lentaNarxi = saved.lentaNarxi;
+        ['a3', 'a2', 'a1'].forEach(m => {
+            if (saved.lak && saved.lak[m]) cfg.lak[m] = { ...cfg.lak[m], ...saved.lak[m] };
+            if (saved.tisneniya && saved.tisneniya[m]) cfg.tisneniya[m] = { ...cfg.tisneniya[m], ...saved.tisneniya[m] };
+        });
+        return cfg;
+    }
+
     // ====================== KUBARIK (poligrafiya, Bloknot kabi — Ofset qog'oz bazasidan) ======================
     // Kubarik — kvadrat varaqlardan yig'ilgan blok (standart 90x90mm, balandligi 90mm). Turlari qog'oz/yelim
     // bo'yicha farqlanadi (Oq, Rangli, Kleyli, Pechatli) — har birini admin tahrirlaydi. Hisob:
@@ -2181,6 +2588,15 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                 if (!Array.isArray(list)) return;
                 list.forEach(g => { if (!g.paperType) g.paperType = (key === 'doorhanger') ? 'Karton' : 'Melovka'; });
             });
+
+            let savedPaket = localStorage.getItem('erp_paket_config');
+            if (savedPaket) {
+                try {
+                    paketConfig = migratePaketConfig(JSON.parse(savedPaket), paketConfig);
+                } catch (e) {
+                    console.warn("Paket sozlamalarini o'qishda xato:", e);
+                }
+            }
 
             let savedKubarik = localStorage.getItem('erp_kubarik_config');
             if (savedKubarik) {

@@ -972,7 +972,8 @@
         let isPapka = (key === 'papka');
         let isKalendar = (key === 'kalendar');
         let isKubarik = (key === 'kubarik');
-        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik;
+        let isPaket = (key === 'paket');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket;
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
         let isReklamaStend = reklamaStendTypes.includes(key);
@@ -984,6 +985,7 @@
         document.getElementById('papkaAdminBox').style.display = isPapka ? 'block' : 'none';
         document.getElementById('kalendarAdminBox').style.display = isKalendar ? 'block' : 'none';
         document.getElementById('kubarikAdminBox').style.display = isKubarik ? 'block' : 'none';
+        document.getElementById('paketAdminBox').style.display = isPaket ? 'block' : 'none';
         // Baner/Orakal/... — maksimal chop eni (reklama.js)
         if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
@@ -1001,7 +1003,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isTextile || isReklamaStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isTextile || isReklamaStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1042,6 +1044,10 @@
         }
         if (isKubarik) {
             renderAdminKubarik();
+            return;
+        }
+        if (isPaket) {
+            renderAdminPaket();
             return;
         }
         if (isPoligrafiya) {
@@ -1277,6 +1283,9 @@ function generateForm(type) {
     else if (type === 'kubarik') {
         html = buildKubarikForm();
     }
+    else if (type === 'paket') {
+        html = buildPaketForm();
+    }
     else if (type === 'doorhanger') {
         html = buildDoorhangerForm();
     }
@@ -1316,6 +1325,11 @@ function generateForm(type) {
         return;
     }
 
+    if (type === 'paket') {
+        renderPaketOptions();
+        return;
+    }
+
     if (reklamaStendTypes.includes(type)) {
         renderReklamaStendSizeOptions(type);
         return;
@@ -1352,6 +1366,7 @@ function calculateIchki() {
     // hamda har birining tannarxi. Faqat ofset-asoslangan turlarda (Papka/Kalendar/Poligrafiya)
     // to'ldiriladi; boshqa turlarda bo'sh qoladi (modal bunday holda faqat Tafsilot matnini ko'rsatadi).
     let costItems = [];
+    let hisobYaroqsiz = false; // true — narx chiqarilmaydi (ma'lumot yetarli emas)
     if (typeof getCustomProduct === 'function') {
         let cp = getCustomProduct(activeProductType);
         if (cp) { previewNameText = cp.name; details = cp.name; }
@@ -1413,6 +1428,13 @@ function calculateIchki() {
             details = res.details;
             costItems = res.costItems || [];
         }
+        else if (activeProductType === 'paket') {
+            let res = calculatePaket(qty);
+            baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
         else if (activeProductType === 'kubarik') {
             let res = calculateKubarik(qty);
             baseUnitPrice = res.unitPrice;
@@ -1443,6 +1465,17 @@ function calculateIchki() {
 
     let unitPrice = Math.round(baseUnitPrice * (1 + marginPercent / 100));
     let totalPrice = unitPrice * qty;
+    // Hisob-kitob uchun ma'lumot yetarli bo'lmasa (masalan paket o'lchami kiritilmagan) — narx
+    // chiqarilmaydi, aks holda faqat taxi summasi "narx" bo'lib ko'rinib qolardi.
+    if (hisobYaroqsiz) {
+        document.getElementById('resDetails').innerText = details;
+        document.getElementById('resQuantity').innerText = qty.toLocaleString() + " dona";
+        document.getElementById('resUnitPrice').innerText = "—";
+        document.getElementById('resTotalPrice').innerText = "—";
+        currentCalcResult = { details, qty, unitPrice: 0, totalPrice: 0, name: previewNameText, imageUrl: previewImgUrl,
+            baseUnitPrice: 0, marginPercent, productType: activeProductType, costItems: [] };
+        return;
+    }
 
     if (reklamaBanTypes.includes(activeProductType)) {
         let chkUstanovka = document.getElementById('chkUstanovka');
