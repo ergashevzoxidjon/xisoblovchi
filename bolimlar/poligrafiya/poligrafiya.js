@@ -816,12 +816,12 @@
             { key: 'a2', name: 'A2', pichoqNarxi: 1700000, yigishNarxi: 3500,
               olchamlar: [{ x: 600, y: 450, z: 150 }, { x: 550, y: 400, z: 120 }] }
         ],
-        // Qog'ozlar — narxi Ofset bo'limi bazasidan (tur + grammaj bo'yicha)
+        // Paket FAQAT Kartondan tayyorlanadi — admin faqat karton grammajlarini belgilaydi,
+        // narxi Ofset bo'limidagi Karton bazasidan olinadi.
         qogozlar: [
-            { paperType: 'Melovka', gsm: 250, isDefault: true },
-            { paperType: 'Melovka', gsm: 300, isDefault: false },
-            { paperType: 'Karton',  gsm: 300, isDefault: false },
-            { paperType: 'Karton',  gsm: 350, isDefault: false }
+            { paperType: 'Karton', gsm: 250, isDefault: false },
+            { paperType: 'Karton', gsm: 300, isDefault: true },
+            { paperType: 'Karton', gsm: 350, isDefault: false }
         ],
         lentaNarxi: 5000, // lentali paket — har bir paketga qo'shimcha xizmat (so'm)
         // Ixtiyoriy LAK — mashina bo'yicha pog'onali: birinchi firstQty bo'lakkacha qat'iy summa, keyin har bo'lakka
@@ -883,7 +883,7 @@
                 </div>
                 <div id="paketBichishInfo" class="paket-bichish-info"></div>
 
-                <div class="step-title">3. Qog'oz</div>
+                <div class="step-title">3. Karton grammaji</div>
                 <div class="options-group" id="paketQogozGroup"></div>
 
                 <div class="step-title">4. Ikki tomonining dizayni</div>
@@ -922,7 +922,7 @@
         `).join('');
         renderPaketOlchamChips();
         document.getElementById('paketQogozGroup').innerHTML = paketConfig.qogozlar.map((q, i) => `
-            <button type="button" class="opt-btn ${i === paketSelected.qogozIndex ? 'active' : ''}" onclick="selectPaketQogoz(${i})">${q.paperType} ${q.gsm}gr</button>
+            <button type="button" class="opt-btn ${i === paketSelected.qogozIndex ? 'active' : ''}" onclick="selectPaketQogoz(${i})">Karton ${q.gsm}gr</button>
         `).join('');
         document.getElementById('paketDizaynGroup').innerHTML = `
             <button type="button" class="opt-btn ${paketSelected.dizayn === 'bir' ? 'active' : ''}" onclick="selectPaketDizayn('bir')">Bir xil</button>
@@ -981,6 +981,7 @@
         if (!qogoz) {
             return { unitPrice: 0, details: "⚠️ Paket uchun qog'oz kiritilmagan — Admin panelda kiriting.", costItems: [], hisobYaroqsiz: true };
         }
+        qogoz = { ...qogoz, paperType: 'Karton' }; // paket faqat Kartondan
         let harXil = paketSelected.dizayn === 'har';
         let k = harXil ? 2 : 1;                     // qog'oz/forma/pechat necha marta hisoblanadi
         let ofsetTiraj = harXil ? qty : qty * 2;    // Ofsetga yuboriladigan bo'lak (zapasni Ofset o'zi qo'shadi)
@@ -1091,7 +1092,7 @@
 
         q('paketQogozlarBody').innerHTML = paketConfig.qogozlar.map((g, i) => `
             <tr>
-                <td><select id="pkQ_type_${i}">${POLIGRAFIYA_PAPER_TYPES.map(p => `<option value="${p}" ${g.paperType === p ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+                <td style="font-weight:600;">Karton</td>
                 <td><div class="input-unit"><input type="number" id="pkQ_gsm_${i}" value="${g.gsm}" min="1"><span>gr</span></div></td>
                 <td style="text-align:center;"><input type="radio" name="pkQDefault" id="pkQ_def_${i}" ${g.isDefault ? 'checked' : ''}></td>
                 <td style="text-align:right;"><button type="button" class="btn btn-danger" style="height:30px; padding:0 10px;" title="O'chirish" onclick="deletePaketQogoz(${i})">✕</button></td>
@@ -1122,8 +1123,8 @@
                 x: son(`pkOl_${i}_${oi}_x`), y: son(`pkOl_${i}_${oi}_y`), z: son(`pkOl_${i}_${oi}_z`)
             } : o)
         }));
-        paketConfig.qogozlar = paketConfig.qogozlar.map((g, i) => q(`pkQ_type_${i}`) ? {
-            paperType: q(`pkQ_type_${i}`).value, gsm: son(`pkQ_gsm_${i}`, 1), isDefault: q(`pkQ_def_${i}`).checked
+        paketConfig.qogozlar = paketConfig.qogozlar.map((g, i) => q(`pkQ_gsm_${i}`) ? {
+            paperType: 'Karton', gsm: son(`pkQ_gsm_${i}`, 1), isDefault: q(`pkQ_def_${i}`).checked
         } : g);
         paketConfig.lentaNarxi = son('paketLentaNarxi');
         ['a3', 'a2', 'a1'].forEach(m => {
@@ -1151,14 +1152,14 @@
 
     function addPaketQogoz() {
         collectPaketFromUI();
-        paketConfig.qogozlar.push({ paperType: 'Melovka', gsm: 250, isDefault: paketConfig.qogozlar.length === 0 });
+        paketConfig.qogozlar.push({ paperType: 'Karton', gsm: 300, isDefault: paketConfig.qogozlar.length === 0 });
         renderAdminPaket();
     }
 
     function deletePaketQogoz(i) {
         collectPaketFromUI();
         let g = paketConfig.qogozlar[i];
-        if (!g || !confirm(`${g.paperType} ${g.gsm}gr qog'ozini o'chirasizmi?`)) return;
+        if (!g || !confirm(`Karton ${g.gsm}gr ni o'chirasizmi?`)) return;
         let wasDefault = g.isDefault;
         paketConfig.qogozlar.splice(i, 1);
         if (wasDefault && paketConfig.qogozlar.length > 0) paketConfig.qogozlar[0].isDefault = true;
@@ -1169,7 +1170,7 @@
         collectPaketFromUI();
         let xato = paketConfig.turlar.some(t => (t.olchamlar || []).some(o => !(o.x > 0 && o.y > 0 && o.z > 0)));
         if (xato) { showToast("⚠️ Tayyor o'lchamlarda X, Y, Z 0 dan katta bo'lishi kerak!"); return; }
-        if (paketConfig.qogozlar.length === 0) { showToast("⚠️ Kamida bitta qog'oz kiriting!"); return; }
+        if (paketConfig.qogozlar.length === 0) { showToast("⚠️ Kamida bitta karton grammajini kiriting!"); return; }
         if (!paketConfig.qogozlar.some(g => g.isDefault)) paketConfig.qogozlar[0].isDefault = true;
         if (!paketConfig.turlar.some(t => t.isDefault)) paketConfig.turlar[0].isDefault = true;
         localStorage.setItem('erp_paket_config', JSON.stringify(paketConfig));
@@ -1189,7 +1190,12 @@
                 return s ? { ...d, ...s, olchamlar: Array.isArray(s.olchamlar) ? s.olchamlar : d.olchamlar } : d;
             });
         }
-        if (Array.isArray(saved.qogozlar) && saved.qogozlar.length > 0) cfg.qogozlar = saved.qogozlar;
+        // Paket faqat Kartondan: eski saqlangan Melovka va boshqa qatorlar tashlab yuboriladi
+        let kartonlar = Array.isArray(saved.qogozlar) ? saved.qogozlar.filter(g => g && g.paperType === 'Karton' && g.gsm > 0) : [];
+        if (kartonlar.length > 0) {
+            if (!kartonlar.some(g => g.isDefault)) kartonlar[0].isDefault = true;
+            cfg.qogozlar = kartonlar;
+        }
         if (typeof saved.lentaNarxi === 'number') cfg.lentaNarxi = saved.lentaNarxi;
         ['a3', 'a2', 'a1'].forEach(m => {
             if (saved.lak && saved.lak[m]) cfg.lak[m] = { ...cfg.lak[m], ...saved.lak[m] };
