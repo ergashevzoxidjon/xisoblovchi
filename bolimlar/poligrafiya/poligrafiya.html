@@ -1,0 +1,316 @@
+<!-- ====================== POLIGRAFIYA bo'limi — HTML qismlari ======================
+     Bu fayl brauzerda alohida ochilmaydi. yigish.bat har bir "@blok NOMI" ... "@/blok"
+     orasidagi qismni umumiy/index.template.html dagi mos "@include" belgisi o'rniga
+     qo'yib, tayyor index.html ni yig'adi. -->
+
+<!-- Bosh sahifadagi mahsulot kartochkalari -->
+<!-- @blok grid -->
+        <div class="section-title">1. POLIGRAFIYA MAHSULOTLARI</div>
+        <div class="product-grid" id="grid-poligrafiya">
+            <div class="product-card" onclick="openCalc('flayer', 'Flayer')"><div class="icon">📄</div><h3>Flayer</h3></div>
+            <div class="product-card" onclick="openCalc('listovka', 'Listovka')"><div class="icon">📑</div><h3>Listovka</h3></div>
+            <div class="product-card" onclick="openCalc('doorhanger', 'Doorhanger')"><div class="icon">🏷️</div><h3>Doorhanger</h3></div>
+            <div class="product-card" onclick="openCalc('buklet', 'Buklet')"><div class="icon">📖</div><h3>Buklet</h3></div>
+            <div class="product-card" onclick="openCalc('bloknot', 'Bloknot')"><div class="icon">📓</div><h3>Bloknot</h3></div>
+            <div class="product-card" onclick="openCalc('paket', 'Paket')"><div class="icon">🛍️</div><h3>Paket</h3></div>
+            <div class="product-card" onclick="openCalc('kalendar', 'Kalendar')"><div class="icon">📅</div><h3>Kalendar</h3></div>
+            <div class="product-card" onclick="openCalc('papka', 'Papka')"><div class="icon">📁</div><h3>Papka</h3></div>
+            <div class="product-card" onclick="openCalc('kubarik', 'Kubarik')"><div class="icon">🧊</div><h3>Kubarik</h3></div>
+        </div>
+<!-- @/blok -->
+
+<!-- Admin panel — shu bo'lim mahsulotlarining sozlama bloklari -->
+<!-- @blok admin -->
+            <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
+            <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" id="poligrafiyaGsmPriceCard">
+                    <div class="add-pen-card-title">⚖️ Ruxsat etilgan Qog'oz Grammajlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px;">Ushbu mahsulot uchun qaysi qog'oz grammajlari ishlatilishi mumkinligini belgilang — har biri alohida kartochka. Narx bu yerda kiritilmaydi: menejer kalkulyatorda grammajni tanlaganda, narx tanlangan Ofset yoki Raqamli (Sifravoy) Pechat bo'limidagi qog'oz bazasidan avtomatik olinadi. "★ Standart" belgilangan kartochka mijoz/menejer ekranida avtomatik tanlangan holda chiqadi.</p>
+                    <div class="poli-gsm-grid" id="adminPoligrafiyaGsmTableBody"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" style="background: #4f46e5;" onclick="addPoligrafiyaGsmRow()">+ Yangi grammaj qo'shish</button>
+                        <button class="btn btn-success" onclick="saveAllPoligrafiyaGsm()">💾 Barcha grammajlarni saqlash</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- DOORHANGER — QO'SHIMCHA (VISOCHKA) ADMIN PANEL BLOKI -->
+            <div id="doorhangerVisochkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📎 Visochka (osish uchun teshik)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Doorhanger FAQAT A3 ofsetda, ikki tomonlama (Chujoy — old/orqa uchun alohida forma)
+                        hisoblanadi, qog'oz turi: Karton. Visochka narxi endi <b>"Ofset pechat kalkulyatori"</b>
+                        admin bo'limidagi umumiy sozlamadan olinadi — bu yerda faqat Doorhanger shu
+                        xizmatdan foydalanadimi-yo'qmi belgilanadi, mijoz/menejerga ko'rsatilmaydi.
+                    </p>
+                    <label style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.9rem; cursor:pointer; margin-bottom:12px;">
+                        <input type="checkbox" id="doorhangerVisochkaEnabled" checked style="width:18px; height:18px;"> Visochka ishlatiladi
+                    </label>
+                    <div style="display:flex; justify-content:flex-end;">
+                        <button class="btn btn-success" onclick="saveDoorhangerConfig()">💾 Saqlash</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOKNOT ADMIN PANEL BLOKI -->
+            <div id="bloknotAdminBox" style="display: none; margin-bottom: 28px;">
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📐 Bloknot O'lchamlari va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Usti/osti (Karton) va ichki varoqlar (Ofset 80gr) narxi endi <b>Ofset bo'limidagi
+                        haqiqiy qog'oz/forma/bosma bazasidan</b> avtomatik hisoblanadi — bu yerda faqat
+                        real ishlab chiqarish parametrlarini kiritasiz.<br>
+                        <b>A3 ulushi</b> — usti+osti birgalikda 1 A3 listning necha ulushini egallaydi
+                        (masalan A6 = 0.25, ya'ni 1 A3 listga 4 ta to'plam sig'adi; A5 = 0.5; A4 = 1).<br>
+                        <b>Ichki ko'p./bo'l.</b> — adad × ko'paytiruvchi = kerakli barg soni, so'ng
+                        bo'luvchiga bo'linadi (1 A3 list buklanib shuncha bargga aylanadi; masalan A6:
+                        ×30 keyin ÷8).
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">Nomi</th>
+                                    <th style="width: 100px;">O'lchami (mm)</th>
+                                    <th style="width: 80px;">A3 ulushi</th>
+                                    <th style="width: 90px;">Karton (gr)</th>
+                                    <th style="width: 90px;">Ichki ko'p.</th>
+                                    <th style="width: 80px;">Ichki bo'l.</th>
+                                    <th style="width: 110px;">Yig'ish (so'm)</th>
+                                    <th style="width: 110px;">Prujina yuqoridan</th>
+                                    <th style="width: 110px;">Prujina yonidan</th>
+                                    <th style="width: 80px; text-align:center;">Standart</th>
+                                    <th style="width: 60px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBloknotSizeTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addBloknotSizeRow()">+ Yangi o'lcham qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📄 Ichki Varoqlar Zapasi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Har bir buyurtma (tiraj)ga bir marta qo'shiladigan zapas A3 list soni
+                        (mashina sozlash/kalibrlash uchun ketadigan qog'oz).
+                    </p>
+                    <div class="form-group" style="max-width: 260px;">
+                        <label>Zapas (A3 list):</label>
+                        <input type="number" min="0" id="bloknotInnerReserveSheets" value="100">
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🧴 Laminatsiya Narxi (majburiy, A3 list bo'yicha)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Laminatsiya <b>BARCHA bloknotlarga majburiy</b> qo'shiladi — mijoz/menejer
+                        tanlamaydi. A3 listlar soni bo'yicha hisoblanadi:
+                        <b>A3 listlar soni = adad × o'lchamning A3 ulushi.</b><br>
+                        Birinchi paket — minimal to'lov: listlar soni undan kam bo'lsa ham to'liq olinadi.
+                        Undan oshgan har bir list alohida narxlanadi.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Birinchi paket (necha A3 list):</label>
+                            <input type="number" min="1" id="bloknotLamFirstSheets" value="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Birinchi paket narxi (so'm):</label>
+                            <input type="number" min="0" id="bloknotLamFirstPrice" value="350000">
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top: 12px;">
+                        <div class="form-group">
+                            <label>Keyingi har bir A3 list (so'm):</label>
+                            <input type="number" min="0" id="bloknotLamNextPrice" value="500">
+                        </div>
+                        <div class="form-group">
+                            <label style="color: var(--text-muted);">Namuna hisob:</label>
+                            <div id="bloknotLamPreview" style="font-family: var(--font-mono); font-size: 0.82rem; padding: 10px 0; color: var(--text-main);"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🔨 Tisneniya Narxi (ixtiyoriy)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Mijoz/menejer belgilaydi (checkbox). Dona narxi har bir bloknotga qo'shiladi.
+                        Klishe bir marta olinib, adadga bo'linadi. 3D lak bilan birga tanlanishi mumkin.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tisneniya (so'm/dona):</label>
+                            <input type="number" min="0" id="bloknotTisneniyaPrice" value="800">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="bloknotKlishePrice" value="50000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">✨ 3D Lak Narxi (ixtiyoriy)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Mijoz/menejer belgilaydi (checkbox). Dona narxi har bir bloknotga qo'shiladi.
+                        Klishe bir marta olinib, adadga bo'linadi. Tisneniya bilan birga tanlanishi mumkin.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>3D lak (so'm/dona):</label>
+                            <input type="number" min="0" id="bloknotLak3dPrice" value="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>3D lak klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="bloknotLak3dKlishePrice" value="50000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">ℹ️ Mijozga Ko'rsatiladigan Ma'lumot</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Hisoblash sahifasida ma'lumot blokida chiqadi. O'lcham avtomatik qo'shiladi.
+                    </p>
+                    <div class="form-group">
+                        <label>Matn:</label>
+                        <input type="text" id="bloknotInfoTextInput" value="Bloknot usti 250-300gr kartondan tayyorlanadi.">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-success" onclick="saveBloknotConfig()">💾 Bloknot sozlamalarini saqlash</button>
+                </div>
+            </div>
+
+            <!-- PAPKA ADMIN PANEL BLOKI -->
+            <div id="papkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📁 Papka Turlari va Yoyilgan O'lchamlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Narx REAL ofset hisobidan (Ofset bo'limidagi Karton narx bazasidan — mijoz/menejer
+                        grammajni o'zi tanlaydi) avtomatik topiladi — mashina (A3/A2) har bir tur uchun
+                        qat'iy belgilangan. "Karmashka+Yig'ish" narxi mijozga umuman ko'rsatilmaydi, faqat
+                        shu turga avtomatik qo'shiladi (hozircha faqat Karmashkalida ishlatiladi).
+                    </p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Nomi</th>
+                                    <th style="width: 100px;">Eni (mm)</th>
+                                    <th style="width: 100px;">Bo'yi (mm)</th>
+                                    <th style="width: 80px;">Mashina</th>
+                                    <th style="width: 200px;">Karmashka+Yig'ish (mijozga ko'rinmaydi, so'm/dona)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPapkaVariantTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🧴 Laminatsiya va 📎 Visochka</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Narxi endi <b>"Ofset pechat kalkulyatori"</b> admin bo'limidagi umumiy sozlamadan
+                        olinadi (barcha mahsulotlar uchun bitta joyda boshqariladi). Bu yerda faqat Papka
+                        shu xizmatlardan foydalanadimi-yo'qmi belgilanadi — BARCHA Papka turlariga
+                        qo'llaniladi, mijoz/menejerga umuman ko'rsatilmaydi.
+                    </p>
+                    <div style="display:flex; gap:24px; flex-wrap:wrap;">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.9rem; cursor:pointer;">
+                            <input type="checkbox" id="papkaLaminatsiyaEnabled" checked style="width:18px; height:18px;"> Laminatsiya ishlatiladi
+                        </label>
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.9rem; cursor:pointer;">
+                            <input type="checkbox" id="papkaVisochkaEnabled" checked style="width:18px; height:18px;"> Visochka ishlatiladi
+                        </label>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">✨ LAK va 🔨 Tisneniya</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Ixtiyoriy — mijoz/menejer tanlaydi, ikkalasi ham bir vaqtda tanlanishi mumkin.
+                        LAK tiered: birinchi ko'rsatilgan donagacha qat'iy summa, undan oshgan har bir
+                        donaga qo'shimcha narx qo'shiladi.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>LAK A3 — 1000tagacha (so'm):</label>
+                            <input type="number" min="0" id="papkaLakA3First" value="500000">
+                        </div>
+                        <div class="form-group">
+                            <label>LAK A3 — 1000dan keyin (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaLakA3Next" value="500">
+                        </div>
+                        <div class="form-group">
+                            <label>LAK A2 — 1000tagacha (so'm):</label>
+                            <input type="number" min="0" id="papkaLakA2First" value="750000">
+                        </div>
+                        <div class="form-group">
+                            <label>LAK A2 — 1000dan keyin (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaLakA2Next" value="750">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tisneniya A3 (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA3Price" value="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya A3 klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA3Klishe" value="500000">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya A2 (so'm/dona):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA2Price" value="2000">
+                        </div>
+                        <div class="form-group">
+                            <label>Tisneniya A2 klishesi (bir martalik):</label>
+                            <input type="number" min="0" id="papkaTisneniyaA2Klishe" value="1000000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📦 Eng kam buyurtma (MOQ)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Shu miqdordan kam kiritilsa, hisob-kitob avtomatik shu songa ko'tariladi.
+                    </p>
+                    <div class="form-group" style="max-width:220px;">
+                        <label>Eng kam dona:</label>
+                        <input type="number" min="1" id="papkaMinQty" value="100">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-success" onclick="savePapkaConfig()">💾 Papka sozlamalarini saqlash</button>
+                </div>
+            </div>
+
+            <!-- KALENDAR ADMIN PANEL BLOKI -->
+            <div id="kalendarAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📅 Kalendar Turlari va Narxlash</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Qog'oz (Melovka/Karton) narxi Ofset Pechat bo'limidagi umumiy bazadan avtomatik
+                        olinadi — bu yerda faqat har bir kalendar turi uchun o'lcham, standart grammaj,
+                        varaq soni va qo'shimcha ishlovlar (laminatsiya, prujina, yig'ish, tisneniya, lak)
+                        narxi kiritiladi.
+                    </p>
+                    <div id="kalendarSubtypesAdminContainer"></div>
+                </div>
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-success" onclick="saveKalendarConfig()">💾 Kalendar sozlamalarini saqlash</button>
+                </div>
+            </div>
+
+<!-- @/blok -->

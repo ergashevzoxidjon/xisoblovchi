@@ -1,0 +1,181 @@
+<!-- ====================== OFSET PECHAT bo'limi — HTML qismlari ======================
+     Bu fayl brauzerda alohida ochilmaydi. yigish.bat har bir "@blok NOMI" ... "@/blok"
+     orasidagi qismni umumiy/index.template.html dagi mos "@include" belgisi o'rniga
+     qo'yib, tayyor index.html ni yig'adi. -->
+
+<!-- Bosh sahifadagi mahsulot kartochkalari -->
+<!-- @blok grid -->
+        <div class="section-title">5. OFSET PECHAT</div>
+        <div class="product-grid" id="grid-ofset">
+            <div class="product-card" onclick="openCalc('ofset_pechat', 'Ofset Pechat Kalkulyatori')"><div class="icon">🖨️</div><h3>Ofset pechat kalkulyatori</h3></div>
+        </div>
+<!-- @/blok -->
+
+<!-- Admin panel — shu bo'lim mahsulotlarining sozlama bloklari -->
+<!-- @blok admin -->
+            <!-- OFSET PECHAT ADMIN PANEL BLOKI -->
+            <div id="ofsetAdminPanelBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🖨️ Ofset Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Ofset qog'ozining faqat bitta standart (A3) turi bor — shu qator o'chirilmaydi,
+                        faqat narxi kiritiladi.
+                    </p>
+                    <div class="form-group" style="max-width: 260px;">
+                        <label>Narxi (so'm):</label>
+                        <input type="number" min="0" id="ofsetSinglePrice" value="22000">
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📄 Melovka Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar.</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminMelovkaPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Melovka')">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📦 Karton Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar (Papka, Kalendar kabi mahsulotlar shu bazadan foydalanadi).</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminKartonPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Karton')">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🎨 Dizayn Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Bu yerda qog'oz gramaj bilan emas, nomi bilan kiritiladi (masalan "Colotech-200gr", "Lyon", "Kvarts").</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">Nomi</th>
+                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminDizaynPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow(&quot;Dizayn qog&#39;ozi&quot;)">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                    <button class="btn btn-success" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🖨️ Ofset Forma (Klishe) Narxi</div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A3 Ofset — forma tannarxi:</label>
+                            <input type="number" id="setPlateA3" value="22000">
+                        </div>
+                        <div class="form-group">
+                            <label>A2 Ofset — forma tannarxi:</label>
+                            <input type="number" id="setPlateA2" value="44000">
+                        </div>
+                        <div class="form-group">
+                            <label>A1 Ofset — forma tannarxi:</label>
+                            <input type="number" id="setPlateA1" value="88000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">💰 Bosma (Pechat) Narxi — Baza va Qadam</div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A3 — Baza (1-1000 ottisk):</label>
+                            <input type="number" id="setPrintA3Base" value="170000">
+                        </div>
+                        <div class="form-group">
+                            <label>A3 — Qadam (har +1000):</label>
+                            <input type="number" id="setPrintA3Step" value="70000">
+                        </div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A2 — Baza (1-1000 ottisk):</label>
+                            <input type="number" id="setPrintA2Base" value="350000">
+                        </div>
+                        <div class="form-group">
+                            <label>A2 — Qadam (har +1000):</label>
+                            <input type="number" id="setPrintA2Step" value="80000">
+                        </div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label>A1 — Baza (1-1000 ottisk):</label>
+                            <input type="number" id="setPrintA1Base" value="1000000">
+                        </div>
+                        <div class="form-group">
+                            <label>A1 — Qadam (har +1000):</label>
+                            <input type="number" id="setPrintA1Step" value="150000">
+                        </div>
+                    </div>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📎 Visochka va 🧴 Laminatsiya (umumiy xizmatlar)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Bu ikkala xizmat Poligrafiya bo'limidagi ko'plab mahsulotlarda (Papka, Doorhanger
+                        va boshqalar) takrorlanadi — narxi shu yerda BIR MARTA, mashina formati (A3/A2/A1)
+                        bo'yicha kiritiladi. Har bir mahsulotning o'z admin bo'limida esa faqat shu xizmatdan
+                        foydalanadimi-yo'qmi (yoqilgan/o'chirilgan) belgilanadi — narx har doim shu yerdan olinadi.
+                    </p>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group"><label>Visochka A3 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA3First" value="120000"></div>
+                        <div class="form-group"><label>Visochka A3 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA3Next" value="120"></div>
+                        <div class="form-group"><label>Laminatsiya A3 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA3" value="550"></div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group"><label>Visochka A2 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA2First" value="200000"></div>
+                        <div class="form-group"><label>Visochka A2 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA2Next" value="200"></div>
+                        <div class="form-group"><label>Laminatsiya A2 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA2" value="1100"></div>
+                    </div>
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group"><label>Visochka A1 — 1000tagacha (so'm):</label><input type="number" min="0" id="finVisochkaA1First" value="0"></div>
+                        <div class="form-group"><label>Visochka A1 — 1000dan keyin (so'm/dona):</label><input type="number" min="0" id="finVisochkaA1Next" value="0"></div>
+                        <div class="form-group"><label>Laminatsiya A1 (so'm/dona):</label><input type="number" min="0" id="finLaminatsiyaA1" value="0"></div>
+                    </div>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveOfsetFinishingServices()">💾 Visochka/Laminatsiya narxlarini saqlash</button>
+                </div>
+            </div>
+
+<!-- @/blok -->

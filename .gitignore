@@ -20,13 +20,14 @@ desktop.ini
 *.zip
 *.rar
 
-# Yuklash va avtomatlashtirish skriptlari (mahalliy ish qurollari)
-push.bat
-pull.bat
-AVTO-SOZLASH.bat
-AVTO-TOXTATISH.bat
-HOLAT.bat
-avto-push.ps1
-avto-push-yashirin.vbs
+# Avto-push jurnali va qulfi - HECH QACHON commit qilinmaydi
+# (eski avto-push o'z logini commit qilib, minglab keraksiz commit yaratgan)
 avto-push.log
 .avto-push.lock
+
+# Mahalliy ish qurollari
+push.bat
+pull.bat
+
+# Claude Code mahalliy sozlamalari
+.claude/

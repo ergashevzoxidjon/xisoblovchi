@@ -1,0 +1,61 @@
+<!-- ====================== REKLAMA bo'limi — HTML qismlari ======================
+     Bu fayl brauzerda alohida ochilmaydi. yigish.bat har bir "@blok NOMI" ... "@/blok"
+     orasidagi qismni umumiy/index.template.html dagi mos "@include" belgisi o'rniga
+     qo'yib, tayyor index.html ni yig'adi. -->
+
+<!-- Bosh sahifadagi mahsulot kartochkalari -->
+<!-- @blok grid -->
+        <div class="section-title">4. REKLAMA MAHSULOTLARI</div>
+        <div class="product-grid" id="grid-reklama">
+            <div class="product-card" onclick="openCalc('baner', 'Baner')"><div class="icon">🖼️</div><h3>Baner</h3></div>
+            <div class="product-card" onclick="openCalc('orakal', 'Orakal')"><div class="icon">🌆</div><h3>Orakal</h3></div>
+            <div class="product-card" onclick="openCalc('setka_orakal', 'Setka Orakal')"><div class="icon">🏁</div><h3>Setka Orakal</h3></div>
+            <div class="product-card" onclick="openCalc('tumanka', 'Tumanka')"><div class="icon">🌫️</div><h3>Tumanka</h3></div>
+            <div class="product-card" onclick="openCalc('xolst', 'Xolst')"><div class="icon">🎨</div><h3>Xolst</h3></div>
+            <div class="product-card" onclick="openCalc('rollup', 'Roll Up')"><div class="icon">📜</div><h3>Roll Up</h3></div>
+            <div class="product-card" onclick="openCalc('pauk', 'Pauk')"><div class="icon">🕷️</div><h3>Pauk</h3></div>
+            <div class="product-card" onclick="openCalc('popup', 'PopUp')"><div class="icon">⛺</div><h3>PopUp</h3></div>
+            <div class="product-card" onclick="openCalc('promostoyka', 'PromoStoyka')"><div class="icon">📣</div><h3>PromoStoyka</h3></div>
+        </div>
+<!-- @/blok -->
+
+<!-- Admin panel — shu bo'lim mahsulotlarining sozlama bloklari -->
+<!-- @blok admin -->
+            <!-- REKLAMA STEND (Roll Up / Pauk / PopUp / PromoStoyka) ADMIN PANEL BLOKI -->
+            <div id="reklamaStendAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📊 Miqdor bo'yicha narx oraliqlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height:1.5;">
+                        Buyurtma miqdoriga qarab har xil narx belgilash uchun oraliqlarni shu yerda sozlang — masalan
+                        <strong>1-3 dona</strong> uchun bir narx, <strong>4-10 dona</strong> uchun arzonroq narx va h.k.
+                        Pastdagi jadvalda har bir o'lcham uchun shu oraliqlarga mos narxlarni kiritasiz.
+                        <strong>"Gacha"ni bo'sh yoki 0 qoldirsangiz</strong> — cheksiz (ya'ni "va undan yuqori") deb qabul qilinadi.
+                    </p>
+                    <div id="reklamaStendTierRangesEditor" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;"></div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem;" onclick="addReklamaStendTierRange()">+ Oraliq qo'shish</button>
+                        <button type="button" class="btn btn-outline" style="height:36px; padding:0 14px; font-size:0.82rem;" onclick="fillDefaultReklamaStendTierRanges()">⚡ Namuna oraliqlar (1-3, 4-10, 11-20, 21-50, 51-100, 101+)</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📐 O'lchamlar va Narxlari</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Har bir o'lcham qatoriga, yuqoridagi oraliqlarning har biriga mos narxni kiriting. <strong>Bazaviy narx</strong> — hech qanday oraliq sozlanmagan yoki mos kelmasa ishlatiladigan zaxira narx. "Standart" ustunida mijoz ekranida avtomatik tanlanadigan o'lchamni belgilang. Material (Glyans/Matoviy) tanlovi narxga ta'sir qilmaydi.</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr id="adminReklamaStendTierHeaderRow"></tr>
+                            </thead>
+                            <tbody id="adminReklamaStendSizeTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" style="background: #4f46e5;" onclick="addReklamaStendSizeRow()">+ Yangi o'lcham qo'shish</button>
+                        <button class="btn btn-success" onclick="saveAllReklamaStendSizes()">💾 Barcha o'lchamlar va narxlarni saqlash</button>
+                    </div>
+                </div>
+            </div>
+
+<!-- @/blok -->
