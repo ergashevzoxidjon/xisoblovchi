@@ -983,8 +983,9 @@
         let isKalendar = (key === 'kalendar');
         let isKubarik = (key === 'kubarik');
         let isPaket = (key === 'paket');
-        let isVaraqli = (key === 'konvert' || key === 'otkritka');
-        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli;
+        let isVaraqli = (key === 'konvert');
+        let isOtkritka = (key === 'otkritka');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli && !isOtkritka;
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
         let isReklamaStend = reklamaStendTypes.includes(key);
@@ -999,6 +1000,7 @@
         document.getElementById('kubarikAdminBox').style.display = isKubarik ? 'block' : 'none';
         document.getElementById('paketAdminBox').style.display = isPaket ? 'block' : 'none';
         document.getElementById('varaqliAdminBox').style.display = isVaraqli ? 'block' : 'none';
+        document.getElementById('otkritkaAdminBox').style.display = isOtkritka ? 'block' : 'none';
         // Baner/Orakal/... — maksimal chop eni (reklama.js)
         if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
@@ -1016,7 +1018,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isTextile || isReklamaStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isTextile || isReklamaStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1069,6 +1071,10 @@
         }
         if (isVaraqli) {
             renderAdminVaraqli();
+            return;
+        }
+        if (isOtkritka) {
+            renderAdminOtkritka();
             return;
         }
         if (isPoligrafiya) {
@@ -1308,8 +1314,11 @@ function generateForm(type) {
     else if (type === 'paket') {
         html = buildPaketForm();
     }
-    else if (type === 'konvert' || type === 'otkritka') {
+    else if (type === 'konvert') {
         html = buildVaraqliForm(type);
+    }
+    else if (type === 'otkritka') {
+        html = buildOtkritkaForm();
     }
     else if (type === 'doorhanger') {
         html = buildDoorhangerForm();
@@ -1355,8 +1364,13 @@ function generateForm(type) {
         return;
     }
 
-    if (type === 'konvert' || type === 'otkritka') {
+    if (type === 'konvert') {
         renderVaraqliOptions(type);
+        return;
+    }
+
+    if (type === 'otkritka') {
+        renderOtkritkaOptions();
         return;
     }
 
@@ -1458,7 +1472,14 @@ function calculateIchki() {
             details = res.details;
             costItems = res.costItems || [];
         }
-        else if (activeProductType === 'konvert' || activeProductType === 'otkritka') {
+        else if (activeProductType === 'otkritka') {
+            let res = calculateOtkritka(qty);
+            baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
+        else if (activeProductType === 'konvert') {
             let res = calculateVaraqli(activeProductType, qty);
             baseUnitPrice = res.unitPrice;
             details = res.details;

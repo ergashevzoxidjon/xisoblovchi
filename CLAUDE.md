@@ -22,7 +22,7 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
   textile      (Futbolka ... Shoper, Bayroqlar)
   suvenir      (Ruchka, Termos, ... Zontik, Koja papkalar, Guvohnomalar)
   reklama      (Baner, Orakal, ..., Roll Up, Pauk, PopUp, PromoStoyka, Tablichka, Nastolniy tablichka, Stend)
-  qogoz        (faqat admin: "Qog'oz bo'limi" — Ofset qog'oz narxlari + Konvert/Otkritka qog'ozlari)
+  qogoz        (faqat admin: "Qog'oz bo'limi" — Ofset qog'oz narxlari + Konvert qog'ozlari)
   ofset        (Ofset pechat kalkulyatori + Ofset qog'oz bazasi)
   sifravoy     (Raqamli pechat kalkulyatori)
 ```
@@ -71,11 +71,13 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
   har xil: adad, qog'oz/forma/pechat ×2 (zapasni `calculateOfsetForMachine` o'zi qo'shadi, +100). Laminatsiya,
   visochka (ofsetFinishingServices), lak, tisneniya — 2×adad bo'lak, mashina narxida. Yig'ish, lenta — har paketga.
   O'lcham tayyor ro'yxatda bo'lmasa — turning bir martalik pichoq narxi. Ma'lumot yetmasa `hisobYaroqsiz` → narx "—".
-- **Konvert va Otkritka** (`varaqliConfig`, `calculateVaraqli`) — bitta dvigatel: tur (tayyor o'lcham + bichim +
-  tiraj bo'yicha Sifravoy/UF dona narxi) yoki o'z o'lchami (bichim formula bilan; Konvertda bir martalik pichoq).
-  Qog'oz — `qogozRoyxati('konvert'|'otkritka')` (Qog'oz bo'limi), bichim varaqqa joylashtiriladi. Konvert:
-  Tisneniya (umumiy, A3). Otkritka: FAQAT Sifravoy (`pechatTurlari: ['sifravoy']`, tanlov ko'rsatilmaydi), "Pechat" qadamida bir/ikki
-  tomonlama, pardoz (Oddiy / 3D lak / 3D folga).
+- **Konvert** (`varaqliConfig`, `calculateVaraqli`): tur (tayyor o'lcham + bichim + tiraj bo'yicha Sifravoy/UF dona
+  narxi) yoki o'z o'lchami (bichim formula bilan + bir martalik pichoq). Qog'oz — `qogozRoyxati('konvert')`
+  (Qog'oz bo'limi). Pechat: Sifravoy / UF / pechatsiz + Tisneniya (umumiy, A3).
+- **Otkritka** (`otkritkaConfig`, `calculateOtkritka`) — FAQAT Sifravoy pechat: ODDIY → Colotech/Lyon/Kvarts
+  (Sifravoy qog'oz bazasidan, `oddiyQogozlar` prefikslari), `calculateDigitalPriceForPaper`, 1/2 tomon;
+  3D LAK / FOLGA → faqat Melovka, 680×480 varaq (qog'oz = Ofset Melovka 700×1000 narxi / 2) + `lakTierlar`
+  (varaq soni bo'yicha varaq narxi). Laminatsiya ixtiyoriy (umumiy: A3 / A2). Har turning qo'shimcha xizmati (so'm/dona).
 - **Qog'oz bo'limi** (`bolimlar/qogoz/`, admin kaliti `qogoz_bolimi`): Ofset qog'oz narxi — `saveOfsetQogozNarxlari()`,
   mashina (forma/bosma) — `saveOfsetMashinaSozlamalari()` alohida (bir-birining maydonlarini saqlab yubormasin).
 - **Kubarik** (`kubarikConfig`): Bloknot kabi — qog'oz Ofset A3 bazasidan, turlar (Oq/Rangli/Kleyli/Pechatli) admin tahrirlaydi.

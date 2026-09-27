@@ -71,7 +71,7 @@
 
             </div>
 
-            <!-- KONVERT / OTKRITKA ADMIN PANEL BLOKI (bitta blok, mahsulotga qarab to'ldiriladi) -->
+            <!-- KONVERT ADMIN PANEL BLOKI -->
             <div id="varaqliAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title" id="vmAdminSarlavha">Turlar va pechat narxlari</div>
@@ -120,6 +120,67 @@
 
                 <div class="admin-card-actions" style="margin-top:16px;">
                     <button class="btn btn-success" onclick="saveVaraqliConfig()">💾 Sozlamalarni saqlash</button>
+                </div>
+            </div>
+
+            <!-- OTKRITKA ADMIN PANEL BLOKI -->
+            <div id="otkritkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">💌 Otkritka turlari va qo'shimcha xizmat</div>
+                    <p class="admin-hint">Har bir tur: tayyor o'lcham (menejer tanlaydi), bichim — yoyilgan o'lcham, va har bir otkritkaga qo'shiladigan
+                        <b>qo'shimcha xizmat</b> (nomi va narxi, so'm/dona; 0 — qo'shilmaydi).</p>
+                    <div id="okAdminTurlar" class="vm-admin-turlar"></div>
+                    <div class="admin-card-actions" style="margin-top:12px;">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addOtkritkaTur()">+ Yangi tur</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">✨ 3D lak va 3D Tilla-Kumush folga</div>
+                    <p class="admin-hint">Faqat Melovkada, katta varaqda chop etiladi. Narx — <b>bitta varaq uchun (pechat + lak/folga)</b>,
+                        varaq soniga qarab: "dan 50" qatori 50 va undan ko'p varaqqa amal qiladi. Melovka qog'ozi alohida qo'shiladi
+                        (Qog'oz bo'limidagi 700×1000 narxining yarmi).</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>Varaq eni</label>
+                            <div class="input-unit"><input type="number" id="okAdminVaraqEni" min="1"><span>mm</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Varaq bo'yi</label>
+                            <div class="input-unit"><input type="number" id="okAdminVaraqBoyi" min="1"><span>mm</span></div>
+                        </div>
+                    </div>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:520px;">
+                            <thead><tr><th>Varaq soni (dan)</th><th>3D lak (so'm/varaq)</th><th>3D folga (so'm/varaq)</th><th></th></tr></thead>
+                            <tbody id="okAdminLakBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline" style="height:34px;" onclick="addOtkritkaLakTier()">+ Tiraj oralig'i</button>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">⚙️ Oddiy otkritka va umumiy</div>
+                    <p class="admin-hint">Oddiy otkritka Sifravoy pechat bo'limida hisoblanadi: qog'oz va varaq narxi (1/2 tomonlama) —
+                        <b>Sifravoy pechat → qog'oz bazasi</b>. Quyida — shu bazadagi qaysi qog'ozlar otkritka uchun ko'rsatilishi
+                        (nomi shu so'zlar bilan boshlanadiganlar). Laminatsiya narxi — umumiy <b>Pardozlash xizmatlari</b>dan
+                        (Sifravoy varag'i — A3, katta varaq — A2).</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Oddiy otkritka qog'ozlari (vergul bilan)</label>
+                            <input type="text" id="okAdminQogozlar" placeholder="Colotech, Lyon, Kvarts">
+                            <small id="okAdminQogozTopildi"></small>
+                        </div>
+                        <div class="form-group">
+                            <label>Zapas</label>
+                            <div class="input-unit"><input type="number" id="okAdminZapas" min="0"><span>varaq</span></div>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveOtkritkaConfig()">💾 Otkritka sozlamalarini saqlash</button>
+                    </div>
                 </div>
             </div>
 

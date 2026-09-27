@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: d16da4e539674593 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 19c31e5feb385859 -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <title>Bosmaxona ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="umumiy/core.css?v=d13358cd">
+    <link rel="stylesheet" href="umumiy/core.css?v=43afe404">
     <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=3e6ee534">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
     <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
@@ -440,7 +440,7 @@
             <!-- QOG'OZ BO'LIMI ADMIN PANEL BLOKI -->
             <div id="qogozAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="admin-link-hint">📄 Barcha qog'oz narxlari shu yerda. Ofset qog'ozlari — Ofset hisobida (Flayer, Paket, Papka,
-                    Bloknot...) xom varoq narxi sifatida; Konvert va Otkritka qog'ozlari — o'sha mahsulotlar kalkulyatorida.</div>
+                    Bloknot...) xom varoq narxi sifatida; Konvert qog'ozlari — Konvert kalkulyatorida.</div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">🖨️ Ofset Qog'ozi</div>
@@ -541,22 +541,6 @@
                     </div>
                 </div>
 
-                <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">💌 Otkritkalar uchun qog'oz</div>
-                    <p class="admin-hint">Otkritka kalkulyatorida tanlanadigan qog'ozlar. Narx — bitta varaq uchun.</p>
-                    <div class="table-card" style="margin-bottom:12px;">
-                        <div class="table-scroll">
-                        <table class="admin-table" style="min-width:760px;">
-                            <thead><tr><th style="min-width:180px;">Qog'oz nomi</th><th>Format</th><th>Eni (mm)</th><th>Bo'yi (mm)</th><th>Narxi (so'm/varaq)</th><th></th></tr></thead>
-                            <tbody id="qogozJadval_otkritka"></tbody>
-                        </table>
-                        </div>
-                    </div>
-                    <div class="admin-card-actions">
-                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addQogozQator('otkritka')">+ Qog'oz qo'shish</button>
-                        <button class="btn btn-success" onclick="saveQogozRoyxati('otkritka')">💾 Saqlash</button>
-                    </div>
-                </div>
             </div>
             <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
             <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
@@ -606,7 +590,7 @@
 
             </div>
 
-            <!-- KONVERT / OTKRITKA ADMIN PANEL BLOKI (bitta blok, mahsulotga qarab to'ldiriladi) -->
+            <!-- KONVERT ADMIN PANEL BLOKI -->
             <div id="varaqliAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title" id="vmAdminSarlavha">Turlar va pechat narxlari</div>
@@ -655,6 +639,67 @@
 
                 <div class="admin-card-actions" style="margin-top:16px;">
                     <button class="btn btn-success" onclick="saveVaraqliConfig()">💾 Sozlamalarni saqlash</button>
+                </div>
+            </div>
+
+            <!-- OTKRITKA ADMIN PANEL BLOKI -->
+            <div id="otkritkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">💌 Otkritka turlari va qo'shimcha xizmat</div>
+                    <p class="admin-hint">Har bir tur: tayyor o'lcham (menejer tanlaydi), bichim — yoyilgan o'lcham, va har bir otkritkaga qo'shiladigan
+                        <b>qo'shimcha xizmat</b> (nomi va narxi, so'm/dona; 0 — qo'shilmaydi).</p>
+                    <div id="okAdminTurlar" class="vm-admin-turlar"></div>
+                    <div class="admin-card-actions" style="margin-top:12px;">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addOtkritkaTur()">+ Yangi tur</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">✨ 3D lak va 3D Tilla-Kumush folga</div>
+                    <p class="admin-hint">Faqat Melovkada, katta varaqda chop etiladi. Narx — <b>bitta varaq uchun (pechat + lak/folga)</b>,
+                        varaq soniga qarab: "dan 50" qatori 50 va undan ko'p varaqqa amal qiladi. Melovka qog'ozi alohida qo'shiladi
+                        (Qog'oz bo'limidagi 700×1000 narxining yarmi).</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>Varaq eni</label>
+                            <div class="input-unit"><input type="number" id="okAdminVaraqEni" min="1"><span>mm</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Varaq bo'yi</label>
+                            <div class="input-unit"><input type="number" id="okAdminVaraqBoyi" min="1"><span>mm</span></div>
+                        </div>
+                    </div>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:520px;">
+                            <thead><tr><th>Varaq soni (dan)</th><th>3D lak (so'm/varaq)</th><th>3D folga (so'm/varaq)</th><th></th></tr></thead>
+                            <tbody id="okAdminLakBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline" style="height:34px;" onclick="addOtkritkaLakTier()">+ Tiraj oralig'i</button>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">⚙️ Oddiy otkritka va umumiy</div>
+                    <p class="admin-hint">Oddiy otkritka Sifravoy pechat bo'limida hisoblanadi: qog'oz va varaq narxi (1/2 tomonlama) —
+                        <b>Sifravoy pechat → qog'oz bazasi</b>. Quyida — shu bazadagi qaysi qog'ozlar otkritka uchun ko'rsatilishi
+                        (nomi shu so'zlar bilan boshlanadiganlar). Laminatsiya narxi — umumiy <b>Pardozlash xizmatlari</b>dan
+                        (Sifravoy varag'i — A3, katta varaq — A2).</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Oddiy otkritka qog'ozlari (vergul bilan)</label>
+                            <input type="text" id="okAdminQogozlar" placeholder="Colotech, Lyon, Kvarts">
+                            <small id="okAdminQogozTopildi"></small>
+                        </div>
+                        <div class="form-group">
+                            <label>Zapas</label>
+                            <div class="input-unit"><input type="number" id="okAdminZapas" min="0"><span>varaq</span></div>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveOtkritkaConfig()">💾 Otkritka sozlamalarini saqlash</button>
+                    </div>
                 </div>
             </div>
 
@@ -1514,11 +1559,11 @@
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
 <script src="umumiy/yordamchi.js?v=1a30ae98"></script>
-<script src="umumiy/core.js?v=9515c326"></script>
+<script src="umumiy/core.js?v=e42373a2"></script>
 <script src="bolimlar/ofset/ofset.js?v=0d5e344d"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
-<script src="bolimlar/qogoz/qogoz.js?v=ac81215e"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=8e81e0e0"></script>
+<script src="bolimlar/qogoz/qogoz.js?v=8ff2dcb5"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=37be94c5"></script>
 <script src="bolimlar/textile/textile.js?v=37fee0b3"></script>
 <script src="bolimlar/suvenir/suvenir.js?v=79bef9fc"></script>
 <script src="bolimlar/reklama/reklama.js?v=ad7bc69a"></script>

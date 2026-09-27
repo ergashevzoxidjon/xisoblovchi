@@ -1,10 +1,11 @@
 // ====================== QOG'OZ BO'LIMI ======================
 // Barcha qog'oz narxlari bitta admin bo'limida:
 //   • Ofset qog'ozlari (ofsetRawPapers — ma'lumot va hisob ofset.js da, bu yerda faqat admin ko'rinishi)
-//   • Konvertlar uchun qog'oz, Otkritkalar uchun qog'oz — har xil formatdagi varaqlar va ularning narxi.
-// Poligrafiya bo'limi (Konvert/Otkritka) bu ro'yxatlarni qogozRoyxati(key) orqali o'qiydi.
+//   • Konvertlar uchun qog'oz — har xil formatdagi varaqlar va ularning narxi.
+// Poligrafiya bo'limi (Konvert) bu ro'yxatni qogozRoyxati('konvert') orqali o'qiydi.
 
-    const QOGOZ_ROYXAT_NOMLARI = { konvert: "Konvertlar uchun qog'oz", otkritka: "Otkritkalar uchun qog'oz" };
+    // Otkritka qog'ozlari endi: oddiy — Sifravoy qog'oz bazasi, 3D lak/folga — Ofset Melovka (poligrafiya.js)
+    const QOGOZ_ROYXAT_NOMLARI = { konvert: "Konvertlar uchun qog'oz" };
 
     // Boshlang'ich (namuna) qog'ozlar — admin haqiqiy narxlarni kiritadi
     let qogozBolimi = {
@@ -14,11 +15,6 @@
             { id: 'kq3', nomi: 'Kraft 100gr',   format: 'A3',   eni: 297, boyi: 420, narx: 1200 },
             { id: 'kq4', nomi: 'Dizayn 120gr',  format: 'SRA3', eni: 320, boyi: 450, narx: 4000 },
             { id: 'kq5', nomi: 'Ofset 120gr',   format: 'A2',   eni: 440, boyi: 620, narx: 2800 }
-        ],
-        otkritka: [
-            { id: 'oq1', nomi: 'Melovka 300gr',   format: 'SRA3', eni: 320, boyi: 450, narx: 3000 },
-            { id: 'oq2', nomi: 'Karton 300gr',    format: 'SRA3', eni: 320, boyi: 450, narx: 2500 },
-            { id: 'oq3', nomi: 'Dizayn 250gr',    format: 'SRA3', eni: 320, boyi: 450, narx: 6000 }
         ]
     };
 

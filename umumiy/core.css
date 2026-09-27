@@ -1385,3 +1385,5 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 #adminScreen .vm-tier-table td input[type="number"] { min-width: 0; width: 100%; padding: 4px 6px; }
 .vm-admin-tur { min-width: 0; overflow: hidden; }
 .vm-pardoz-group { display: flex; gap: 8px; flex-wrap: wrap; flex-basis: 100%; }
+.ok-admin-xizmat { display: grid; grid-template-columns: 1fr 150px; gap: 6px; margin-top: 4px; }
+.ok-admin-xizmat .input-unit input { min-width: 0; width: 100%; }
