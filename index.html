@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 9e672877b5611d52 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 12d99343b825d156 -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -7,13 +7,14 @@
     <title>Bosmaxona ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="umumiy/core.css?v=4d675cfe">
+    <link rel="stylesheet" href="umumiy/core.css?v=d13358cd">
     <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=3e6ee534">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
     <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
     <link rel="stylesheet" href="bolimlar/sifravoy/sifravoy.css?v=0813f0c4">
     <link rel="stylesheet" href="bolimlar/ofset/ofset.css?v=4e4b736d">
     <link rel="stylesheet" href="bolimlar/reklama/reklama.css?v=c12511e4">
+    <link rel="stylesheet" href="bolimlar/qogoz/qogoz.css?v=346af5e4">
 </head>
 <body>
 
@@ -121,6 +122,8 @@
             <div class="product-card" onclick="openCalc('kardxolder', 'Kardxolder')"><div class="icon">💳</div><h3>Kardxolder</h3></div>
             <div class="product-card" onclick="openCalc('soat', 'Soat')"><div class="icon">⌚</div><h3>Soat</h3></div>
             <div class="product-card" onclick="openCalc('zontik', 'Zontik')"><div class="icon">☂️</div><h3>Zontik</h3></div>
+            <div class="product-card" onclick="openCalc('koja_papka', 'Koja papkalar')"><div class="icon">💼</div><h3>Koja papkalar</h3></div>
+            <div class="product-card" onclick="openCalc('guvohnoma', 'Guvohnomalar')"><div class="icon">📇</div><h3>Guvohnomalar</h3></div>
         </div>
 
         <div class="section-title">4. REKLAMA MAHSULOTLARI</div>
@@ -134,6 +137,9 @@
             <div class="product-card" onclick="openCalc('pauk', 'Pauk')"><div class="icon">🕷️</div><h3>Pauk</h3></div>
             <div class="product-card" onclick="openCalc('popup', 'PopUp')"><div class="icon">⛺</div><h3>PopUp</h3></div>
             <div class="product-card" onclick="openCalc('promostoyka', 'PromoStoyka')"><div class="icon">📣</div><h3>PromoStoyka</h3></div>
+            <div class="product-card" onclick="openCalc('tablichka', 'Tablichkalar')"><div class="icon">🪧</div><h3>Tablichkalar</h3></div>
+            <div class="product-card" onclick="openCalc('nastolniy_tablichka', 'Nastolniy tablichkalar')"><div class="icon">🔖</div><h3>Nastolniy tablichkalar</h3></div>
+            <div class="product-card" onclick="openCalc('stend', 'Stendlar')"><div class="icon">📋</div><h3>Stendlar</h3></div>
         </div>
 
         <div class="section-title">5. OFSET PECHAT</div>
@@ -282,88 +288,9 @@
 
             <!-- OFSET PECHAT ADMIN PANEL BLOKI -->
             <div id="ofsetAdminPanelBox" style="display: none; margin-bottom: 28px;">
-                <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">🖨️ Ofset Qog'ozi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        Ofset qog'ozining faqat bitta standart (A3) turi bor — shu qator o'chirilmaydi,
-                        faqat narxi kiritiladi.
-                    </p>
-                    <div class="form-group" style="max-width: 260px;">
-                        <label>Narxi (so'm):</label>
-                        <input type="number" min="0" id="ofsetSinglePrice" value="22000">
-                    </div>
-                </div>
+                <div class="admin-link-hint">📄 Qog'oz narxlari (Ofset, Melovka, Karton, Dizayn qog'ozi) endi alohida:
+                    <b>Admin panel → 📄 Qog'oz bo'limi</b>.</div>
 
-                <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">📄 Melovka Qog'ozi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar.</p>
-                    <div class="table-card" style="margin-bottom: 16px;">
-                        <div class="table-scroll">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 90px;">Gramaj (g)</th>
-                                    <th style="width: 130px;">620x880 (so'm)</th>
-                                    <th style="width: 130px;">620x940 (so'm)</th>
-                                    <th style="width: 130px;">700x1000 (so'm)</th>
-                                    <th style="width: 70px; text-align: right;">Amal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminMelovkaPaperTableBody"></tbody>
-                        </table>
-                        </div>
-                    </div>
-                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Melovka')">+ Yangi grammaj qo'shish</button>
-                </div>
-
-                <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">📦 Karton Qog'ozi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar (Papka, Kalendar kabi mahsulotlar shu bazadan foydalanadi).</p>
-                    <div class="table-card" style="margin-bottom: 16px;">
-                        <div class="table-scroll">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 90px;">Gramaj (g)</th>
-                                    <th style="width: 130px;">620x880 (so'm)</th>
-                                    <th style="width: 130px;">620x940 (so'm)</th>
-                                    <th style="width: 130px;">700x1000 (so'm)</th>
-                                    <th style="width: 70px; text-align: right;">Amal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminKartonPaperTableBody"></tbody>
-                        </table>
-                        </div>
-                    </div>
-                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Karton')">+ Yangi grammaj qo'shish</button>
-                </div>
-
-                <div class="add-pen-card" style="margin-bottom: 16px;">
-                    <div class="add-pen-card-title">🎨 Dizayn Qog'ozi</div>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Bu yerda qog'oz gramaj bilan emas, nomi bilan kiritiladi (masalan "Colotech-200gr", "Lyon", "Kvarts").</p>
-                    <div class="table-card" style="margin-bottom: 16px;">
-                        <div class="table-scroll">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 150px;">Nomi</th>
-                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
-                                    <th style="width: 130px;">620x880 (so'm)</th>
-                                    <th style="width: 130px;">620x940 (so'm)</th>
-                                    <th style="width: 130px;">700x1000 (so'm)</th>
-                                    <th style="width: 70px; text-align: right;">Amal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminDizaynPaperTableBody"></tbody>
-                        </table>
-                        </div>
-                    </div>
-                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow(&quot;Dizayn qog&#39;ozi&quot;)">+ Yangi grammaj qo'shish</button>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-                    <button class="btn btn-success" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
-                </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">🖨️ Ofset Forma (Klishe) Narxi</div>
@@ -415,7 +342,7 @@
                             <input type="number" id="setPrintA1Step" value="150000">
                         </div>
                     </div>
-                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveAllOfsetPapers()">💾 Barcha o'zgarishlarni saqlash</button>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 6px;" onclick="saveOfsetMashinaSozlamalari()">💾 Forma va bosma narxlarini saqlash</button>
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
@@ -510,6 +437,127 @@
                 </div>
             </div>
 
+            <!-- QOG'OZ BO'LIMI ADMIN PANEL BLOKI -->
+            <div id="qogozAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="admin-link-hint">📄 Barcha qog'oz narxlari shu yerda. Ofset qog'ozlari — Ofset hisobida (Flayer, Paket, Papka,
+                    Bloknot...) xom varoq narxi sifatida; Konvert va Otkritka qog'ozlari — o'sha mahsulotlar kalkulyatorida.</div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🖨️ Ofset Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Ofset qog'ozining faqat bitta standart (A3) turi bor — shu qator o'chirilmaydi,
+                        faqat narxi kiritiladi.
+                    </p>
+                    <div class="form-group" style="max-width: 260px;">
+                        <label>Narxi (so'm):</label>
+                        <input type="number" min="0" id="ofsetSinglePrice" value="22000">
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📄 Melovka Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar.</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminMelovkaPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Melovka')">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📦 Karton Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Grammaji va bosma bichimlari bo'yicha narxlar (Papka, Kalendar kabi mahsulotlar shu bazadan foydalanadi).</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Gramaj (g)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminKartonPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow('Karton')">+ Yangi grammaj qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">🎨 Dizayn Qog'ozi</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Bu yerda qog'oz gramaj bilan emas, nomi bilan kiritiladi (masalan "Colotech-200gr", "Lyon", "Kvarts").</p>
+                    <div class="table-card" style="margin-bottom: 16px;">
+                        <div class="table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">Nomi</th>
+                                    <th style="width: 130px;">SRA3 320x450 (so'm)</th>
+                                    <th style="width: 130px;">620x880 (so'm)</th>
+                                    <th style="width: 130px;">620x940 (so'm)</th>
+                                    <th style="width: 130px;">700x1000 (so'm)</th>
+                                    <th style="width: 70px; text-align: right;">Amal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminDizaynPaperTableBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: #4f46e5;" onclick="addOfsetPaperRow(&quot;Dizayn qog&#39;ozi&quot;)">+ Yangi grammaj qo'shish</button>
+                </div>
+                <div class="admin-card-actions" style="margin-bottom: 24px;">
+                    <button class="btn btn-success" onclick="saveOfsetQogozNarxlari()">💾 Ofset qog'oz narxlarini saqlash</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">✉️ Konvertlar uchun qog'oz</div>
+                    <p class="admin-hint">Konvert kalkulyatorida tanlanadigan qog'ozlar. Format — sotib olinadigan varaq o'lchami; konvert bichimi shu varaqqa joylashtiriladi va kerakli varaq soni hisoblanadi.</p>
+                    <div class="table-card" style="margin-bottom:12px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:760px;">
+                            <thead><tr><th style="min-width:180px;">Qog'oz nomi</th><th>Format</th><th>Eni (mm)</th><th>Bo'yi (mm)</th><th>Narxi (so'm/varaq)</th><th></th></tr></thead>
+                            <tbody id="qogozJadval_konvert"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addQogozQator('konvert')">+ Qog'oz qo'shish</button>
+                        <button class="btn btn-success" onclick="saveQogozRoyxati('konvert')">💾 Saqlash</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">💌 Otkritkalar uchun qog'oz</div>
+                    <p class="admin-hint">Otkritka kalkulyatorida tanlanadigan qog'ozlar. Narx — bitta varaq uchun.</p>
+                    <div class="table-card" style="margin-bottom:12px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:760px;">
+                            <thead><tr><th style="min-width:180px;">Qog'oz nomi</th><th>Format</th><th>Eni (mm)</th><th>Bo'yi (mm)</th><th>Narxi (so'm/varaq)</th><th></th></tr></thead>
+                            <tbody id="qogozJadval_otkritka"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addQogozQator('otkritka')">+ Qog'oz qo'shish</button>
+                        <button class="btn btn-success" onclick="saveQogozRoyxati('otkritka')">💾 Saqlash</button>
+                    </div>
+                </div>
+            </div>
             <!-- POLIGRAFIYA MAHSULOT O'LCHAMI ADMIN PANEL BLOKI -->
             <div id="poligrafiyaSizeAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" id="poliMahsulotSozlamaCard" style="display:none; margin-bottom:16px;">
@@ -556,6 +604,58 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- KONVERT / OTKRITKA ADMIN PANEL BLOKI (bitta blok, mahsulotga qarab to'ldiriladi) -->
+            <div id="varaqliAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title" id="vmAdminSarlavha">Turlar va pechat narxlari</div>
+                    <p class="admin-hint">Har bir tur: tayyor o'lcham (menejer tanlaydi), bichim — qog'ozga joylashtiriladigan yoyilgan o'lcham,
+                        va tiraj bo'yicha pechat narxi (so'm/dona). Masalan "Adad dan 100" qatori 100 va undan ko'p donaga amal qiladi.
+                        Qog'oz narxi — <b>Qog'oz bo'limidan</b>.</p>
+                    <div id="vmAdminTurlar" class="vm-admin-turlar"></div>
+                    <div class="admin-card-actions" style="margin-top:12px;">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addVaraqliTur()">+ Yangi tur</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">⚙️ Umumiy sozlamalar</div>
+                    <p class="admin-hint">O'z o'lchami (tayyor turga mos kelmasa) bichimi: <b>(eni + qo'shimcha eni) × (bo'yi × karra + qo'shimcha bo'yi)</b>.</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group" id="vmAdminPichoqGroup">
+                            <label>Pichoq (o'z o'lchami uchun)</label>
+                            <div class="input-unit"><input type="number" id="vmAdminPichoq" min="0"><span>so'm, bir marta</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Zapas</label>
+                            <div class="input-unit"><input type="number" id="vmAdminZapas" min="0"><span>varaq</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Qo'shimcha eni</label>
+                            <div class="input-unit"><input type="number" id="vmAdminQoshEni" min="0"><span>mm</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Bo'yi karra</label>
+                            <div class="input-unit"><input type="number" id="vmAdminBoyiKarra" min="1" step="0.5"><span>×</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Qo'shimcha bo'yi</label>
+                            <div class="input-unit"><input type="number" id="vmAdminQoshBoyi" min="0"><span>mm</span></div>
+                        </div>
+                    </div>
+                    <div class="admin-link-hint" id="vmAdminTisIzoh">🔨 Tisneniya narxi (dona + klishe) — umumiy: <b>Ofset pechat → ✂️ Pardozlash xizmatlari</b>, A3 qatori.</div>
+                </div>
+
+                <div class="add-pen-card" id="vmAdminPardozCard">
+                    <div class="add-pen-card-title">✨ Pardozlash (3D lak, folga)</div>
+                    <p class="admin-hint">Menejer bittasini tanlaydi. "Oddiy" — qo'shimcha narxsiz.</p>
+                    <div class="admin-form-grid" id="vmAdminPardozlar"></div>
+                </div>
+
+                <div class="admin-card-actions" style="margin-top:16px;">
+                    <button class="btn btn-success" onclick="saveVaraqliConfig()">💾 Sozlamalarni saqlash</button>
+                </div>
             </div>
 
             <!-- PAKET ADMIN PANEL BLOKI -->
@@ -1413,17 +1513,18 @@
 </div>
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
-<script src="umumiy/yordamchi.js?v=d3583ade"></script>
-<script src="umumiy/core.js?v=8b3ad0ba"></script>
-<script src="bolimlar/ofset/ofset.js?v=7a6efdc0"></script>
+<script src="umumiy/yordamchi.js?v=1a30ae98"></script>
+<script src="umumiy/core.js?v=9515c326"></script>
+<script src="bolimlar/ofset/ofset.js?v=0d5e344d"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=73d2d562"></script>
+<script src="bolimlar/qogoz/qogoz.js?v=ac81215e"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=2a2747a1"></script>
 <script src="bolimlar/textile/textile.js?v=37fee0b3"></script>
-<script src="bolimlar/suvenir/suvenir.js?v=c4324465"></script>
-<script src="bolimlar/reklama/reklama.js?v=960069e0"></script>
+<script src="bolimlar/suvenir/suvenir.js?v=79bef9fc"></script>
+<script src="bolimlar/reklama/reklama.js?v=ad7bc69a"></script>
 <script src="umumiy/custom-products.js?v=09afcfda"></script>
 <script src="umumiy/full-calc.js?v=4ef1771f"></script>
-<script src="umumiy/admin-ux.js?v=fea78040"></script>
+<script src="umumiy/admin-ux.js?v=78336b6d"></script>
 <script src="umumiy/ishga-tushirish.js?v=578cb326"></script>
 </body>
 </html>

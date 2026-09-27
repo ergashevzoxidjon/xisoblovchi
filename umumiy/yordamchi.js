@@ -15,7 +15,8 @@
         poligrafiya: 'Poligrafiya',
         textile: 'Textile',
         suvenir: 'Suvenir',
-        reklama: 'Reklama'
+        reklama: 'Reklama',
+        qogoz: "Qog'oz bo'limi"
     };
     // Bosh sahifadagi har bir bo'lim kartochkalari to'rining id si (bo'lim ishlamasa xiralashtiriladi)
     const BOLIM_GRID_ID = {
@@ -113,8 +114,8 @@
 
     // Tisneniya (gravirovka) tanlanganda bir martalik "Klishe" (qolip) narxi qo'shiladigan turlar.
     // Bu narx buyurtma miqdoriga bog'liq emas — bir marta, butun buyurtma uchun qo'shiladi.
-    let klisheFeeProductTypes = ['yejidnevnik'];
-    let klisheOneTimePrices = { yejidnevnik: 150000 };
+    let klisheFeeProductTypes = ['yejidnevnik', 'koja_papka', 'guvohnoma'];
+    let klisheOneTimePrices = { yejidnevnik: 150000, koja_papka: 150000, guvohnoma: 150000 };
 
     function saveKlisheFee() {
         let input = document.getElementById('klisheFeeInput');

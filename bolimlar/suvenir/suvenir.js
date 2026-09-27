@@ -14,7 +14,10 @@
         powerbanklar: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
         // Yejidnevnikda uchinchi chop turi "Tisneniya" nomi bilan (ichki kalit sifatida umumiy
         // "gravirovka" ishlatiladi — narxi va bir martalik Klishe to'lovi mustaqil hisoblanadi)
-        yejidnevnik: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Tisneniya' }
+        yejidnevnik: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Tisneniya' },
+        // Koja papka va Guvohnoma — Yejidnevnik kabi: Tisneniya tanlansa bir martalik klishe qo'shiladi
+        koja_papka: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Tisneniya' },
+        guvohnoma: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Tisneniya' }
     };
 
     // Har bir reklama turi uchun qaysi qo'shimcha xizmatlar tegishli ekanligi

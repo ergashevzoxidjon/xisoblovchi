@@ -210,7 +210,9 @@
         }
     }
 
-    function saveAllOfsetPapers() {
+    // Qog'oz narxlari (Qog'oz bo'limi → "Ofset qog'ozlari"). Mashina sozlamalariga TEGMAYDI —
+    // aks holda boshqa ekranda ko'rinmay turgan forma/bosma maydonlari ham saqlanib ketardi.
+    function saveOfsetQogozNarxlari() {
         ofsetRawPapers.forEach((item, index) => {
             if (item.name === 'Ofset') return;
             let isDizayn = (item.name === "Dizayn qog'ozi");
@@ -248,7 +250,13 @@
         }
 
         localStorage.setItem('erp_ofset_raw_papers', JSON.stringify(ofsetRawPapers));
+        if (typeof logAudit === 'function') logAudit("Ofset qog'oz narxlari o'zgartirildi", `${ofsetRawPapers.length} ta qog'oz qatori`);
+        renderAdminOfsetPapersMatrix();
+        showToast("💾 Qog'oz narxlari saqlandi!");
+    }
 
+    // Ofset mashina sozlamalari (forma va bosma narxi) — Ofset pechat admin bo'limi
+    function saveOfsetMashinaSozlamalari() {
         ofsetMachineSettings = {
             plateA3: parseFloat(document.getElementById('setPlateA3').value) || 0,
             plateA2: parseFloat(document.getElementById('setPlateA2').value) || 0,
@@ -261,11 +269,9 @@
             printA1Step: parseFloat(document.getElementById('setPrintA1Step').value) || 0
         };
         localStorage.setItem('erp_ofset_machine_settings', JSON.stringify(ofsetMachineSettings));
-
-        if (typeof logAudit === 'function') logAudit("Ofset pechat narxlari o'zgartirildi", `${ofsetRawPapers.length} ta qog'oz turi va mashina sozlamalari yangilandi`);
-        renderAdminOfsetPapersMatrix();
+        if (typeof logAudit === 'function') logAudit("Ofset forma/bosma narxlari o'zgartirildi", '');
         loadOfsetMachineSettingsToUI();
-        showToast("💾 Barcha ofset o'zgarishlar saqlandi!");
+        showToast("💾 Forma va bosma narxlari saqlandi!");
     }
 
     function renderOfsetPublicTable() {

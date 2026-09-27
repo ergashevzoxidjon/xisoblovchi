@@ -7,7 +7,8 @@
 // Bo'lim fayllariga tegmaydi: har qanday "save..." tugmasi bosilgach, o'sha blok "saqlangan" hisoblanadi
 // (agar showToast ⚠️/❌ bilan xato bildirmagan bo'lsa).
 
-    const ADMIN_BOLIM_NOMI = { poligrafiya: 'Poligrafiya', textile: 'Textile', souvenir: 'Suvenir', reklama: 'Reklama' };
+    const ADMIN_BOLIM_NOMI = { poligrafiya: 'Poligrafiya', textile: 'Textile', souvenir: 'Suvenir', reklama: 'Reklama',
+        ofset: 'Ofset pechat', sifravoy: 'Sifravoy pechat', qogoz: "Qog'oz bo'limi" };
 
     // ---------- 3) Saqlanmagan o'zgarishlar ----------
     // Admin menejerining bevosita bolalari — mahsulot bo'lim bloklari (bloknotAdminBox, adminTextileBox...)

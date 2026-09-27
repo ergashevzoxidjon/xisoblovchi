@@ -2,7 +2,8 @@
     // Bular reklamaBanTypes'dan (baner/orakal/...) TUBDAN farqli: mijoz eni/bo'yini o'zi kiritmaydi —
     // har bir mahsulotning bir nechta TAYYOR o'lcham-varianti bor va har biri o'zining QAT'IY narxiga
     // ega (admin belgilaydi). Material (Glyans/Matoviy) esa faqat ko'rinish uchun — narxga ta'sir qilmaydi.
-    const reklamaStendNames = { rollup: 'Roll Up', pauk: 'Pauk', popup: 'PopUp', promostoyka: 'PromoStoyka' };
+    const reklamaStendNames = { rollup: 'Roll Up', pauk: 'Pauk', popup: 'PopUp', promostoyka: 'PromoStoyka',
+        tablichka: 'Tablichka', nastolniy_tablichka: 'Nastolniy tablichka', stend: 'Stend' };
 
     // Miqdor bo'yicha narx oraliqlari — har bir reklama-stend turiga umumiy, o'sha turning
     // BARCHA o'lchamlariga bir xil ustunlar sifatida qo'llaniladi (admin buni jadval ko'rinishida
@@ -19,7 +20,10 @@
         rollup: reklamaStendDefaultQtyRanges.map(r => ({ ...r })),
         pauk: reklamaStendDefaultQtyRanges.map(r => ({ ...r })),
         popup: reklamaStendDefaultQtyRanges.map(r => ({ ...r })),
-        promostoyka: reklamaStendDefaultQtyRanges.map(r => ({ ...r }))
+        promostoyka: reklamaStendDefaultQtyRanges.map(r => ({ ...r })),
+        tablichka: reklamaStendDefaultQtyRanges.map(r => ({ ...r })),
+        nastolniy_tablichka: reklamaStendDefaultQtyRanges.map(r => ({ ...r })),
+        stend: reklamaStendDefaultQtyRanges.map(r => ({ ...r }))
     };
     // Namuna chegirma koeffitsientlari — faqat boshlang'ich demo narxlarni to'ldirish uchun
     const reklamaStendSampleTierMultipliers = [1.00, 0.94, 0.88, 0.82, 0.77, 0.72];
@@ -43,6 +47,19 @@
         ],
         promostoyka: [
             { label: 'Standart', price: 400000, isDefault: true, tierPrices: withSampleReklamaStendTierPrices(400000) }
+        ],
+        tablichka: [
+            { label: '200x300mm', price: 80000, tierPrices: withSampleReklamaStendTierPrices(80000) },
+            { label: '300x400mm', price: 120000, isDefault: true, tierPrices: withSampleReklamaStendTierPrices(120000) },
+            { label: '400x600mm', price: 180000, tierPrices: withSampleReklamaStendTierPrices(180000) }
+        ],
+        nastolniy_tablichka: [
+            { label: 'A5 (148x210mm)', price: 60000, isDefault: true, tierPrices: withSampleReklamaStendTierPrices(60000) },
+            { label: 'A4 (210x297mm)', price: 90000, tierPrices: withSampleReklamaStendTierPrices(90000) }
+        ],
+        stend: [
+            { label: '600x900mm', price: 350000, isDefault: true, tierPrices: withSampleReklamaStendTierPrices(350000) },
+            { label: '1000x1500mm', price: 700000, tierPrices: withSampleReklamaStendTierPrices(700000) }
         ]
     };
     let selectedReklamaStendSizeIndex = -1;

@@ -1,7 +1,7 @@
     let defaultPrices = {
         flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000, konvert: 1500, otkritka: 2000,
         futbolka: 45000, kepka: 25000, svitshot: 75000, xudi: 95000, jiletka: 85000, shoper: 20000,
-        ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000,
+        ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000, koja_papka: 60000, guvohnoma: 25000,
         baner: 35000, orakal: 45000, setka_orakal: 50000, tumanka: 40000, xolst: 85000,
         // Roll Up/Pauk/PopUp/PromoStoyka narxi o'lcham variantidan (reklamaStendSizeDatabase) to'g'ridan-to'g'ri
         // olinadi — bu yerdagi qiymatlar faqat ehtiyot uchun (variant topilmasa ishlatiladi).
@@ -50,7 +50,9 @@
             { key: 'statuetka', name: 'Statuetka', icon: '🏅' },
             { key: 'kardxolder', name: 'Kardxolder', icon: '💳' },
             { key: 'soat', name: 'Soat', icon: '⌚' },
-            { key: 'zontik', name: 'Zontik', icon: '☂️' }
+            { key: 'zontik', name: 'Zontik', icon: '☂️' },
+            { key: 'koja_papka', name: 'Koja papkalar', icon: '💼' },
+            { key: 'guvohnoma', name: 'Guvohnomalar', icon: '📇' }
         ],
         reklama: [
             { key: 'baner', name: 'Baner', icon: '🖼️' },
@@ -61,10 +63,16 @@
             { key: 'rollup', name: 'Roll Up', icon: '📜' },
             { key: 'pauk', name: 'Pauk', icon: '🕷️' },
             { key: 'popup', name: 'PopUp', icon: '⛺' },
-            { key: 'promostoyka', name: 'PromoStoyka', icon: '📣' }
+            { key: 'promostoyka', name: 'PromoStoyka', icon: '📣' },
+            { key: 'tablichka', name: 'Tablichkalar', icon: '🪧' },
+            { key: 'nastolniy_tablichka', name: 'Nastolniy tablichkalar', icon: '🔖' },
+            { key: 'stend', name: 'Stendlar', icon: '📋' }
         ],
         ofset: [
             { key: 'ofset_pechat', name: 'Ofset pechat kalkulyatori', icon: '🖨️' }
+        ],
+        qogoz: [
+            { key: 'qogoz_bolimi', name: "Qog'oz narxlari", icon: '📄' }
         ],
         sifravoy: [
             { key: 'sifravoy_pechat', name: 'Raqamli Pechat Kalkulyatori', icon: '🖨️' }
@@ -77,7 +85,7 @@
     // Roll Up/Pauk/PopUp/PromoStoyka — o'lchami bo'yicha maydonga (kv.m) emas, balki har bir tayyor
     // o'lcham-variant uchun ADMIN BELGILAGAN QAT'IY NARXGA ega mahsulotlar (reklamaBanTypes'dan farqli
     // arxitektura — batafsili reklama.js da). Material (Glyans/Matoviy) tanlovi narxga ta'sir qilmaydi.
-    const reklamaStendTypes = ['rollup', 'pauk', 'popup', 'promostoyka'];
+    const reklamaStendTypes = ['rollup', 'pauk', 'popup', 'promostoyka', 'tablichka', 'nastolniy_tablichka', 'stend'];
     const hasSizesTypes = []; // razmerlar (Kichik/O'rta/Katta) bo'yicha ustama qo'llaniladigan turlar (hozircha hech biri ishlatmaydi)
     const oneSidedOnlySouvenirs = ['plagetkalar', 'naborlar', 'statuetka', 'soat', 'kardxolder', 'zontik']; // faqat bir tomonlama pechat qilinadigan turlar (ikki tomonlama variant ko'rsatilmaydi)
     // Standart "UF Pechat / Sifravoy Pechat" juftligi o'rniga boshqacha chop turlari to'plamidan foydalanadigan suvenir turlari.
@@ -97,7 +105,7 @@
 
     // Bo'limlarni ishga tushirish tartibi muhim: Poligrafiya (Bloknot/Kalendar/Doorhanger)
     // Ofset qog'oz bazasiga qator qo'shadi, shuning uchun Ofset undan oldin yuklanadi.
-    const BOLIM_INIT_TARTIBI = ['ofset', 'sifravoy', 'poligrafiya', 'textile', 'suvenir', 'reklama'];
+    const BOLIM_INIT_TARTIBI = ['ofset', 'sifravoy', 'qogoz', 'poligrafiya', 'textile', 'suvenir', 'reklama'];
 
     function bolimlarniIshgaTushir() {
         BOLIM_INIT_TARTIBI.forEach(nomi => {
@@ -879,7 +887,8 @@
         souvenir:    { title: 'Suvenir mahsulotlari',     icon: '🎁', accent: 'yellow' },
         reklama:     { title: 'Reklama mahsulotlari',     icon: '🖼️', accent: 'ink' },
         ofset:       { title: 'Ofset pechat',             icon: '⚙️', accent: 'green' },
-        sifravoy:    { title: 'Sifravoy pechat',          icon: '⚡', accent: 'violet' }
+        sifravoy:    { title: 'Sifravoy pechat',          icon: '⚡', accent: 'violet' },
+        qogoz:       { title: "Qog'oz bo'limi",           icon: '📄', accent: 'green' }
     };
 
     function renderAdminCategoryGrid() {
@@ -968,17 +977,20 @@
 
         let isDigital = (key === 'sifravoy_pechat');
         let isOfset = (key === 'ofset_pechat');
+        let isQogoz = (key === 'qogoz_bolimi');
         let isBloknot = (key === 'bloknot');
         let isPapka = (key === 'papka');
         let isKalendar = (key === 'kalendar');
         let isKubarik = (key === 'kubarik');
         let isPaket = (key === 'paket');
-        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket;
+        let isVaraqli = (key === 'konvert' || key === 'otkritka');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli;
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
         let isReklamaStend = reklamaStendTypes.includes(key);
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
+        document.getElementById('qogozAdminBox').style.display = isQogoz ? 'block' : 'none';
         document.getElementById('digitalAdminPanelBox').style.display = isDigital ? 'block' : 'none';
         document.getElementById('poligrafiyaSizeAdminBox').style.display = isPoligrafiya ? 'block' : 'none';
         document.getElementById('bloknotAdminBox').style.display = isBloknot ? 'block' : 'none';
@@ -986,6 +998,7 @@
         document.getElementById('kalendarAdminBox').style.display = isKalendar ? 'block' : 'none';
         document.getElementById('kubarikAdminBox').style.display = isKubarik ? 'block' : 'none';
         document.getElementById('paketAdminBox').style.display = isPaket ? 'block' : 'none';
+        document.getElementById('varaqliAdminBox').style.display = isVaraqli ? 'block' : 'none';
         // Baner/Orakal/... — maksimal chop eni (reklama.js)
         if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
@@ -1003,7 +1016,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isTextile || isReklamaStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isTextile || isReklamaStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1013,6 +1026,10 @@
         }
         if (isTextile) {
             loadTextileEditState(key);
+            return;
+        }
+        if (isQogoz) {
+            renderAdminQogozBolimi();
             return;
         }
         if (isOfset) {
@@ -1048,6 +1065,10 @@
         }
         if (isPaket) {
             renderAdminPaket();
+            return;
+        }
+        if (isVaraqli) {
+            renderAdminVaraqli();
             return;
         }
         if (isPoligrafiya) {
@@ -1146,6 +1167,7 @@
     function mahsulotBolimi(type) {
         if (type === 'ofset_pechat') return 'ofset';
         if (type === 'sifravoy_pechat') return 'sifravoy';
+        if (type === 'qogoz_bolimi') return 'qogoz';
         if (typeof isCustomProductKey === 'function' && isCustomProductKey(type)) return null;
         if (souvenirKeys.includes(type)) return 'suvenir';
         if (textileKeys.includes(type)) return 'textile';
@@ -1286,6 +1308,9 @@ function generateForm(type) {
     else if (type === 'paket') {
         html = buildPaketForm();
     }
+    else if (type === 'konvert' || type === 'otkritka') {
+        html = buildVaraqliForm(type);
+    }
     else if (type === 'doorhanger') {
         html = buildDoorhangerForm();
     }
@@ -1327,6 +1352,11 @@ function generateForm(type) {
 
     if (type === 'paket') {
         renderPaketOptions();
+        return;
+    }
+
+    if (type === 'konvert' || type === 'otkritka') {
+        renderVaraqliOptions(type);
         return;
     }
 
@@ -1427,6 +1457,13 @@ function calculateIchki() {
             baseUnitPrice = res.unitPrice;
             details = res.details;
             costItems = res.costItems || [];
+        }
+        else if (activeProductType === 'konvert' || activeProductType === 'otkritka') {
+            let res = calculateVaraqli(activeProductType, qty);
+            baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
         }
         else if (activeProductType === 'paket') {
             let res = calculatePaket(qty);

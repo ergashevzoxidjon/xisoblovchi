@@ -117,18 +117,8 @@
             { gsm: 300, paperType: 'Karton', isDefault: true },
             { gsm: 350, paperType: 'Karton', isDefault: false },
             { gsm: 400, paperType: 'Karton', isDefault: false }
-        ],
-        konvert: [
-            { gsm: 80, paperType: 'Ofset', isDefault: false },
-            { gsm: 130, paperType: 'Melovka', isDefault: true },
-            { gsm: 150, paperType: 'Melovka', isDefault: false }
-        ],
-        otkritka: [
-            { gsm: 250, paperType: 'Melovka', isDefault: false },
-            { gsm: 300, paperType: 'Melovka', isDefault: true },
-            { gsm: 300, paperType: 'Karton', isDefault: false },
-            { gsm: 350, paperType: 'Karton', isDefault: false }
         ]
+        // Konvert va Otkritka — alohida dvigatel (varaqliConfig), qog'ozi Qog'oz bo'limidan
     };
     const POLIGRAFIYA_PAPER_TYPES = ['Ofset', 'Melovka', 'Karton', "Dizayn qog'ozi"];
     let selectedPoligrafiyaGsmIndex = -1;
@@ -147,13 +137,11 @@
     //   yoyilganOlcham — bichish (yoyilgan) o'lchami, masalan Konvert 110x220 → 230x330mm.
     //                    Bo'sh bo'lsa, tayyor o'lcham (poligrafiyaSizeLabels) bo'yicha hisoblanadi.
     //   ishlovNomi/ishlovNarxi — qo'shimcha ishlov (vyrubka+skleyka, bigovka), so'm/dona, marjasiz.
-    const POLI_DVIGATEL_TURLARI = ['flayer', 'listovka', 'buklet', 'konvert', 'otkritka'];
+    const POLI_DVIGATEL_TURLARI = ['flayer', 'listovka', 'buklet'];
     let poligrafiyaMahsulotSozlama = {
         flayer:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 },
         listovka: { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 },
-        buklet:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: 'Bigovka (buklash)', ishlovNarxi: 0 },
-        konvert:  { ofsetMinTiraj: 1000, yoyilganOlcham: '230x330mm', ishlovNomi: 'Vyrubka + skleyka', ishlovNarxi: 300 },
-        otkritka: { ofsetMinTiraj: 1000, yoyilganOlcham: '200x150mm', ishlovNomi: 'Bigovka (buklash)', ishlovNarxi: 100 }
+        buklet:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: 'Bigovka (buklash)', ishlovNarxi: 0 }
     };
 
     function poliSozlama(type) {
@@ -789,6 +777,407 @@
         // mahsulotlariga bir xil, bloknot uchun alohida emas).
 
         return { unitPrice: unit, details: qismlar.join(' | '), costItems };
+    }
+
+    // ====================== KONVERT VA OTKRITKA (varaqli mahsulotlar — umumiy dvigatel) ======================
+    // Ikkalasi bir xil hisoblanadi, farqi faqat sozlamada:
+    //   1) Tur (admin kiritgan tayyor o'lcham) tanlanadi yoki menejer eni × bo'yini o'zi kiritadi.
+    //      Tayyor turning bichish (yoyilgan) o'lchami admin tomonidan aniq kiritiladi; o'z o'lchamida
+    //      bichish = (eni + qoshEni) × (bo'yi × boyiKarra + qoshBoyi) va (Konvertda) bir martalik pichoq.
+    //   2) Qog'oz — Qog'oz bo'limidagi ro'yxatdan (varaq formati + narxi). Bichim varaqqa joylashtiriladi
+    //      (aylantirib ham), varaq soni = ceil(adad / varaqdagi dona) + zapas.
+    //   3) Pechat (Sifravoy yoki UF) — turning tiraj oraliqlari bo'yicha dona narxi (admin kiritadi).
+    //   4) Konvert: Tisneniya (ixtiyoriy) — umumiy Pardozlash xizmatlari (A3 qatori): dona + klishe.
+    //      Otkritka: pardozlash — Oddiy / 3D lak / 3D Tilla-Kumush folga (dona narxi), ikki tomonlama pechat.
+    const VARAQLI_TURLAR = ['konvert', 'otkritka'];
+    const VARAQLI_PECHAT_NOMI = { sifravoy: 'Sifravoy pechat', uf: 'UF pechat', yoq: 'Pechatsiz' };
+
+    let varaqliConfig = {
+        konvert: {
+            pichoqNarxi: 500000,   // o'z (nostandart) o'lcham uchun bir martalik pichoq
+            zapasVaraq: 10,        // tirajga bir marta qo'shiladigan zapas varaq
+            formula: { qoshEni: 30, boyiKarra: 2, qoshBoyi: 50 },
+            pechatsizMumkin: true, // faqat tisneniya bo'lishi mumkin
+            tisneniya: true,
+            ikkiTomon: false,
+            pardozlar: [],
+            turlar: [
+                { key: 'evro', nomi: 'Evro', eni: 220, boyi: 110, bichishEni: 230, bichishBoyi: 330,
+                  tierlar: [{ dan: 1, sifravoy: 1500, uf: 2500 }, { dan: 100, sifravoy: 1000, uf: 1800 }, { dan: 500, sifravoy: 700, uf: 1300 }, { dan: 1000, sifravoy: 500, uf: 1000 }] },
+                { key: 'c6', nomi: 'C6', eni: 162, boyi: 114, bichishEni: 180, bichishBoyi: 260,
+                  tierlar: [{ dan: 1, sifravoy: 1300, uf: 2200 }, { dan: 100, sifravoy: 900, uf: 1600 }, { dan: 500, sifravoy: 600, uf: 1100 }, { dan: 1000, sifravoy: 450, uf: 900 }] },
+                { key: 'c5', nomi: 'C5', eni: 229, boyi: 162, bichishEni: 250, bichishBoyi: 370,
+                  tierlar: [{ dan: 1, sifravoy: 1800, uf: 2800 }, { dan: 100, sifravoy: 1200, uf: 2000 }, { dan: 500, sifravoy: 850, uf: 1500 }, { dan: 1000, sifravoy: 650, uf: 1200 }] },
+                { key: 'c4', nomi: 'C4', eni: 324, boyi: 229, bichishEni: 350, bichishBoyi: 500,
+                  tierlar: [{ dan: 1, sifravoy: 2500, uf: 3500 }, { dan: 100, sifravoy: 1700, uf: 2600 }, { dan: 500, sifravoy: 1200, uf: 2000 }, { dan: 1000, sifravoy: 950, uf: 1600 }] }
+            ]
+        },
+        otkritka: {
+            pichoqNarxi: 0,        // to'rtburchak — pichoq kerak emas
+            zapasVaraq: 10,
+            formula: { qoshEni: 0, boyiKarra: 1, qoshBoyi: 0 },
+            pechatsizMumkin: false,
+            tisneniya: false,
+            ikkiTomon: true,
+            pardozlar: [
+                { key: 'oddiy', nomi: 'Oddiy', narx: 0 },
+                { key: 'lak3d', nomi: '3D lak', narx: 1500 },
+                { key: 'folga', nomi: '3D Tilla-Kumush folga', narx: 2500 }
+            ],
+            turlar: [
+                { key: 'o100', nomi: '100×150', eni: 100, boyi: 150, bichishEni: 100, bichishBoyi: 150,
+                  tierlar: [{ dan: 1, sifravoy: 800, uf: 1500 }, { dan: 100, sifravoy: 600, uf: 1200 }, { dan: 500, sifravoy: 400, uf: 900 }, { dan: 1000, sifravoy: 300, uf: 700 }] },
+                { key: 'a6', nomi: 'A6 (105×148)', eni: 105, boyi: 148, bichishEni: 105, bichishBoyi: 148,
+                  tierlar: [{ dan: 1, sifravoy: 800, uf: 1500 }, { dan: 100, sifravoy: 600, uf: 1200 }, { dan: 500, sifravoy: 400, uf: 900 }, { dan: 1000, sifravoy: 300, uf: 700 }] },
+                { key: 'evro', nomi: 'Evro (99×210)', eni: 99, boyi: 210, bichishEni: 99, bichishBoyi: 210,
+                  tierlar: [{ dan: 1, sifravoy: 900, uf: 1700 }, { dan: 100, sifravoy: 700, uf: 1300 }, { dan: 500, sifravoy: 450, uf: 1000 }, { dan: 1000, sifravoy: 350, uf: 800 }] },
+                { key: 'a5buk', nomi: 'A5 buklet (148×210)', eni: 148, boyi: 210, bichishEni: 296, bichishBoyi: 210,
+                  tierlar: [{ dan: 1, sifravoy: 1400, uf: 2500 }, { dan: 100, sifravoy: 1000, uf: 2000 }, { dan: 500, sifravoy: 700, uf: 1500 }, { dan: 1000, sifravoy: 550, uf: 1200 }] }
+            ]
+        }
+    };
+
+    let varaqliSelected = { tur: '', qogozId: '', pechat: 'sifravoy', tisneniya: false, pardoz: 'oddiy', ikkiTomon: false };
+
+    function varaqliCfg(type) { return varaqliConfig[type]; }
+    function varaqliTuri(type, key) {
+        let c = varaqliCfg(type);
+        return (c.turlar || []).find(t => t.key === key) || (c.turlar || [])[0] || null;
+    }
+    function varaqliQogozlar(type) {
+        // Qog'oz bo'limi ishlamasa ham kalkulyator yiqilmasin — bo'sh ro'yxat qaytadi
+        return xavfsizOl(() => qogozRoyxati(type), []);
+    }
+    function varaqliOlcham() {
+        let v = id => parseFloat(document.getElementById(id)?.value) || 0;
+        return { eni: v('vmEni'), boyi: v('vmBoyi') };
+    }
+
+    function buildVaraqliForm(type) {
+        let c = varaqliCfg(type);
+        let t = (c.turlar || [])[0];
+        let qog = varaqliQogozlar(type)[0];
+        varaqliSelected = { tur: t ? t.key : '', qogozId: qog ? qog.id : '', pechat: 'sifravoy', tisneniya: false, pardoz: 'oddiy', ikkiTomon: false };
+        return `
+            <div class="poli-calc">
+                <div class="step-title">1. Turi <span class="paket-step-hint">(bosing — o'lcham avtomatik qo'yiladi; boshqa o'lcham kerak bo'lsa o'zingiz kiriting)</span></div>
+                <div class="options-group" id="vmTurGroup"></div>
+                <div class="paket-olcham-row" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label>Eni <span class="majburiy">*</span></label>
+                        <div class="input-unit"><input type="number" id="vmEni" min="1" value="${t ? t.eni : ''}" oninput="renderVaraqliTurChips('${type}'); calculate()"><span>mm</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bo'yi <span class="majburiy">*</span></label>
+                        <div class="input-unit"><input type="number" id="vmBoyi" min="1" value="${t ? t.boyi : ''}" oninput="renderVaraqliTurChips('${type}'); calculate()"><span>mm</span></div>
+                    </div>
+                </div>
+                <div id="vmInfo" class="paket-bichish-info"></div>
+
+                <div class="step-title">2. Qog'oz</div>
+                <div class="options-group" id="vmQogozGroup"></div>
+
+                <div class="step-title">3. Pechat</div>
+                <div class="options-group" id="vmPechatGroup"></div>
+
+                <div class="step-title">4. Qo'shimcha</div>
+                <div class="options-group" id="vmQoshimchaGroup"></div>
+
+                <div class="form-group poli-qty-group">
+                    <label>Adad (dona)</label>
+                    <input type="number" id="inpQuantity" value="500" min="1" oninput="calculate()">
+                </div>
+            </div>
+        `;
+    }
+
+    function renderVaraqliTurChips(type) {
+        let group = document.getElementById('vmTurGroup');
+        if (!group) return;
+        let { eni, boyi } = varaqliOlcham();
+        group.innerHTML = (varaqliCfg(type).turlar || []).map(t => {
+            let mos = t.key === varaqliSelected.tur && t.eni === eni && t.boyi === boyi;
+            return `<button type="button" class="opt-btn ${mos ? 'active' : ''}" onclick="selectVaraqliTur('${type}', '${t.key}')">${t.nomi}</button>`;
+        }).join('') || `<span class="paket-step-hint">Tur kiritilmagan — o'lchamni qo'lda kiriting.</span>`;
+    }
+
+    function renderVaraqliOptions(type) {
+        let c = varaqliCfg(type);
+        renderVaraqliTurChips(type);
+        let qogozlar = varaqliQogozlar(type);
+        document.getElementById('vmQogozGroup').innerHTML = qogozlar.length === 0
+            ? `<span class="paket-xato">⚠️ Qog'oz kiritilmagan — Admin panel → Qog'oz bo'limi</span>`
+            : qogozlar.map(q => `
+                <button type="button" class="opt-btn ${q.id === varaqliSelected.qogozId ? 'active' : ''}" onclick="selectVaraqli('qogozId', '${q.id}', '${type}')">${q.nomi} · ${q.format}</button>
+            `).join('');
+        let pechatlar = ['sifravoy', 'uf'].concat(c.pechatsizMumkin ? ['yoq'] : []);
+        document.getElementById('vmPechatGroup').innerHTML = pechatlar.map(p => `
+            <button type="button" class="opt-btn ${varaqliSelected.pechat === p ? 'active' : ''}" onclick="selectVaraqli('pechat', '${p}', '${type}')">${VARAQLI_PECHAT_NOMI[p]}</button>
+        `).join('');
+        let qosh = [];
+        if (c.ikkiTomon) {
+            qosh.push(`<button type="button" class="opt-btn ${!varaqliSelected.ikkiTomon ? 'active' : ''}" onclick="selectVaraqli('ikkiTomon', false, '${type}')">Bir tomonlama</button>`);
+            qosh.push(`<button type="button" class="opt-btn ${varaqliSelected.ikkiTomon ? 'active' : ''}" onclick="selectVaraqli('ikkiTomon', true, '${type}')">Ikki tomonlama</button>`);
+        }
+        if (c.tisneniya) {
+            qosh.push(`<button type="button" class="opt-btn ${varaqliSelected.tisneniya ? 'active' : ''}" onclick="selectVaraqli('tisneniya', ${!varaqliSelected.tisneniya}, '${type}')">🔨 Tisneniya</button>`);
+        }
+        let pardozHtml = (c.pardozlar || []).length ? `
+            <div class="vm-pardoz-group">${c.pardozlar.map(p => `
+                <button type="button" class="opt-btn ${varaqliSelected.pardoz === p.key ? 'active' : ''}" onclick="selectVaraqli('pardoz', '${p.key}', '${type}')">${p.nomi}</button>`).join('')}
+            </div>` : '';
+        document.getElementById('vmQoshimchaGroup').innerHTML = qosh.join('') + pardozHtml;
+    }
+
+    function selectVaraqliTur(type, key) {
+        let t = varaqliTuri(type, key);
+        if (!t) return;
+        varaqliSelected.tur = t.key;
+        // Tanlangan qog'ozga bu turning bichimi sig'masa — birinchi sig'adigan qog'ozga o'tamiz
+        let sigadi = q => q && calculateOfsetGridFitting((q.eni || 0) - 10, (q.boyi || 0) - 10, t.bichishEni, t.bichishBoyi).count > 0;
+        let qogozlar = varaqliQogozlar(type);
+        if (!sigadi(qogozlar.find(q => q.id === varaqliSelected.qogozId))) {
+            let mos = qogozlar.find(sigadi);
+            if (mos) varaqliSelected.qogozId = mos.id;
+        }
+        document.getElementById('vmEni').value = t.eni;
+        document.getElementById('vmBoyi').value = t.boyi;
+        renderVaraqliOptions(type);
+        calculate();
+    }
+
+    function selectVaraqli(field, value, type) {
+        varaqliSelected[field] = value;
+        renderVaraqliOptions(type);
+        calculate();
+    }
+
+    // Tiraj bo'yicha dona narxi: adaddan kichik yoki teng eng katta "dan" qatori
+    function varaqliTierNarxi(tur, qty, pechat) {
+        let list = (tur.tierlar || []).slice().sort((a, b) => a.dan - b.dan);
+        if (list.length === 0) return 0;
+        let mos = list[0];
+        list.forEach(t => { if (qty >= t.dan) mos = t; });
+        return parseFloat(mos[pechat]) || 0;
+    }
+
+    function calculateVaraqli(type, qty) {
+        qty = Math.max(parseInt(qty) || 1, 1);
+        let c = varaqliCfg(type);
+        let nomi = type === 'konvert' ? 'Konvert' : 'Otkritka';
+        let info = html => { let el = document.getElementById('vmInfo'); if (el) el.innerHTML = html; };
+        let yaroqsiz = (xabar) => {
+            info(`<div class="paket-xato">⚠️ ${xabar}</div>`);
+            return { unitPrice: 0, details: `⚠️ ${xabar}`, costItems: [], hisobYaroqsiz: true };
+        };
+
+        let tur = varaqliTuri(type, varaqliSelected.tur);
+        let { eni, boyi } = varaqliOlcham();
+        if (!(eni > 0 && boyi > 0)) return yaroqsiz("Eni va bo'yini kiriting — ikkalasi ham majburiy.");
+
+        // Bichish o'lchami: tayyor turga aynan mos bo'lsa — admin kiritgan, aks holda formula
+        let tayyor = tur && tur.eni === eni && tur.boyi === boyi;
+        let f = c.formula || { qoshEni: 0, boyiKarra: 1, qoshBoyi: 0 };
+        let bEni = tayyor ? tur.bichishEni : eni + (parseFloat(f.qoshEni) || 0);
+        let bBoyi = tayyor ? tur.bichishBoyi : boyi * (parseFloat(f.boyiKarra) || 1) + (parseFloat(f.qoshBoyi) || 0);
+        let pichoq = (!tayyor && (parseFloat(c.pichoqNarxi) || 0) > 0) ? parseFloat(c.pichoqNarxi) : 0;
+        // Narx oraliqlari: tanlangan (yoki eng yaqin) turdan
+        let narxTuri = tur || (c.turlar || [])[0];
+        if (!narxTuri) return yaroqsiz("Admin panelda birorta tur kiritilmagan.");
+
+        let qogoz = varaqliQogozlar(type).find(q => q.id === varaqliSelected.qogozId) || varaqliQogozlar(type)[0];
+        if (!qogoz) return yaroqsiz("Qog'oz kiritilmagan — Admin panel → Qog'oz bo'limi.");
+
+        let fit = calculateOfsetGridFitting((qogoz.eni || 0) - 10, (qogoz.boyi || 0) - 10, bEni, bBoyi);
+        if (!fit || fit.count <= 0) return yaroqsiz(`Bichim ${bEni}×${bBoyi} mm "${qogoz.nomi} ${qogoz.format}" (${qogoz.eni}×${qogoz.boyi}) varag'iga sig'maydi — boshqa qog'oz tanlang.`);
+
+        let costItems = [];
+        let jami = 0;
+        let qosh = (label, soni, summa) => { jami += summa; costItems.push({ label, qty: soni, total: Math.round(summa) }); };
+
+        // 1) Qog'oz
+        let varaq = Math.ceil(qty / fit.count) + (parseInt(c.zapasVaraq) || 0);
+        qosh(`Qog'oz (${qogoz.nomi}, ${qogoz.format} ${qogoz.eni}×${qogoz.boyi})`, `${varaq} varaq (1 varaqda ${fit.count} dona)`, varaq * (parseFloat(qogoz.narx) || 0));
+
+        // 2) Pechat — tiraj bo'yicha dona narxi
+        let pechat = varaqliSelected.pechat;
+        if (pechat !== 'yoq') {
+            let tomon = (c.ikkiTomon && varaqliSelected.ikkiTomon) ? 2 : 1;
+            let dona = varaqliTierNarxi(narxTuri, qty, pechat);
+            qosh(`${VARAQLI_PECHAT_NOMI[pechat]}${tomon === 2 ? ' (ikki tomonlama)' : ''}`, `${qty} dona × ${dona.toLocaleString()}${tomon === 2 ? ' × 2' : ''}`, dona * qty * tomon);
+        }
+
+        // 3) Konvert: Tisneniya — umumiy Pardozlash xizmatlari (A3)
+        if (c.tisneniya && varaqliSelected.tisneniya) {
+            let tis = ofsetFinishingServices.tisneniya.a3 || {};
+            qosh('Tisneniya', `${qty} dona`, (parseFloat(tis.pricePerUnit) || 0) * qty);
+            qosh('Tisneniya klishesi (bir martalik)', '1 marta', parseFloat(tis.klishePrice) || 0);
+        }
+
+        // 4) Otkritka: pardozlash (Oddiy / 3D lak / folga)
+        let pardoz = (c.pardozlar || []).find(p => p.key === varaqliSelected.pardoz);
+        if (pardoz && (parseFloat(pardoz.narx) || 0) > 0) qosh(pardoz.nomi, `${qty} dona`, (parseFloat(pardoz.narx) || 0) * qty);
+
+        // 5) Nostandart o'lcham — bir martalik pichoq
+        if (pichoq > 0) qosh(`Pichoq yasatish (bir martalik)`, '1 marta', pichoq);
+
+        info(`
+            <div>📐 Bichim: <b>${bEni}×${bBoyi} mm</b> → ${qogoz.format} varaqqa <b>${fit.count} dona</b> · ${varaq} varaq (zapas bilan)</div>
+            ${tayyor ? `<div class="paket-pichoq-bor">✓ Tayyor tur: ${tur.nomi}</div>`
+                : (pichoq > 0 ? `<div class="paket-pichoq">✂️ Nostandart o'lcham — bir martalik pichoq: <b>${pichoq.toLocaleString()} so'm</b> qo'shildi (narx oraliqlari: ${narxTuri.nomi})</div>`
+                              : `<div class="paket-step-hint">O'z o'lchami (narx oraliqlari: ${narxTuri.nomi})</div>`)}
+        `);
+
+        let qismlar = [`${nomi} ${tayyor ? tur.nomi + ' ' : ''}${eni}×${boyi}mm (bichim ${bEni}×${bBoyi})`, qogoz.nomi, VARAQLI_PECHAT_NOMI[pechat]];
+        if (c.ikkiTomon && varaqliSelected.ikkiTomon && pechat !== 'yoq') qismlar.push('ikki tomonlama');
+        if (c.tisneniya && varaqliSelected.tisneniya) qismlar.push('tisneniya');
+        if (pardoz && pardoz.key !== 'oddiy') qismlar.push(pardoz.nomi);
+        if (pichoq > 0) qismlar.push('pichoq (bir martalik)');
+        return { unitPrice: jami / qty, details: qismlar.join(' | '), costItems };
+    }
+
+    // ---- Admin: Konvert / Otkritka (bitta umumiy blok, currentManagingProduct bo'yicha) ----
+    function renderAdminVaraqli() {
+        let type = currentManagingProduct;
+        let c = varaqliCfg(type);
+        let q = id => document.getElementById(id);
+        if (!c || !q('vmAdminTurlar')) return;
+        let esc = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        q('vmAdminSarlavha').textContent = type === 'konvert' ? '✉️ Konvert turlari va pechat narxlari' : '💌 Otkritka turlari va pechat narxlari';
+
+        q('vmAdminTurlar').innerHTML = (c.turlar || []).map((t, ti) => `
+            <div class="vm-admin-tur">
+                <div class="vm-admin-tur-head">
+                    <input type="text" id="vmT_nomi_${ti}" value="${esc(t.nomi)}" placeholder="Tur nomi" class="vm-admin-tur-nomi">
+                    <button type="button" class="btn btn-danger" style="height:32px; padding:0 10px;" title="Turni o'chirish" onclick="deleteVaraqliTur(${ti})">✕</button>
+                </div>
+                <div class="vm-admin-olcham">
+                    <label>Tayyor o'lcham</label>
+                    <div class="input-unit"><input type="number" id="vmT_eni_${ti}" value="${t.eni}" min="1"><span>eni</span></div>
+                    <div class="input-unit"><input type="number" id="vmT_boyi_${ti}" value="${t.boyi}" min="1"><span>bo'yi</span></div>
+                    <label>Bichim (yoyilgan)</label>
+                    <div class="input-unit"><input type="number" id="vmT_beni_${ti}" value="${t.bichishEni}" min="1"><span>eni</span></div>
+                    <div class="input-unit"><input type="number" id="vmT_bboyi_${ti}" value="${t.bichishBoyi}" min="1"><span>bo'yi</span></div>
+                </div>
+                <table class="admin-table vm-tier-table">
+                    <thead><tr><th>Adad (dan)</th><th>Sifravoy (so'm/dona)</th><th>UF (so'm/dona)</th><th></th></tr></thead>
+                    <tbody>${(t.tierlar || []).map((r, ri) => `
+                        <tr>
+                            <td><input type="number" id="vmT_${ti}_dan_${ri}" value="${r.dan}" min="1"></td>
+                            <td><input type="number" id="vmT_${ti}_sif_${ri}" value="${r.sifravoy}" min="0"></td>
+                            <td><input type="number" id="vmT_${ti}_uf_${ri}" value="${r.uf}" min="0"></td>
+                            <td style="text-align:right;"><button type="button" class="btn btn-outline" style="height:30px; padding:0 8px;" title="Qatorni o'chirish" onclick="deleteVaraqliTier(${ti}, ${ri})">✕</button></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-outline" style="height:32px; font-size:0.78rem; margin-top:6px;" onclick="addVaraqliTier(${ti})">+ Tiraj oralig'i</button>
+            </div>
+        `).join('');
+
+        q('vmAdminPichoqGroup').style.display = type === 'konvert' ? '' : 'none';
+        q('vmAdminPichoq').value = c.pichoqNarxi || 0;
+        q('vmAdminZapas').value = c.zapasVaraq || 0;
+        q('vmAdminQoshEni').value = c.formula.qoshEni;
+        q('vmAdminBoyiKarra').value = c.formula.boyiKarra;
+        q('vmAdminQoshBoyi').value = c.formula.qoshBoyi;
+        q('vmAdminPardozCard').style.display = (c.pardozlar || []).length ? '' : 'none';
+        q('vmAdminPardozlar').innerHTML = (c.pardozlar || []).map((p, pi) => `
+            <div class="form-group">
+                <label>${esc(p.nomi)}</label>
+                <div class="input-unit"><input type="number" id="vmP_${pi}" value="${p.narx || 0}" min="0" ${p.key === 'oddiy' ? 'disabled' : ''}><span>so'm/dona</span></div>
+            </div>
+        `).join('');
+        q('vmAdminTisIzoh').style.display = c.tisneniya ? '' : 'none';
+    }
+
+    function collectVaraqliFromUI() {
+        let type = currentManagingProduct;
+        let c = varaqliCfg(type);
+        let q = id => document.getElementById(id);
+        if (!c || !q('vmAdminTurlar')) return;
+        let son = (id, min) => Math.max(min || 0, parseFloat(q(id)?.value) || 0);
+        c.turlar = (c.turlar || []).map((t, ti) => q(`vmT_nomi_${ti}`) ? {
+            key: t.key,
+            nomi: q(`vmT_nomi_${ti}`).value.trim() || `Tur ${ti + 1}`,
+            eni: son(`vmT_eni_${ti}`), boyi: son(`vmT_boyi_${ti}`),
+            bichishEni: son(`vmT_beni_${ti}`), bichishBoyi: son(`vmT_bboyi_${ti}`),
+            tierlar: (t.tierlar || []).map((r, ri) => q(`vmT_${ti}_dan_${ri}`) ? {
+                dan: son(`vmT_${ti}_dan_${ri}`, 1), sifravoy: son(`vmT_${ti}_sif_${ri}`), uf: son(`vmT_${ti}_uf_${ri}`)
+            } : r)
+        } : t);
+        c.pichoqNarxi = son('vmAdminPichoq');
+        c.zapasVaraq = son('vmAdminZapas');
+        c.formula = { qoshEni: son('vmAdminQoshEni'), boyiKarra: son('vmAdminBoyiKarra', 1) || 1, qoshBoyi: son('vmAdminQoshBoyi') };
+        (c.pardozlar || []).forEach((p, pi) => { if (q(`vmP_${pi}`) && p.key !== 'oddiy') p.narx = son(`vmP_${pi}`); });
+    }
+
+    function addVaraqliTur() {
+        collectVaraqliFromUI();
+        let c = varaqliCfg(currentManagingProduct);
+        let oxirgi = c.turlar.slice(-1)[0];
+        c.turlar.push({ key: 't' + Date.now().toString(36), nomi: 'Yangi tur', eni: 100, boyi: 150, bichishEni: 100, bichishBoyi: 150,
+            tierlar: oxirgi ? JSON.parse(JSON.stringify(oxirgi.tierlar)) : [{ dan: 1, sifravoy: 0, uf: 0 }] });
+        renderAdminVaraqli();
+    }
+
+    function deleteVaraqliTur(ti) {
+        collectVaraqliFromUI();
+        let c = varaqliCfg(currentManagingProduct);
+        if (!c.turlar[ti] || !confirm(`"${c.turlar[ti].nomi}" turini o'chirasizmi?`)) return;
+        c.turlar.splice(ti, 1);
+        renderAdminVaraqli();
+    }
+
+    function addVaraqliTier(ti) {
+        collectVaraqliFromUI();
+        let t = varaqliCfg(currentManagingProduct).turlar[ti];
+        if (!t) return;
+        let oxirgi = (t.tierlar || []).slice(-1)[0] || { dan: 0, sifravoy: 0, uf: 0 };
+        t.tierlar = (t.tierlar || []).concat([{ dan: (oxirgi.dan || 0) * 2 || 1, sifravoy: oxirgi.sifravoy, uf: oxirgi.uf }]);
+        renderAdminVaraqli();
+    }
+
+    function deleteVaraqliTier(ti, ri) {
+        collectVaraqliFromUI();
+        let t = varaqliCfg(currentManagingProduct).turlar[ti];
+        if (!t || t.tierlar.length <= 1) { showToast("⚠️ Kamida bitta tiraj oralig'i qolishi kerak."); return; }
+        t.tierlar.splice(ri, 1);
+        renderAdminVaraqli();
+    }
+
+    function saveVaraqliConfig() {
+        collectVaraqliFromUI();
+        let type = currentManagingProduct;
+        let c = varaqliCfg(type);
+        if (!c) return;
+        if (c.turlar.some(t => !(t.eni > 0 && t.boyi > 0 && t.bichishEni > 0 && t.bichishBoyi > 0))) {
+            showToast("⚠️ Har bir turning o'lchami va bichimi 0 dan katta bo'lishi kerak!");
+            return;
+        }
+        c.turlar.forEach(t => { t.tierlar.sort((a, b) => a.dan - b.dan); });
+        localStorage.setItem('erp_varaqli_config', JSON.stringify(varaqliConfig));
+        if (typeof logAudit === 'function') logAudit(`${type === 'konvert' ? 'Konvert' : 'Otkritka'} sozlamalari o'zgartirildi`,
+            c.turlar.map(t => `${t.nomi} ${t.eni}×${t.boyi} (${t.tierlar.length} oraliq)`).join('; '));
+        renderAdminVaraqli();
+        showToast("💾 Sozlamalar saqlandi!");
+    }
+
+    function migrateVaraqliConfig(saved, defaults) {
+        let cfg = JSON.parse(JSON.stringify(defaults));
+        if (!saved || typeof saved !== 'object') return cfg;
+        VARAQLI_TURLAR.forEach(type => {
+            let s = saved[type];
+            if (!s || typeof s !== 'object') return;
+            let d = cfg[type];
+            if (Array.isArray(s.turlar)) d.turlar = s.turlar;
+            ['pichoqNarxi', 'zapasVaraq'].forEach(k => { if (typeof s[k] === 'number') d[k] = s[k]; });
+            if (s.formula && typeof s.formula === 'object') d.formula = { ...d.formula, ...s.formula };
+            if (Array.isArray(s.pardozlar)) d.pardozlar = d.pardozlar.map(p => {
+                let sp = s.pardozlar.find(x => x && x.key === p.key);
+                return sp ? { ...p, narx: typeof sp.narx === 'number' ? sp.narx : p.narx } : p;
+            });
+        });
+        return cfg;
     }
 
     // ====================== PAKET (poligrafiya — Ofset bazasidan, eng murakkab hisob) ======================
@@ -2558,6 +2947,15 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                 if (!Array.isArray(list)) return;
                 list.forEach(g => { if (!g.paperType) g.paperType = (key === 'doorhanger') ? 'Karton' : 'Melovka'; });
             });
+
+            let savedVaraqli = localStorage.getItem('erp_varaqli_config');
+            if (savedVaraqli) {
+                try {
+                    varaqliConfig = migrateVaraqliConfig(JSON.parse(savedVaraqli), varaqliConfig);
+                } catch (e) {
+                    console.warn("Konvert/Otkritka sozlamalarini o'qishda xato:", e);
+                }
+            }
 
             let savedPaket = localStorage.getItem('erp_paket_config');
             if (savedPaket) {

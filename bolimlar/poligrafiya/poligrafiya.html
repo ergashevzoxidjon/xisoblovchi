@@ -71,6 +71,58 @@
 
             </div>
 
+            <!-- KONVERT / OTKRITKA ADMIN PANEL BLOKI (bitta blok, mahsulotga qarab to'ldiriladi) -->
+            <div id="varaqliAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title" id="vmAdminSarlavha">Turlar va pechat narxlari</div>
+                    <p class="admin-hint">Har bir tur: tayyor o'lcham (menejer tanlaydi), bichim — qog'ozga joylashtiriladigan yoyilgan o'lcham,
+                        va tiraj bo'yicha pechat narxi (so'm/dona). Masalan "Adad dan 100" qatori 100 va undan ko'p donaga amal qiladi.
+                        Qog'oz narxi — <b>Qog'oz bo'limidan</b>.</p>
+                    <div id="vmAdminTurlar" class="vm-admin-turlar"></div>
+                    <div class="admin-card-actions" style="margin-top:12px;">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addVaraqliTur()">+ Yangi tur</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">⚙️ Umumiy sozlamalar</div>
+                    <p class="admin-hint">O'z o'lchami (tayyor turga mos kelmasa) bichimi: <b>(eni + qo'shimcha eni) × (bo'yi × karra + qo'shimcha bo'yi)</b>.</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group" id="vmAdminPichoqGroup">
+                            <label>Pichoq (o'z o'lchami uchun)</label>
+                            <div class="input-unit"><input type="number" id="vmAdminPichoq" min="0"><span>so'm, bir marta</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Zapas</label>
+                            <div class="input-unit"><input type="number" id="vmAdminZapas" min="0"><span>varaq</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Qo'shimcha eni</label>
+                            <div class="input-unit"><input type="number" id="vmAdminQoshEni" min="0"><span>mm</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Bo'yi karra</label>
+                            <div class="input-unit"><input type="number" id="vmAdminBoyiKarra" min="1" step="0.5"><span>×</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Qo'shimcha bo'yi</label>
+                            <div class="input-unit"><input type="number" id="vmAdminQoshBoyi" min="0"><span>mm</span></div>
+                        </div>
+                    </div>
+                    <div class="admin-link-hint" id="vmAdminTisIzoh">🔨 Tisneniya narxi (dona + klishe) — umumiy: <b>Ofset pechat → ✂️ Pardozlash xizmatlari</b>, A3 qatori.</div>
+                </div>
+
+                <div class="add-pen-card" id="vmAdminPardozCard">
+                    <div class="add-pen-card-title">✨ Pardozlash (3D lak, folga)</div>
+                    <p class="admin-hint">Menejer bittasini tanlaydi. "Oddiy" — qo'shimcha narxsiz.</p>
+                    <div class="admin-form-grid" id="vmAdminPardozlar"></div>
+                </div>
+
+                <div class="admin-card-actions" style="margin-top:16px;">
+                    <button class="btn btn-success" onclick="saveVaraqliConfig()">💾 Sozlamalarni saqlash</button>
+                </div>
+            </div>
+
             <!-- PAKET ADMIN PANEL BLOKI -->
             <div id="paketAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">

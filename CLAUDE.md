@@ -20,8 +20,9 @@ umumiy/
 bolimlar/<nomi>/<nomi>.html|.css|.js
   poligrafiya  (Flayer, Listovka, Doorhanger, Buklet, Bloknot, Paket, Kalendar, Papka, Kubarik, Konvert, Otkritka)
   textile      (Futbolka ... Shoper, Bayroqlar)
-  suvenir      (Ruchka, Termos, ... Zontik)
-  reklama      (Baner, Orakal, ..., Roll Up, Pauk, PopUp, PromoStoyka)
+  suvenir      (Ruchka, Termos, ... Zontik, Koja papkalar, Guvohnomalar)
+  reklama      (Baner, Orakal, ..., Roll Up, Pauk, PopUp, PromoStoyka, Tablichka, Nastolniy tablichka, Stend)
+  qogoz        (faqat admin: "Qog'oz bo'limi" — Ofset qog'oz narxlari + Konvert/Otkritka qog'ozlari)
   ofset        (Ofset pechat kalkulyatori + Ofset qog'oz bazasi)
   sifravoy     (Raqamli pechat kalkulyatori)
 ```
@@ -59,8 +60,7 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 
 ## Muhim biznes qoidalari
 
-- **Ofset minimal tiraji** (`poligrafiyaMahsulotSozlama`, `POLI_DVIGATEL_TURLARI` — Flayer, Listovka, Buklet,
-  Konvert, Otkritka): adad kam bo'lsa Ofset tugmasi `disabled`, hisob Raqamli pechatda. Admin → mahsulot →
+- **Ofset minimal tiraji** (`poligrafiyaMahsulotSozlama`, `POLI_DVIGATEL_TURLARI` — Flayer, Listovka, Buklet): adad kam bo'lsa Ofset tugmasi `disabled`, hisob Raqamli pechatda. Admin → mahsulot →
   "⚙️ Mahsulot sozlamalari" (bichish o'lchami, qo'shimcha ishlov narxi ham shu yerda).
 - **Pardozlash narxlari — bitta umumiy joy**: `ofsetFinishingServices` (visochka, laminatsiya, lak, tisneniya ×
   A3/A2/A1), admin: Ofset pechat → "✂️ Pardozlash xizmatlari". Papka va Paket shundan oladi — mahsulotda alohida
@@ -71,6 +71,12 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
   har xil: adad, qog'oz/forma/pechat ×2 (zapasni `calculateOfsetForMachine` o'zi qo'shadi, +100). Laminatsiya,
   visochka (ofsetFinishingServices), lak, tisneniya — 2×adad bo'lak, mashina narxida. Yig'ish, lenta — har paketga.
   O'lcham tayyor ro'yxatda bo'lmasa — turning bir martalik pichoq narxi. Ma'lumot yetmasa `hisobYaroqsiz` → narx "—".
+- **Konvert va Otkritka** (`varaqliConfig`, `calculateVaraqli`) — bitta dvigatel: tur (tayyor o'lcham + bichim +
+  tiraj bo'yicha Sifravoy/UF dona narxi) yoki o'z o'lchami (bichim formula bilan; Konvertda bir martalik pichoq).
+  Qog'oz — `qogozRoyxati('konvert'|'otkritka')` (Qog'oz bo'limi), bichim varaqqa joylashtiriladi. Konvert:
+  Tisneniya (umumiy, A3). Otkritka: ikki tomon, pardoz (Oddiy / 3D lak / 3D folga).
+- **Qog'oz bo'limi** (`bolimlar/qogoz/`, admin kaliti `qogoz_bolimi`): Ofset qog'oz narxi — `saveOfsetQogozNarxlari()`,
+  mashina (forma/bosma) — `saveOfsetMashinaSozlamalari()` alohida (bir-birining maydonlarini saqlab yubormasin).
 - **Kubarik** (`kubarikConfig`): Bloknot kabi — qog'oz Ofset A3 bazasidan, turlar (Oq/Rangli/Kleyli/Pechatli) admin tahrirlaydi.
 - **Reklama maksimal chop eni** (`reklamaMaxEni`: baner 3.1, orakal/setka/tumanka 1.5 m): IKKALA tomon ham
   kattaroq bo'lsa ogohlantirish (aylantirib sig'sa — yo'q).
