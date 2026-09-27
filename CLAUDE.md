@@ -76,8 +76,9 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
   (Qog'oz bo'limi). Pechat: Sifravoy / UF / pechatsiz + Tisneniya (umumiy, A3).
 - **Otkritka** (`otkritkaConfig`, `calculateOtkritka`) — FAQAT Sifravoy pechat: ODDIY → Colotech/Lyon/Kvarts
   (Sifravoy qog'oz bazasidan, `oddiyQogozlar` prefikslari), `calculateDigitalPriceForPaper`, 1/2 tomon;
-  3D LAK / FOLGA → faqat Melovka, 680×480 varaq (qog'oz = Ofset Melovka 700×1000 narxi / 2) + `lakTierlar`
-  (varaq soni bo'yicha varaq narxi). Laminatsiya ixtiyoriy (umumiy: A3 / A2). Har turning qo'shimcha xizmati (so'm/dona).
+  3D LAK / FOLGA → FAQAT Colotech 300gr, A2 Sifravoy (Sifravoy bazasidagi `lakQogoz` = "Colotech 300g A2", 680×480)
+  + `lakTierlar` (faqat lak/folga ishi, varaq soni bo'yicha). Ikkalasida 1/2 tomonlama. Laminatsiya ixtiyoriy
+  (umumiy: SRA3 — A3, A2 varaq — A2). Har turning qo'shimcha xizmati (so'm/dona).
 - **Qog'oz bo'limi** (`bolimlar/qogoz/`, admin kaliti `qogoz_bolimi`): Ofset qog'oz narxi — `saveOfsetQogozNarxlari()`,
   mashina (forma/bosma) — `saveOfsetMashinaSozlamalari()` alohida (bir-birining maydonlarini saqlab yubormasin).
 - **Kubarik** (`kubarikConfig`): Bloknot kabi — qog'oz Ofset A3 bazasidan, turlar (Oq/Rangli/Kleyli/Pechatli) admin tahrirlaydi.
