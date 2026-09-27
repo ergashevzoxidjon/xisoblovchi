@@ -1166,30 +1166,35 @@
     }
 
     // ====================== OTKRITKA ======================
-    // Tur (admin kiritgan tayyor o'lcham + bichim) yoki o'z o'lchami. Hisob pardozlashga qarab ikki xil:
-    //   • ODDIY — qog'oz: Colotech / Lyon / Kvarts (Sifravoy pechat qog'oz bazasidan, nomi shu so'zlar bilan
-    //     boshlanadigan qatorlar). Bichim Sifravoy varag'iga joylashtiriladi: varaq × (1 yoki 2 tomonlama narx).
-    //   • 3D LAK / 3D TILLA-KUMUSH FOLGA — FAQAT Colotech 300gr, A2 Sifravoy pechatda (680×480 varaq):
-    //     qog'oz + pechat — Sifravoy qog'oz bazasidagi `lakQogoz` qatoridan (1/2 tomonlama varaq narxi),
+    // Menejer YOYILGAN (bichim) o'lchamni kiritadi yoki turni bosadi (turning yoyilgan o'lchami qo'yiladi).
+    // Otkritkaning O'Z qog'oz ro'yxati bor (Sifravoy pechat qog'ozlaridan alohida, admin kiritadi):
+    //   varaq o'lchami, pechat maydoni, 1 tomonlama / 2 tomonlama varaq narxi (qog'oz + Sifravoy pechat).
+    //   • ODDIY — shu ro'yxatdagi qog'ozlardan biri (Colotech / Lyon / Kvarts...).
+    //   • 3D LAK / 3D TILLA-KUMUSH FOLGA — faqat Colotech 300gr, A2 Sifravoy (680×480) — `lakQogoz`,
     //     + lak/folga ishi — admin kiritgan tiraj oraliqlari bo'yicha, har varaqqa.
-    //   + Laminatsiya (ixtiyoriy) — umumiy Pardozlash xizmatlari: Sifravoy varag'i — A3, 680×480 — A2 narxi, har varaqqa.
+    //   Hisob (Sifravoy usuli): bichim varaqning pechat maydoniga joylashtiriladi, varaq × (1 yoki 2 tomon narx).
+    //   + Laminatsiya (ixtiyoriy) — umumiy Pardozlash xizmatlari: SRA3 — A3, A2 varaq — A2 narxi, har varaqqa.
     //   + Turning qo'shimcha xizmati (admin kiritadi, so'm/dona) — har bir otkritkaga.
     const OTKRITKA_PARDOZ_NOMI = { oddiy: 'Oddiy', lak3d: '3D lak', folga: '3D Tilla-Kumush folga' };
 
     let otkritkaConfig = {
         zapasVaraq: 5,
-        // Oddiy otkritka qog'ozlari — Sifravoy qog'oz bazasidan admin birma-bir belgilagan aniq nomlar.
-        // null — hali belgilanmagan: nomi Colotech / Lyon / Kvarts bilan boshlanadiganlar olinadi.
-        oddiyQogozNomlari: null,
-        // 3D lak / folga qog'ozi — Sifravoy qog'oz bazasidagi shu nomli qator (Colotech 300gr, A2 680×480)
-        lakQogoz: 'Colotech 300g A2',
-        // Faqat lak/folga ishi, so'm / A2 varaq (pechat Sifravoy narxida alohida); "dan" — varaq sonidan boshlab
+        // Oddiy otkritka qog'ozlari — narx: bitta varaq, qog'oz + Sifravoy pechat
+        qogozlar: [
+            { id: 'okq1', name: 'Colotech 300g', q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 4500, price2: 5500 },
+            { id: 'okq2', name: 'Lyon',          q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 8000, price2: 9500 },
+            { id: 'okq3', name: 'Kvarts',        q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 8000, price2: 9500 }
+        ],
+        // 3D lak / folga qog'ozi — Colotech 300gr, A2 Sifravoy
+        lakQogoz: { name: 'Colotech 300g A2', q_eni: 680, q_boyi: 480, p_eni: 670, p_boyi: 470, price1: 12000, price2: 15000 },
+        // Faqat lak/folga ishi, so'm / A2 varaq; "dan" — varaq sonidan boshlab
         lakTierlar: [
             { dan: 1,   lak3d: 15000, folga: 20000 },
             { dan: 50,  lak3d: 11000, folga: 15000 },
             { dan: 200, lak3d: 8000,  folga: 11000 },
             { dan: 500, lak3d: 6000,  folga: 9000 }
         ],
+        // eni/boyi — tayyor (buklangan) o'lcham, faqat ko'rsatish uchun; bichishEni/Boyi — yoyilgan o'lcham (hisob shu bo'yicha)
         turlar: [
             { key: 'o100', nomi: '100×150', eni: 100, boyi: 150, bichishEni: 100, bichishBoyi: 150, xizmatNomi: "Qo'shimcha xizmat", xizmatNarxi: 0 },
             { key: 'a6', nomi: 'A6 (105×148)', eni: 105, boyi: 148, bichishEni: 105, bichishBoyi: 148, xizmatNomi: "Qo'shimcha xizmat", xizmatNarxi: 0 },
@@ -1198,56 +1203,30 @@
         ]
     };
 
-    let otkritkaSelected = { tur: '', pardoz: 'oddiy', qogoz: '', ikkiTomon: false, laminatsiya: false };
+    let otkritkaSelected = { tur: '', pardoz: 'oddiy', qogozId: '', ikkiTomon: false, laminatsiya: false };
 
     function otkritkaTuri(key) {
         return otkritkaConfig.turlar.find(t => t.key === key) || otkritkaConfig.turlar[0] || null;
     }
-
-    // Oddiy otkritka qog'ozlari — Sifravoy bazasidan (Colotech..., Lyon..., Kvarts...)
-    const OTKRITKA_STANDART_QOGOZ_PREFIKSLARI = ['colotech', 'lyon', 'kvarts'];
-
-    // Sifravoy bazasidagi, oddiy otkritkaga belgilash mumkin bo'lgan qog'ozlar (A2 lak/folga qog'ozidan tashqari)
-    function otkritkaSifravoyQogozlari() {
-        let lakNomi = (otkritkaConfig.lakQogoz || '').toLowerCase().trim();
-        return (xavfsizOl(() => digitalPapersDatabase, []) || []).filter(p => (p.name || '').toLowerCase().trim() !== lakNomi);
-    }
-
-    // Belgilanmagan (null) holatda — Colotech / Lyon / Kvarts bilan boshlanadigan qog'ozlar
-    function otkritkaStandartQogozNomlari() {
-        return otkritkaSifravoyQogozlari()
-            .filter(p => OTKRITKA_STANDART_QOGOZ_PREFIKSLARI.some(pr => (p.name || '').toLowerCase().startsWith(pr)))
-            .map(p => p.name);
-    }
-
-    // Oddiy otkritka qog'ozlari — admin belgilaganlari (Sifravoy bazasidagi tartibda)
-    function otkritkaOddiyQogozlar() {
-        let nomlar = Array.isArray(otkritkaConfig.oddiyQogozNomlari) ? otkritkaConfig.oddiyQogozNomlari : otkritkaStandartQogozNomlari();
-        return otkritkaSifravoyQogozlari().filter(p => nomlar.includes(p.name));
-    }
-
-    // 3D lak / folga qog'ozi — Sifravoy bazasidagi Colotech 300gr A2 qatori
-    function otkritkaLakQogozi() {
-        let nomi = (otkritkaConfig.lakQogoz || '').toLowerCase().trim();
-        return (xavfsizOl(() => digitalPapersDatabase, []) || []).find(p => (p.name || '').toLowerCase().trim() === nomi) || null;
-    }
+    function otkritkaOddiyQogozlar() { return otkritkaConfig.qogozlar || []; }
+    function otkritkaLakQogozi() { return otkritkaConfig.lakQogoz || null; }
 
     function buildOtkritkaForm() {
         let t = otkritkaConfig.turlar[0];
         let q = otkritkaOddiyQogozlar()[0];
-        otkritkaSelected = { tur: t ? t.key : '', pardoz: 'oddiy', qogoz: q ? q.name : '', ikkiTomon: false, laminatsiya: false };
+        otkritkaSelected = { tur: t ? t.key : '', pardoz: 'oddiy', qogozId: q ? q.id : '', ikkiTomon: false, laminatsiya: false };
         return `
             <div class="poli-calc">
-                <div class="step-title">1. Turi <span class="paket-step-hint">(bosing — o'lcham avtomatik qo'yiladi; boshqa o'lcham kerak bo'lsa o'zingiz kiriting)</span></div>
+                <div class="step-title">1. Turi <span class="paket-step-hint">(bosing — yoyilgan o'lchami qo'yiladi; boshqa o'lcham kerak bo'lsa o'zingiz kiriting)</span></div>
                 <div class="options-group" id="okTurGroup"></div>
                 <div class="paket-olcham-row" style="grid-template-columns: 1fr 1fr;">
                     <div class="form-group">
-                        <label>Eni <span class="majburiy">*</span></label>
-                        <div class="input-unit"><input type="number" id="okEni" min="1" value="${t ? t.eni : ''}" oninput="renderOtkritkaOptions(); calculate()"><span>mm</span></div>
+                        <label>Yoyilgan eni <span class="majburiy">*</span></label>
+                        <div class="input-unit"><input type="number" id="okEni" min="1" value="${t ? t.bichishEni : ''}" oninput="renderOtkritkaOptions(); calculate()"><span>mm</span></div>
                     </div>
                     <div class="form-group">
-                        <label>Bo'yi <span class="majburiy">*</span></label>
-                        <div class="input-unit"><input type="number" id="okBoyi" min="1" value="${t ? t.boyi : ''}" oninput="renderOtkritkaOptions(); calculate()"><span>mm</span></div>
+                        <label>Yoyilgan bo'yi <span class="majburiy">*</span></label>
+                        <div class="input-unit"><input type="number" id="okBoyi" min="1" value="${t ? t.bichishBoyi : ''}" oninput="renderOtkritkaOptions(); calculate()"><span>mm</span></div>
                     </div>
                 </div>
                 <div id="okInfo" class="paket-bichish-info"></div>
@@ -1272,15 +1251,18 @@
         `;
     }
 
+    function otkritkaOlcham() {
+        return { eni: parseFloat(document.getElementById('okEni')?.value) || 0, boyi: parseFloat(document.getElementById('okBoyi')?.value) || 0 };
+    }
+
     function renderOtkritkaOptions() {
         let turGroup = document.getElementById('okTurGroup');
         if (!turGroup) return;
         let s = otkritkaSelected;
-        let eni = parseFloat(document.getElementById('okEni').value) || 0;
-        let boyi = parseFloat(document.getElementById('okBoyi').value) || 0;
+        let { eni, boyi } = otkritkaOlcham();
         turGroup.innerHTML = otkritkaConfig.turlar.map(t => `
-            <button type="button" class="opt-btn ${t.key === s.tur && t.eni === eni && t.boyi === boyi ? 'active' : ''}" onclick="selectOtkritkaTur('${t.key}')">${t.nomi}</button>
-        `).join('') || `<span class="paket-step-hint">Tur kiritilmagan — o'lchamni qo'lda kiriting.</span>`;
+            <button type="button" class="opt-btn ${t.key === s.tur && t.bichishEni === eni && t.bichishBoyi === boyi ? 'active' : ''}" onclick="selectOtkritkaTur('${t.key}')">${t.nomi}</button>
+        `).join('') || `<span class="paket-step-hint">Tur kiritilmagan — yoyilgan o'lchamni qo'lda kiriting.</span>`;
 
         document.getElementById('okPardozGroup').innerHTML = Object.keys(OTKRITKA_PARDOZ_NOMI).map(k => `
             <button type="button" class="opt-btn ${s.pardoz === k ? 'active' : ''}" onclick="selectOtkritka('pardoz', '${k}')">${OTKRITKA_PARDOZ_NOMI[k]}</button>
@@ -1288,18 +1270,18 @@
 
         let oddiy = s.pardoz === 'oddiy';
         document.getElementById('okQogozSarlavha').innerHTML = oddiy
-            ? `3. Qog'oz <span class="paket-step-hint">(Sifravoy pechat qog'ozlari)</span>`
+            ? `3. Qog'oz`
             : `3. Qog'oz <span class="paket-step-hint">(3D lak va folga faqat Colotech 300gr, A2 Sifravoy pechatda)</span>`;
         if (oddiy) {
             let list = otkritkaOddiyQogozlar();
             document.getElementById('okQogozGroup').innerHTML = list.length === 0
-                ? `<span class="paket-xato">⚠️ Otkritka uchun qog'oz belgilanmagan — Admin → Sifravoy pechat</span>`
-                : list.map(p => `<button type="button" class="opt-btn ${p.name === s.qogoz ? 'active' : ''}" onclick="selectOtkritka('qogoz', ${JSON.stringify(p.name).replace(/"/g, '&quot;')})">${p.name}</button>`).join('');
+                ? `<span class="paket-xato">⚠️ Otkritka qog'ozlari kiritilmagan — Admin → Otkritka</span>`
+                : list.map(p => `<button type="button" class="opt-btn ${p.id === s.qogozId ? 'active' : ''}" onclick="selectOtkritka('qogozId', '${p.id}')">${p.name}</button>`).join('');
         } else {
             let lq = otkritkaLakQogozi();
             document.getElementById('okQogozGroup').innerHTML = lq
                 ? `<button type="button" class="opt-btn active" style="pointer-events:none;">${lq.name} · ${lq.q_eni}×${lq.q_boyi}</button>`
-                : `<span class="paket-xato">⚠️ Sifravoy qog'oz bazasida "${otkritkaConfig.lakQogoz}" yo'q — Admin → Sifravoy pechat</span>`;
+                : `<span class="paket-xato">⚠️ Lak/folga qog'ozi kiritilmagan — Admin → Otkritka</span>`;
         }
 
         document.getElementById('okPechatGroup').innerHTML = `
@@ -1315,8 +1297,8 @@
         let t = otkritkaTuri(key);
         if (!t) return;
         otkritkaSelected.tur = t.key;
-        document.getElementById('okEni').value = t.eni;
-        document.getElementById('okBoyi').value = t.boyi;
+        document.getElementById('okEni').value = t.bichishEni;
+        document.getElementById('okBoyi').value = t.bichishBoyi;
         renderOtkritkaOptions();
         calculate();
     }
@@ -1345,54 +1327,40 @@
         };
 
         let tur = otkritkaTuri(s.tur);
-        let eni = parseFloat(document.getElementById('okEni')?.value) || 0;
-        let boyi = parseFloat(document.getElementById('okBoyi')?.value) || 0;
-        if (!(eni > 0 && boyi > 0)) return yaroqsiz("Eni va bo'yini kiriting — ikkalasi ham majburiy.");
-        let tayyor = tur && tur.eni === eni && tur.boyi === boyi;
-        let bEni = tayyor ? tur.bichishEni : eni;
-        let bBoyi = tayyor ? tur.bichishBoyi : boyi;
+        let { eni: bEni, boyi: bBoyi } = otkritkaOlcham(); // menejer kiritgani — yoyilgan o'lcham
+        if (!(bEni > 0 && bBoyi > 0)) return yaroqsiz("Yoyilgan eni va bo'yini kiriting — ikkalasi ham majburiy.");
+        let tayyor = tur && tur.bichishEni === bEni && tur.bichishBoyi === bBoyi;
         let zapas = parseInt(otkritkaConfig.zapasVaraq) || 0;
+
+        let oddiy = s.pardoz === 'oddiy';
+        let qogoz = oddiy ? (otkritkaOddiyQogozlar().find(p => p.id === s.qogozId) || otkritkaOddiyQogozlar()[0]) : otkritkaLakQogozi();
+        if (!qogoz) return yaroqsiz(oddiy ? "Otkritka qog'ozlari kiritilmagan — Admin → Otkritka." : "Lak/folga qog'ozi kiritilmagan — Admin → Otkritka.");
+        let r = calculateDigitalPriceForPaper(qogoz, bEni, bBoyi, qty, s.ikkiTomon ? 2 : 1);
+        if (!r) return yaroqsiz(`Yoyilgan o'lcham ${bEni}×${bBoyi} mm "${qogoz.name}" pechat maydoniga (${qogoz.p_eni}×${qogoz.p_boyi}) sig'maydi.`);
 
         let costItems = [];
         let jami = 0;
         let qosh = (label, soni, summa) => { jami += summa; costItems.push({ label, qty: soni, total: Math.round(summa) }); };
-        let varaq, perSheet, varaqNomi, lamKey;
-        let qismlar = [`Otkritka ${tayyor ? tur.nomi + ' ' : ''}${eni}×${boyi}mm (bichim ${bEni}×${bBoyi})`, OTKRITKA_PARDOZ_NOMI[s.pardoz]];
 
-        {
-            // Ikkala holatda ham Sifravoy pechat bo'limida hisoblanib qaytadi:
-            // oddiy — tanlangan Colotech/Lyon/Kvarts, 3D lak/folga — Colotech 300gr A2 varag'i
-            let oddiy = s.pardoz === 'oddiy';
-            let qogoz = oddiy ? (otkritkaOddiyQogozlar().find(p => p.name === s.qogoz) || otkritkaOddiyQogozlar()[0]) : otkritkaLakQogozi();
-            if (!qogoz) return yaroqsiz(oddiy
-                ? `Otkritka uchun qog'oz belgilanmagan — Admin → Otkritka → "Oddiy otkritka qog'ozlari".`
-                : `Sifravoy qog'oz bazasida "${otkritkaConfig.lakQogoz}" (A2 680×480) yo'q — admin qo'shishi kerak.`);
-            let r = calculateDigitalPriceForPaper(qogoz, bEni, bBoyi, qty, s.ikkiTomon ? 2 : 1);
-            if (!r) return yaroqsiz(`Bichim ${bEni}×${bBoyi} mm "${qogoz.name}" varag'iga (${qogoz.p_eni}×${qogoz.p_boyi}) sig'maydi.`);
-            perSheet = r.perSheet;
-            varaq = r.sheetsNeeded + zapas;
-            let varaqNarx = s.ikkiTomon ? qogoz.price2 : qogoz.price1;
-            qosh(`Sifravoy pechat (${qogoz.name}, ${s.ikkiTomon ? 'ikki' : 'bir'} tomonlama)`, `${varaq} varaq × ${(+varaqNarx || 0).toLocaleString()}`, varaq * (parseFloat(varaqNarx) || 0));
-            varaqNomi = `${qogoz.q_eni}×${qogoz.q_boyi}`;
-            // Laminatsiya narxi varaq formatiga qarab: A2 (katta) yoki A3 (SRA3)
-            lamKey = (Math.max(qogoz.q_eni || 0, qogoz.q_boyi || 0) > 460) ? 'a2' : 'a3';
-            qismlar.push(qogoz.name, s.ikkiTomon ? 'ikki tomonlama' : 'bir tomonlama');
+        // 1) Qog'oz + Sifravoy pechat — varaq narxi (1 / 2 tomonlama)
+        let varaq = r.sheetsNeeded + zapas;
+        let varaqNarx = parseFloat(s.ikkiTomon ? qogoz.price2 : qogoz.price1) || 0;
+        qosh(`Sifravoy pechat (${qogoz.name}, ${s.ikkiTomon ? 'ikki' : 'bir'} tomonlama)`, `${varaq} varaq × ${varaqNarx.toLocaleString()}`, varaq * varaqNarx);
 
-            // 3D lak / folga ishi — tiraj oraliqlari bo'yicha, har A2 varaqqa
-            if (!oddiy) {
-                let tier = otkritkaLakTierNarxi(varaq, s.pardoz);
-                qosh(`${OTKRITKA_PARDOZ_NOMI[s.pardoz]} (A2)`, `${varaq} varaq × ${tier.toLocaleString()}`, varaq * tier);
-            }
+        // 2) 3D lak / folga ishi — tiraj oraliqlari bo'yicha, har varaqqa
+        if (!oddiy) {
+            let tier = otkritkaLakTierNarxi(varaq, s.pardoz);
+            qosh(`${OTKRITKA_PARDOZ_NOMI[s.pardoz]} (A2)`, `${varaq} varaq × ${tier.toLocaleString()}`, varaq * tier);
         }
 
-        // Laminatsiya (ixtiyoriy) — umumiy narx, har varaqqa
+        // 3) Laminatsiya (ixtiyoriy) — umumiy narx, varaq formatiga qarab
+        let lamKey = (Math.max(qogoz.q_eni || 0, qogoz.q_boyi || 0) > 460) ? 'a2' : 'a3';
         if (s.laminatsiya) {
             let lam = parseFloat(ofsetFinishingServices.laminatsiya[lamKey]) || 0;
             qosh(`Laminatsiya (${lamKey.toUpperCase()} narxi)`, `${varaq} varaq`, varaq * lam);
-            qismlar.push('laminatsiya');
         }
 
-        // Turning qo'shimcha xizmati — har bir otkritkaga (o'z o'lchamida — tanlangan tur bo'yicha)
+        // 4) Turning qo'shimcha xizmati — har bir otkritkaga (o'z o'lchamida — tanlangan tur bo'yicha)
         let xizmatTuri = tur || otkritkaConfig.turlar[0];
         if (xizmatTuri) {
             let x = parseFloat(xizmatTuri.xizmatNarxi) || 0;
@@ -1400,13 +1368,44 @@
         }
 
         info(`
-            <div>📐 Bichim: <b>${bEni}×${bBoyi} mm</b> → ${varaqNomi} varaqqa <b>${perSheet} dona</b> · ${varaq} varaq (zapas bilan)</div>
-            <div class="${tayyor ? 'paket-pichoq-bor' : 'paket-step-hint'}">${tayyor ? `✓ Tayyor tur: ${tur.nomi}` : `O'z o'lchami (qo'shimcha xizmat: ${xizmatTuri ? xizmatTuri.nomi : '—'})`}</div>
+            <div>📐 Yoyilgan: <b>${bEni}×${bBoyi} mm</b> → ${qogoz.q_eni}×${qogoz.q_boyi} varaqqa <b>${r.perSheet} dona</b> · ${varaq} varaq (zapas bilan)</div>
+            <div class="${tayyor ? 'paket-pichoq-bor' : 'paket-step-hint'}">${tayyor ? `✓ Tur: ${tur.nomi} (tayyor holati ${tur.eni}×${tur.boyi} mm)` : `O'z o'lchami (qo'shimcha xizmat: ${xizmatTuri ? xizmatTuri.nomi : '—'})`}</div>
         `);
+        let qismlar = [`Otkritka ${tayyor ? tur.nomi + ' ' : ''}(yoyilgan ${bEni}×${bBoyi}mm)`, OTKRITKA_PARDOZ_NOMI[s.pardoz], qogoz.name,
+            s.ikkiTomon ? 'ikki tomonlama' : 'bir tomonlama'];
+        if (s.laminatsiya) qismlar.push('laminatsiya');
         return { unitPrice: jami / qty, details: qismlar.join(' | '), costItems };
     }
 
     // ---- Admin: Otkritka ----
+    function otkritkaQogozQatori(p, prefix, i, ochirish) {
+        let esc = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        return `
+            <tr>
+                <td><input type="text" id="${prefix}_name_${i}" value="${esc(p.name)}" placeholder="masalan: Colotech 250g"></td>
+                <td><input type="number" id="${prefix}_qeni_${i}" value="${p.q_eni}" min="1"></td>
+                <td><input type="number" id="${prefix}_qboyi_${i}" value="${p.q_boyi}" min="1"></td>
+                <td><input type="number" id="${prefix}_peni_${i}" value="${p.p_eni}" min="1"></td>
+                <td><input type="number" id="${prefix}_pboyi_${i}" value="${p.p_boyi}" min="1"></td>
+                <td><input type="number" id="${prefix}_p1_${i}" value="${p.price1}" min="0"></td>
+                <td><input type="number" id="${prefix}_p2_${i}" value="${p.price2}" min="0"></td>
+                <td style="text-align:right;">${ochirish ? `<button type="button" class="btn btn-danger" style="height:30px; padding:0 10px;" title="O'chirish" onclick="deleteOtkritkaQogoz(${i})">✕</button>` : ''}</td>
+            </tr>`;
+    }
+
+    function otkritkaQogozniOqi(prefix, i, eski) {
+        let q = id => document.getElementById(id);
+        if (!q(`${prefix}_name_${i}`)) return eski;
+        let son = id => Math.max(0, parseFloat(q(id).value) || 0);
+        return {
+            ...(eski || {}),
+            name: q(`${prefix}_name_${i}`).value.trim(),
+            q_eni: son(`${prefix}_qeni_${i}`), q_boyi: son(`${prefix}_qboyi_${i}`),
+            p_eni: son(`${prefix}_peni_${i}`), p_boyi: son(`${prefix}_pboyi_${i}`),
+            price1: son(`${prefix}_p1_${i}`), price2: son(`${prefix}_p2_${i}`)
+        };
+    }
+
     function renderAdminOtkritka() {
         let q = id => document.getElementById(id);
         if (!q('okAdminTurlar')) return;
@@ -1418,12 +1417,12 @@
                     <button type="button" class="btn btn-danger" style="height:32px; padding:0 10px;" title="Turni o'chirish" onclick="deleteOtkritkaTur(${ti})">✕</button>
                 </div>
                 <div class="vm-admin-olcham">
-                    <label>Tayyor o'lcham</label>
-                    <div class="input-unit"><input type="number" id="okT_eni_${ti}" value="${t.eni}" min="1"><span>eni</span></div>
-                    <div class="input-unit"><input type="number" id="okT_boyi_${ti}" value="${t.boyi}" min="1"><span>bo'yi</span></div>
-                    <label>Bichim (yoyilgan)</label>
+                    <label>Yoyilgan (hisob)</label>
                     <div class="input-unit"><input type="number" id="okT_beni_${ti}" value="${t.bichishEni}" min="1"><span>eni</span></div>
                     <div class="input-unit"><input type="number" id="okT_bboyi_${ti}" value="${t.bichishBoyi}" min="1"><span>bo'yi</span></div>
+                    <label>Tayyor holati</label>
+                    <div class="input-unit"><input type="number" id="okT_eni_${ti}" value="${t.eni}" min="1"><span>eni</span></div>
+                    <div class="input-unit"><input type="number" id="okT_boyi_${ti}" value="${t.boyi}" min="1"><span>bo'yi</span></div>
                 </div>
                 <div class="ok-admin-xizmat">
                     <input type="text" id="okT_xnomi_${ti}" value="${esc(t.xizmatNomi)}" placeholder="Qo'shimcha xizmat nomi">
@@ -1431,6 +1430,12 @@
                 </div>
             </div>
         `).join('');
+
+        q('okAdminQogozBody').innerHTML = otkritkaOddiyQogozlar().length === 0
+            ? `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:16px;">Hozircha qog'oz yo'q — "+ Qog'oz qo'shish" ni bosing.</td></tr>`
+            : otkritkaOddiyQogozlar().map((p, i) => otkritkaQogozQatori(p, 'okQ', i, true)).join('');
+        let lq = otkritkaLakQogozi() || { name: 'Colotech 300g A2', q_eni: 680, q_boyi: 480, p_eni: 670, p_boyi: 470, price1: 0, price2: 0 };
+        q('okAdminLakQogozBody').innerHTML = otkritkaQogozQatori(lq, 'okLQ', 0, false);
 
         q('okAdminLakBody').innerHTML = otkritkaConfig.lakTierlar.map((r, ri) => `
             <tr>
@@ -1440,24 +1445,7 @@
                 <td style="text-align:right;"><button type="button" class="btn btn-outline" style="height:30px; padding:0 8px;" title="Qatorni o'chirish" onclick="deleteOtkritkaLakTier(${ri})">✕</button></td>
             </tr>
         `).join('');
-        q('okAdminLakQogoz').value = otkritkaConfig.lakQogoz || '';
-        let lq = otkritkaLakQogozi();
-        q('okAdminLakQogozTopildi').textContent = lq
-            ? `Sifravoy bazasida topildi: ${lq.name} (${lq.q_eni}×${lq.q_boyi}, 1 tomon ${(+lq.price1).toLocaleString()} / 2 tomon ${(+lq.price2).toLocaleString()} so'm)`
-            : "⚠️ Sifravoy bazasida bunday nomli qog'oz yo'q — Sifravoy pechat admin bo'limida qo'shing";
         q('okAdminZapas').value = otkritkaConfig.zapasVaraq;
-        // Sifravoy bazasidagi har bir qog'oz — alohida belgilanadi
-        let tanlangan = otkritkaOddiyQogozlar().map(p => p.name);
-        let barchasi = otkritkaSifravoyQogozlari();
-        q('okAdminQogozlar').innerHTML = barchasi.length === 0
-            ? `<div class="paket-xato">⚠️ Sifravoy qog'oz bazasi bo'sh — avval Sifravoy pechat admin bo'limida qog'oz qo'shing.</div>`
-            : barchasi.map((p, i) => `
-                <label class="ok-qogoz-check">
-                    <input type="checkbox" id="okQ_${i}" data-nomi="${esc(p.name)}" ${tanlangan.includes(p.name) ? 'checked' : ''}>
-                    <span class="ok-qogoz-nomi">${esc(p.name)}</span>
-                    <span class="ok-qogoz-narx">${p.q_eni}×${p.q_boyi} · 1 tomon ${(+p.price1 || 0).toLocaleString()} / 2 tomon ${(+p.price2 || 0).toLocaleString()} so'm</span>
-                </label>
-            `).join('');
     }
 
     function collectOtkritkaFromUI() {
@@ -1472,13 +1460,12 @@
             xizmatNomi: q(`okT_xnomi_${ti}`).value.trim() || "Qo'shimcha xizmat",
             xizmatNarxi: son(`okT_xnarx_${ti}`)
         } : t);
+        otkritkaConfig.qogozlar = otkritkaOddiyQogozlar().map((p, i) => otkritkaQogozniOqi('okQ', i, p));
+        otkritkaConfig.lakQogoz = otkritkaQogozniOqi('okLQ', 0, otkritkaConfig.lakQogoz);
         otkritkaConfig.lakTierlar = otkritkaConfig.lakTierlar.map((r, ri) => q(`okL_dan_${ri}`) ? {
             dan: son(`okL_dan_${ri}`, 1), lak3d: son(`okL_lak_${ri}`), folga: son(`okL_folga_${ri}`)
         } : r);
-        otkritkaConfig.lakQogoz = q('okAdminLakQogoz').value.trim();
         otkritkaConfig.zapasVaraq = son('okAdminZapas');
-        let belgilar = [...document.querySelectorAll('#okAdminQogozlar input[type="checkbox"]')];
-        if (belgilar.length) otkritkaConfig.oddiyQogozNomlari = belgilar.filter(c => c.checked).map(c => c.dataset.nomi);
     }
 
     function addOtkritkaTur() {
@@ -1492,6 +1479,25 @@
         let t = otkritkaConfig.turlar[ti];
         if (!t || !confirm(`"${t.nomi}" turini o'chirasizmi?`)) return;
         otkritkaConfig.turlar.splice(ti, 1);
+        renderAdminOtkritka();
+    }
+
+    function addOtkritkaQogoz() {
+        collectOtkritkaFromUI();
+        let oxirgi = otkritkaOddiyQogozlar().slice(-1)[0];
+        otkritkaConfig.qogozlar = otkritkaOddiyQogozlar().concat([{
+            id: 'okq' + Date.now().toString(36), name: '',
+            q_eni: oxirgi ? oxirgi.q_eni : 320, q_boyi: oxirgi ? oxirgi.q_boyi : 450,
+            p_eni: oxirgi ? oxirgi.p_eni : 310, p_boyi: oxirgi ? oxirgi.p_boyi : 440, price1: 0, price2: 0
+        }]);
+        renderAdminOtkritka();
+    }
+
+    function deleteOtkritkaQogoz(i) {
+        collectOtkritkaFromUI();
+        let p = otkritkaOddiyQogozlar()[i];
+        if (!p || !confirm(`"${p.name || 'Nomsiz'}" qog'ozini o'chirasizmi?`)) return;
+        otkritkaConfig.qogozlar.splice(i, 1);
         renderAdminOtkritka();
     }
 
@@ -1510,47 +1516,56 @@
     }
 
     function saveOtkritkaConfig() {
-        // Tekshiruv sozlamani o'zgartirishdan OLDIN — rad etilgan saqlash kalkulyatordagi ro'yxatni bo'shatib qo'ymasin
-        let belgilar = document.querySelectorAll('#okAdminQogozlar input[type="checkbox"]');
-        if (belgilar.length && ![...belgilar].some(c => c.checked)) {
-            showToast("⚠️ Oddiy otkritka uchun kamida bitta qog'ozni belgilang!");
-            return;
-        }
         collectOtkritkaFromUI();
-        if (otkritkaConfig.turlar.some(t => !(t.eni > 0 && t.boyi > 0 && t.bichishEni > 0 && t.bichishBoyi > 0))) {
-            showToast("⚠️ Har bir turning o'lchami va bichimi 0 dan katta bo'lishi kerak!");
+        let c = otkritkaConfig;
+        let xatoQogoz = [...c.qogozlar, c.lakQogoz].find(p => !p || !p.name || !(p.q_eni > 0 && p.q_boyi > 0 && p.p_eni > 0 && p.p_boyi > 0));
+        if (c.qogozlar.length === 0) { showToast("⚠️ Kamida bitta otkritka qog'ozini kiriting!"); return; }
+        if (xatoQogoz) { showToast("⚠️ Har bir qog'ozning nomi, varaq va pechat maydoni o'lchami bo'lishi kerak!"); return; }
+        if (c.turlar.some(t => !(t.eni > 0 && t.boyi > 0 && t.bichishEni > 0 && t.bichishBoyi > 0))) {
+            showToast("⚠️ Har bir turning yoyilgan va tayyor o'lchami 0 dan katta bo'lishi kerak!");
             return;
         }
-        otkritkaConfig.lakTierlar.sort((a, b) => a.dan - b.dan);
-        localStorage.setItem('erp_otkritka_config', JSON.stringify(otkritkaConfig));
+        c.lakTierlar.sort((a, b) => a.dan - b.dan);
+        localStorage.setItem('erp_otkritka_config', JSON.stringify(c));
         if (typeof logAudit === 'function') logAudit("Otkritka sozlamalari o'zgartirildi",
-            otkritkaConfig.turlar.map(t => `${t.nomi}: ${t.xizmatNomi} ${t.xizmatNarxi}`).join('; ') + `; lak/folga ${otkritkaConfig.lakTierlar.length} oraliq`);
+            `Qog'ozlar: ${c.qogozlar.map(p => `${p.name} ${p.price1}/${p.price2}`).join(', ')}; lak qog'ozi ${c.lakQogoz.name} ${c.lakQogoz.price1}/${c.lakQogoz.price2}; `
+            + c.turlar.map(t => `${t.nomi}: ${t.xizmatNomi} ${t.xizmatNarxi}`).join('; '));
         renderAdminOtkritka();
         showToast("💾 Otkritka sozlamalari saqlandi!");
     }
 
+    // Eski sxemalar: qog'ozlar Sifravoy bazasidan olinardi (oddiyQogozNomlari / oddiyQogozlar prefikslari,
+    // lakQogoz — nom). Endi otkritkaning o'z ro'yxati — o'sha qog'ozlar narxi bilan birga bir marta ko'chiriladi.
     function migrateOtkritkaConfig(saved, defaults) {
         let cfg = JSON.parse(JSON.stringify(defaults));
         if (!saved || typeof saved !== 'object') return cfg;
         if (Array.isArray(saved.turlar)) cfg.turlar = saved.turlar;
-        if (Array.isArray(saved.lakTierlar) && saved.lakTierlar.length) cfg.lakTierlar = saved.lakTierlar;
-        if (Array.isArray(saved.oddiyQogozNomlari)) {
-            cfg.oddiyQogozNomlari = saved.oddiyQogozNomlari;
-        } else if (Array.isArray(saved.oddiyQogozlar)) {
-            // Eski sxema: nom boshlanishlari ("Colotech, Lyon") — hozirgi Sifravoy bazasidagi aniq nomlarga aylantiramiz
-            let prefikslar = saved.oddiyQogozlar.map(x => String(x).toLowerCase().trim()).filter(Boolean);
-            let lakNomi = String(saved.lakQogoz || defaults.lakQogoz || '').toLowerCase().trim();
-            let nomlar = (xavfsizOl(() => digitalPapersDatabase, []) || [])
-                .filter(p => prefikslar.some(pr => (p.name || '').toLowerCase().startsWith(pr)) && (p.name || '').toLowerCase().trim() !== lakNomi)
-                .map(p => p.name);
-            // Hech narsa topilmasa — null (standart: Colotech / Lyon / Kvarts), ro'yxat bo'sh qolmasin
-            cfg.oddiyQogozNomlari = nomlar.length ? nomlar : null;
-        }
-        if (typeof saved.lakQogoz === 'string' && saved.lakQogoz.trim()) cfg.lakQogoz = saved.lakQogoz;
-        // Eski (Melovka 680×480) sxemadagi lakTierlar pechatni ham o'z ichiga olgan edi — yangi sxemada faqat
-        // lak/folga ishi, shuning uchun eski saqlangan qiymatlar tashlanadi (standart namuna bilan boshlanadi).
-        if (!saved.lakQogoz) cfg.lakTierlar = JSON.parse(JSON.stringify(defaults.lakTierlar));
         if (typeof saved.zapasVaraq === 'number') cfg.zapasVaraq = saved.zapasVaraq;
+        let sifravoy = xavfsizOl(() => digitalPapersDatabase, []) || [];
+        let nusxa = (p, id) => ({ id, name: p.name, q_eni: p.q_eni, q_boyi: p.q_boyi, p_eni: p.p_eni, p_boyi: p.p_boyi, price1: p.price1, price2: p.price2 });
+
+        if (Array.isArray(saved.qogozlar)) {
+            cfg.qogozlar = saved.qogozlar;
+        } else {
+            let lakNomi = String(typeof saved.lakQogoz === 'string' ? saved.lakQogoz : 'Colotech 300g A2').toLowerCase().trim();
+            let tanlangan;
+            if (Array.isArray(saved.oddiyQogozNomlari)) {
+                tanlangan = sifravoy.filter(p => saved.oddiyQogozNomlari.includes(p.name));
+            } else {
+                let prefikslar = (Array.isArray(saved.oddiyQogozlar) ? saved.oddiyQogozlar : ['Colotech', 'Lyon', 'Kvarts']).map(x => String(x).toLowerCase().trim());
+                tanlangan = sifravoy.filter(p => prefikslar.some(pr => (p.name || '').toLowerCase().startsWith(pr)) && (p.name || '').toLowerCase().trim() !== lakNomi);
+            }
+            if (tanlangan.length) cfg.qogozlar = tanlangan.map((p, i) => nusxa(p, 'okq' + (i + 1)));
+        }
+
+        if (saved.lakQogoz && typeof saved.lakQogoz === 'object') {
+            cfg.lakQogoz = saved.lakQogoz;
+        } else if (typeof saved.lakQogoz === 'string') {
+            let lp = sifravoy.find(p => (p.name || '').toLowerCase().trim() === saved.lakQogoz.toLowerCase().trim());
+            if (lp) cfg.lakQogoz = nusxa(lp, 'oklq');
+        }
+        // lakTierlar faqat yangi (lak/folga ishi) sxemada saqlangan bo'lsa olinadi
+        if (saved.lakQogoz && Array.isArray(saved.lakTierlar) && saved.lakTierlar.length) cfg.lakTierlar = saved.lakTierlar;
         return cfg;
     }
 
@@ -3322,6 +3337,8 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                 list.forEach(g => { if (!g.paperType) g.paperType = (key === 'doorhanger') ? 'Karton' : 'Melovka'; });
             });
 
+            // Otkritka — o'z qog'oz ro'yxati bilan. Eski sxemada qog'ozlar Sifravoy bazasidan olinardi —
+            // migrateOtkritkaConfig ularni (narxi bilan) bir marta otkritka ro'yxatiga ko'chiradi.
             let savedOtkritka = localStorage.getItem('erp_otkritka_config');
             if (savedOtkritka) {
                 try {
@@ -3329,30 +3346,6 @@ function calculateResult_poligrafiya(activeProductTypeParam, qty, baseCost) {
                 } catch (e) {
                     console.warn("Otkritka sozlamalarini o'qishda xato:", e);
                 }
-            }
-            // Bir martalik: oddiy otkritka qog'ozlari (Colotech / Lyon / Kvarts) Sifravoy qog'oz bazasida
-            // bo'lmasa — namuna narx bilan qo'shiladi (admin Sifravoy pechat bo'limida to'g'rilaydi).
-            if (!localStorage.getItem('erp_otkritka_a2_seeded')) {
-                let nomi = otkritkaConfig.lakQogoz;
-                if (nomi && !digitalPapersDatabase.some(p => (p.name || '').toLowerCase().trim() === nomi.toLowerCase().trim())) {
-                    digitalPapersDatabase.push({ name: nomi, q_eni: 680, q_boyi: 480, p_eni: 670, p_boyi: 470, price1: 12000, price2: 15000 });
-                    localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
-                }
-                localStorage.setItem('erp_otkritka_a2_seeded', '1');
-            }
-            if (!localStorage.getItem('erp_otkritka_qogoz_seeded')) {
-                let qoshildi = false;
-                [['Colotech 300g', 4500, 5500], ['Lyon', 8000, 9500], ['Kvarts', 8000, 9500]].forEach(([nomi, p1, p2]) => {
-                    let prefiks = nomi.split(' ')[0].toLowerCase();
-                    // A2 lak/folga qatori (Colotech 300g A2) oddiy otkritka qog'ozi hisoblanmaydi
-                    let lakNomi = (otkritkaConfig.lakQogoz || '').toLowerCase().trim();
-                    if (!digitalPapersDatabase.some(p => (p.name || '').toLowerCase().startsWith(prefiks) && (p.name || '').toLowerCase().trim() !== lakNomi)) {
-                        digitalPapersDatabase.push({ name: nomi, q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: p1, price2: p2 });
-                        qoshildi = true;
-                    }
-                });
-                if (qoshildi) localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
-                localStorage.setItem('erp_otkritka_qogoz_seeded', '1');
             }
 
             let savedVaraqli = localStorage.getItem('erp_varaqli_config');

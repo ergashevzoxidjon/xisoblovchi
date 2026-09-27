@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: b9f77c5f90f3a529 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 2ee0bdbdedf2ea6f -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <title>Bosmaxona ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="umumiy/core.css?v=b21b94fa">
+    <link rel="stylesheet" href="umumiy/core.css?v=43afe404">
     <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=3e6ee534">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
     <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
@@ -646,8 +646,8 @@
             <div id="otkritkaAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title">💌 Otkritka turlari va qo'shimcha xizmat</div>
-                    <p class="admin-hint">Har bir tur: tayyor o'lcham (menejer tanlaydi), bichim — yoyilgan o'lcham, va har bir otkritkaga qo'shiladigan
-                        <b>qo'shimcha xizmat</b> (nomi va narxi, so'm/dona; 0 — qo'shilmaydi).</p>
+                    <p class="admin-hint">Har bir tur: <b>yoyilgan o'lcham</b> — hisob shu bo'yicha (menejer turni bosganda shu o'lcham qo'yiladi),
+                        tayyor holati — ma'lumot uchun, va har bir otkritkaga qo'shiladigan <b>qo'shimcha xizmat</b> (so'm/dona; 0 — qo'shilmaydi).</p>
                     <div id="okAdminTurlar" class="vm-admin-turlar"></div>
                     <div class="admin-card-actions" style="margin-top:12px;">
                         <button type="button" class="btn" style="background:#4f46e5;" onclick="addOtkritkaTur()">+ Yangi tur</button>
@@ -655,15 +655,31 @@
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📄 Otkritka qog'ozlari (oddiy otkritka)</div>
+                    <p class="admin-hint">Otkritkaning o'z qog'oz ro'yxati — Sifravoy pechat qog'ozlaridan alohida. Narx — <b>bitta varaq uchun,
+                        qog'oz + Sifravoy pechat</b> (1 va 2 tomonlama). Yoyilgan o'lcham varaqning pechat maydoniga joylashtiriladi.</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:860px;">
+                            <thead><tr><th style="min-width:160px;">Qog'oz nomi</th><th>Varaq eni</th><th>Varaq bo'yi</th><th>Pechat maydoni eni</th><th>Pechat maydoni bo'yi</th><th>1 tomon (so'm/varaq)</th><th>2 tomon (so'm/varaq)</th><th></th></tr></thead>
+                            <tbody id="okAdminQogozBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn" style="background:#4f46e5;" onclick="addOtkritkaQogoz()">+ Qog'oz qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title">✨ 3D lak va 3D Tilla-Kumush folga</div>
-                    <p class="admin-hint">Faqat <b>Colotech 300gr</b> qog'ozda, <b>A2 Sifravoy pechatda</b> (680×480) chop etiladi. Qog'oz va pechat narxi —
-                        Sifravoy qog'oz bazasidagi quyidagi qatordan (1/2 tomonlama varaq narxi). Jadvalda — <b>faqat lak/folga ishi</b>,
-                        bitta A2 varaq uchun, varaq soniga qarab: "dan 50" qatori 50 va undan ko'p varaqqa amal qiladi.</p>
-                    <div class="admin-form-grid">
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label>Lak/folga qog'ozi (Sifravoy bazasidagi nomi)</label>
-                            <input type="text" id="okAdminLakQogoz" placeholder="Colotech 300g A2">
-                            <small id="okAdminLakQogozTopildi"></small>
+                    <p class="admin-hint">Faqat <b>Colotech 300gr</b> qog'ozda, <b>A2 Sifravoy pechatda</b> chop etiladi. Quyida — shu qog'oz (varaq narxi:
+                        qog'oz + pechat), undan keyin — <b>faqat lak/folga ishi</b>, bitta varaq uchun, varaq soniga qarab
+                        ("dan 50" qatori 50 va undan ko'p varaqqa amal qiladi).</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:860px;">
+                            <thead><tr><th style="min-width:160px;">Qog'oz nomi</th><th>Varaq eni</th><th>Varaq bo'yi</th><th>Pechat maydoni eni</th><th>Pechat maydoni bo'yi</th><th>1 tomon (so'm/varaq)</th><th>2 tomon (so'm/varaq)</th><th></th></tr></thead>
+                            <tbody id="okAdminLakQogozBody"></tbody>
+                        </table>
                         </div>
                     </div>
                     <div class="table-card" style="margin-bottom:10px;">
@@ -678,13 +694,8 @@
                 </div>
 
                 <div class="add-pen-card">
-                    <div class="add-pen-card-title">⚙️ Oddiy otkritka va umumiy</div>
-                    <p class="admin-hint">Otkritka Sifravoy pechat bo'limida hisoblanadi: qog'oz va varaq narxi (1/2 tomonlama) —
-                        <b>Sifravoy pechat → qog'oz bazasi</b>. Quyida shu bazadagi barcha qog'ozlar — oddiy otkritka uchun
-                        menejerga ko'rsatiladiganlarini belgilang. Yangi qog'oz kerak bo'lsa, avval Sifravoy pechat bo'limiga qo'shing.
-                        Laminatsiya narxi — umumiy <b>Pardozlash xizmatlari</b>dan (Sifravoy varag'i — A3, katta varaq — A2).</p>
-                    <label class="ok-qogoz-sarlavha">Oddiy otkritka qog'ozlari</label>
-                    <div id="okAdminQogozlar" class="ok-qogoz-royxat"></div>
+                    <div class="add-pen-card-title">⚙️ Umumiy</div>
+                    <p class="admin-hint">Laminatsiya narxi — umumiy <b>Pardozlash xizmatlari</b>dan (SRA3 varaq — A3, A2 varaq — A2 narxi, har varaqqa).</p>
                     <div class="admin-form-grid">
                         <div class="form-group">
                             <label>Zapas</label>
@@ -1557,7 +1568,7 @@
 <script src="bolimlar/ofset/ofset.js?v=0d5e344d"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
 <script src="bolimlar/qogoz/qogoz.js?v=8ff2dcb5"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=caddd9c5"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=be1422e1"></script>
 <script src="bolimlar/textile/textile.js?v=37fee0b3"></script>
 <script src="bolimlar/suvenir/suvenir.js?v=79bef9fc"></script>
 <script src="bolimlar/reklama/reklama.js?v=ad7bc69a"></script>

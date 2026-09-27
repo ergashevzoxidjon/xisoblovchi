@@ -1387,13 +1387,3 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 .vm-pardoz-group { display: flex; gap: 8px; flex-wrap: wrap; flex-basis: 100%; }
 .ok-admin-xizmat { display: grid; grid-template-columns: 1fr 150px; gap: 6px; margin-top: 4px; }
 .ok-admin-xizmat .input-unit input { min-width: 0; width: 100%; }
-.ok-qogoz-sarlavha { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; }
-.ok-qogoz-royxat { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; margin-bottom: 16px; }
-.ok-qogoz-check {
-    display: grid; grid-template-columns: auto 1fr; column-gap: 10px; align-items: center; cursor: pointer;
-    border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; background: #fff; transition: border-color 0.15s, background 0.15s;
-}
-.ok-qogoz-check:has(input:checked) { border-color: var(--primary); background: #eaf6fc; }
-.ok-qogoz-check input { grid-row: span 2; width: 18px; height: 18px; accent-color: var(--primary); margin: 0; }
-.ok-qogoz-nomi { font-weight: 700; font-size: 0.86rem; }
-.ok-qogoz-narx { font-size: 0.72rem; color: var(--text-muted); }

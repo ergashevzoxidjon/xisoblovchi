@@ -74,11 +74,12 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 - **Konvert** (`varaqliConfig`, `calculateVaraqli`): tur (tayyor o'lcham + bichim + tiraj bo'yicha Sifravoy/UF dona
   narxi) yoki o'z o'lchami (bichim formula bilan + bir martalik pichoq). Qog'oz — `qogozRoyxati('konvert')`
   (Qog'oz bo'limi). Pechat: Sifravoy / UF / pechatsiz + Tisneniya (umumiy, A3).
-- **Otkritka** (`otkritkaConfig`, `calculateOtkritka`) — FAQAT Sifravoy pechat: ODDIY → admin Sifravoy qog'oz bazasidan
-  birma-bir belgilagan qog'ozlar (`oddiyQogozNomlari`; null — Colotech/Lyon/Kvarts bilan boshlanadiganlar), `calculateDigitalPriceForPaper`, 1/2 tomon;
-  3D LAK / FOLGA → FAQAT Colotech 300gr, A2 Sifravoy (Sifravoy bazasidagi `lakQogoz` = "Colotech 300g A2", 680×480)
-  + `lakTierlar` (faqat lak/folga ishi, varaq soni bo'yicha). Ikkalasida 1/2 tomonlama. Laminatsiya ixtiyoriy
-  (umumiy: SRA3 — A3, A2 varaq — A2). Har turning qo'shimcha xizmati (so'm/dona).
+- **Otkritka** (`otkritkaConfig`, `calculateOtkritka`) — FAQAT Sifravoy pechat. Menejer YOYILGAN o'lchamni kiritadi
+  (tur bosilsa — turning `bichishEni/Boyi`). Otkritkaning O'Z qog'oz ro'yxati (`otkritkaConfig.qogozlar`, Sifravoy
+  bazasidan alohida; maydonlar Sifravoy bilan bir xil: q_eni/q_boyi/p_eni/p_boyi/price1/price2) va `lakQogoz`
+  (Colotech 300g A2, 680×480) — 3D lak/folga faqat shu qog'ozda + `lakTierlar` (faqat lak/folga ishi, varaq bo'yicha).
+  Hisob `calculateDigitalPriceForPaper`, 1/2 tomon. Laminatsiya ixtiyoriy (umumiy: SRA3 — A3, A2 — A2).
+  Har turning qo'shimcha xizmati (so'm/dona).
 - **Qog'oz bo'limi** (`bolimlar/qogoz/`, admin kaliti `qogoz_bolimi`): Ofset qog'oz narxi — `saveOfsetQogozNarxlari()`,
   mashina (forma/bosma) — `saveOfsetMashinaSozlamalari()` alohida (bir-birining maydonlarini saqlab yubormasin).
 - **Kubarik** (`kubarikConfig`): Bloknot kabi — qog'oz Ofset A3 bazasidan, turlar (Oq/Rangli/Kleyli/Pechatli) admin tahrirlaydi.
