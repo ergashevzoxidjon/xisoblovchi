@@ -74,8 +74,8 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 - **Konvert** (`varaqliConfig`, `calculateVaraqli`): tur (tayyor o'lcham + bichim + tiraj bo'yicha Sifravoy/UF dona
   narxi) yoki o'z o'lchami (bichim formula bilan + bir martalik pichoq). Qog'oz — `qogozRoyxati('konvert')`
   (Qog'oz bo'limi). Pechat: Sifravoy / UF / pechatsiz + Tisneniya (umumiy, A3).
-- **Otkritka** (`otkritkaConfig`, `calculateOtkritka`) — FAQAT Sifravoy pechat: ODDIY → Colotech/Lyon/Kvarts
-  (Sifravoy qog'oz bazasidan, `oddiyQogozlar` prefikslari), `calculateDigitalPriceForPaper`, 1/2 tomon;
+- **Otkritka** (`otkritkaConfig`, `calculateOtkritka`) — FAQAT Sifravoy pechat: ODDIY → admin Sifravoy qog'oz bazasidan
+  birma-bir belgilagan qog'ozlar (`oddiyQogozNomlari`; null — Colotech/Lyon/Kvarts bilan boshlanadiganlar), `calculateDigitalPriceForPaper`, 1/2 tomon;
   3D LAK / FOLGA → FAQAT Colotech 300gr, A2 Sifravoy (Sifravoy bazasidagi `lakQogoz` = "Colotech 300g A2", 680×480)
   + `lakTierlar` (faqat lak/folga ishi, varaq soni bo'yicha). Ikkalasida 1/2 tomonlama. Laminatsiya ixtiyoriy
   (umumiy: SRA3 — A3, A2 varaq — A2). Har turning qo'shimcha xizmati (so'm/dona).
