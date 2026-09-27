@@ -797,6 +797,7 @@
             pichoqNarxi: 500000,   // o'z (nostandart) o'lcham uchun bir martalik pichoq
             zapasVaraq: 10,        // tirajga bir marta qo'shiladigan zapas varaq
             formula: { qoshEni: 30, boyiKarra: 2, qoshBoyi: 50 },
+            pechatTurlari: ['sifravoy', 'uf'], // menejer bittasini tanlaydi
             pechatsizMumkin: true, // faqat tisneniya bo'lishi mumkin
             tisneniya: true,
             ikkiTomon: false,
@@ -816,6 +817,7 @@
             pichoqNarxi: 0,        // to'rtburchak — pichoq kerak emas
             zapasVaraq: 10,
             formula: { qoshEni: 0, boyiKarra: 1, qoshBoyi: 0 },
+            pechatTurlari: ['sifravoy'], // Otkritka FAQAT Sifravoy pechatda — tanlov ko'rsatilmaydi
             pechatsizMumkin: false,
             tisneniya: false,
             ikkiTomon: true,
@@ -857,7 +859,8 @@
         let c = varaqliCfg(type);
         let t = (c.turlar || [])[0];
         let qog = varaqliQogozlar(type)[0];
-        varaqliSelected = { tur: t ? t.key : '', qogozId: qog ? qog.id : '', pechat: 'sifravoy', tisneniya: false, pardoz: 'oddiy', ikkiTomon: false };
+        let pechatTurlari = c.pechatTurlari || ['sifravoy', 'uf'];
+        varaqliSelected = { tur: t ? t.key : '', qogozId: qog ? qog.id : '', pechat: pechatTurlari[0], tisneniya: false, pardoz: 'oddiy', ikkiTomon: false };
         return `
             <div class="poli-calc">
                 <div class="step-title">1. Turi <span class="paket-step-hint">(bosing — o'lcham avtomatik qo'yiladi; boshqa o'lcham kerak bo'lsa o'zingiz kiriting)</span></div>
@@ -877,7 +880,7 @@
                 <div class="step-title">2. Qog'oz</div>
                 <div class="options-group" id="vmQogozGroup"></div>
 
-                <div class="step-title">3. Pechat</div>
+                <div class="step-title">3. Pechat${pechatTurlari.length === 1 ? ` <span class="paket-step-hint">(${VARAQLI_PECHAT_NOMI[pechatTurlari[0]]})</span>` : ''}</div>
                 <div class="options-group" id="vmPechatGroup"></div>
 
                 <div class="step-title">4. Qo'shimcha</div>
@@ -910,15 +913,19 @@
             : qogozlar.map(q => `
                 <button type="button" class="opt-btn ${q.id === varaqliSelected.qogozId ? 'active' : ''}" onclick="selectVaraqli('qogozId', '${q.id}', '${type}')">${q.nomi} · ${q.format}</button>
             `).join('');
-        let pechatlar = ['sifravoy', 'uf'].concat(c.pechatsizMumkin ? ['yoq'] : []);
-        document.getElementById('vmPechatGroup').innerHTML = pechatlar.map(p => `
+        // Pechat turi faqat bir nechta bo'lsa tanlanadi (Otkritka — faqat Sifravoy, tanlovsiz);
+        // bir/ikki tomonlama ham shu "Pechat" qadamida.
+        let pechatlar = (c.pechatTurlari || ['sifravoy', 'uf']).concat(c.pechatsizMumkin ? ['yoq'] : []);
+        if (!pechatlar.includes(varaqliSelected.pechat)) varaqliSelected.pechat = pechatlar[0];
+        let pechatHtml = pechatlar.length > 1 ? pechatlar.map(p => `
             <button type="button" class="opt-btn ${varaqliSelected.pechat === p ? 'active' : ''}" onclick="selectVaraqli('pechat', '${p}', '${type}')">${VARAQLI_PECHAT_NOMI[p]}</button>
-        `).join('');
-        let qosh = [];
+        `).join('') : '';
         if (c.ikkiTomon) {
-            qosh.push(`<button type="button" class="opt-btn ${!varaqliSelected.ikkiTomon ? 'active' : ''}" onclick="selectVaraqli('ikkiTomon', false, '${type}')">Bir tomonlama</button>`);
-            qosh.push(`<button type="button" class="opt-btn ${varaqliSelected.ikkiTomon ? 'active' : ''}" onclick="selectVaraqli('ikkiTomon', true, '${type}')">Ikki tomonlama</button>`);
+            pechatHtml += `<button type="button" class="opt-btn ${!varaqliSelected.ikkiTomon ? 'active' : ''}" onclick="selectVaraqli('ikkiTomon', false, '${type}')">Bir tomonlama</button>`
+                + `<button type="button" class="opt-btn ${varaqliSelected.ikkiTomon ? 'active' : ''}" onclick="selectVaraqli('ikkiTomon', true, '${type}')">Ikki tomonlama</button>`;
         }
+        document.getElementById('vmPechatGroup').innerHTML = pechatHtml;
+        let qosh = [];
         if (c.tisneniya) {
             qosh.push(`<button type="button" class="opt-btn ${varaqliSelected.tisneniya ? 'active' : ''}" onclick="selectVaraqli('tisneniya', ${!varaqliSelected.tisneniya}, '${type}')">🔨 Tisneniya</button>`);
         }
@@ -1044,6 +1051,7 @@
         if (!c || !q('vmAdminTurlar')) return;
         let esc = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
         q('vmAdminSarlavha').textContent = type === 'konvert' ? '✉️ Konvert turlari va pechat narxlari' : '💌 Otkritka turlari va pechat narxlari';
+        let ufBor = (c.pechatTurlari || ['sifravoy', 'uf']).includes('uf'); // Otkritka — faqat Sifravoy
 
         q('vmAdminTurlar').innerHTML = (c.turlar || []).map((t, ti) => `
             <div class="vm-admin-tur">
@@ -1060,12 +1068,12 @@
                     <div class="input-unit"><input type="number" id="vmT_bboyi_${ti}" value="${t.bichishBoyi}" min="1"><span>bo'yi</span></div>
                 </div>
                 <table class="admin-table vm-tier-table">
-                    <thead><tr><th>Adad (dan)</th><th>Sifravoy (so'm/dona)</th><th>UF (so'm/dona)</th><th></th></tr></thead>
+                    <thead><tr><th>Adad (dan)</th><th>Sifravoy (so'm/dona)</th>${ufBor ? `<th>UF (so'm/dona)</th>` : ''}<th></th></tr></thead>
                     <tbody>${(t.tierlar || []).map((r, ri) => `
                         <tr>
                             <td><input type="number" id="vmT_${ti}_dan_${ri}" value="${r.dan}" min="1"></td>
                             <td><input type="number" id="vmT_${ti}_sif_${ri}" value="${r.sifravoy}" min="0"></td>
-                            <td><input type="number" id="vmT_${ti}_uf_${ri}" value="${r.uf}" min="0"></td>
+                            ${ufBor ? `<td><input type="number" id="vmT_${ti}_uf_${ri}" value="${r.uf}" min="0"></td>` : ''}
                             <td style="text-align:right;"><button type="button" class="btn btn-outline" style="height:30px; padding:0 8px;" title="Qatorni o'chirish" onclick="deleteVaraqliTier(${ti}, ${ri})">✕</button></td>
                         </tr>`).join('')}
                     </tbody>
@@ -1102,7 +1110,8 @@
             eni: son(`vmT_eni_${ti}`), boyi: son(`vmT_boyi_${ti}`),
             bichishEni: son(`vmT_beni_${ti}`), bichishBoyi: son(`vmT_bboyi_${ti}`),
             tierlar: (t.tierlar || []).map((r, ri) => q(`vmT_${ti}_dan_${ri}`) ? {
-                dan: son(`vmT_${ti}_dan_${ri}`, 1), sifravoy: son(`vmT_${ti}_sif_${ri}`), uf: son(`vmT_${ti}_uf_${ri}`)
+                dan: son(`vmT_${ti}_dan_${ri}`, 1), sifravoy: son(`vmT_${ti}_sif_${ri}`),
+                uf: q(`vmT_${ti}_uf_${ri}`) ? son(`vmT_${ti}_uf_${ri}`) : (r.uf || 0)
             } : r)
         } : t);
         c.pichoqNarxi = son('vmAdminPichoq');

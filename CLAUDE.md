@@ -74,7 +74,8 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 - **Konvert va Otkritka** (`varaqliConfig`, `calculateVaraqli`) — bitta dvigatel: tur (tayyor o'lcham + bichim +
   tiraj bo'yicha Sifravoy/UF dona narxi) yoki o'z o'lchami (bichim formula bilan; Konvertda bir martalik pichoq).
   Qog'oz — `qogozRoyxati('konvert'|'otkritka')` (Qog'oz bo'limi), bichim varaqqa joylashtiriladi. Konvert:
-  Tisneniya (umumiy, A3). Otkritka: ikki tomon, pardoz (Oddiy / 3D lak / 3D folga).
+  Tisneniya (umumiy, A3). Otkritka: FAQAT Sifravoy (`pechatTurlari: ['sifravoy']`, tanlov ko'rsatilmaydi), "Pechat" qadamida bir/ikki
+  tomonlama, pardoz (Oddiy / 3D lak / 3D folga).
 - **Qog'oz bo'limi** (`bolimlar/qogoz/`, admin kaliti `qogoz_bolimi`): Ofset qog'oz narxi — `saveOfsetQogozNarxlari()`,
   mashina (forma/bosma) — `saveOfsetMashinaSozlamalari()` alohida (bir-birining maydonlarini saqlab yubormasin).
 - **Kubarik** (`kubarikConfig`): Bloknot kabi — qog'oz Ofset A3 bazasidan, turlar (Oq/Rangli/Kleyli/Pechatli) admin tahrirlaydi.
