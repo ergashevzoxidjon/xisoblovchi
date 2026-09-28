@@ -283,11 +283,131 @@
         return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
     }
 
+    // Yuklangan rasm localStorage'da base64 matn sifatida saqlanadi. Brauzer xotirasi ~5 MB,
+    // telefon kamerasidagi bitta rasm esa 3–5 MB bo'lishi mumkin — shuning uchun rasm saqlashdan
+    // oldin kichraytiriladi va siqiladi (kartochkalarda rasm 150px atrofida ko'rinadi).
+    const RASM_MAX_OLCHAM = 600;  // eng uzun tomon, px
+    const RASM_SIFAT = 0.8;
+    const RASM_SIQISH_CHEGARASI = 60000; // shundan uzun data-URL rasmlar siqiladi (~45 KB)
+
     function convertBase64(file) {
         return new Promise((resolve, reject) => {
             const fileReader = new FileReader();
             fileReader.readAsDataURL(file);
-            fileReader.onload = () => resolve(fileReader.result);
+            fileReader.onload = () => {
+                let natija = fileReader.result;
+                if (file && /^image\/(png|jpe?g|webp|bmp)$/i.test(file.type)) {
+                    rasmniSiqish(natija).then(resolve, () => resolve(natija));
+                } else {
+                    resolve(natija);
+                }
+            };
             fileReader.onerror = (error) => reject(error);
         });
     }
+
+    // data-URL rasmni RASM_MAX_OLCHAM gacha kichraytirib WebP (yoki JPEG) ga siqadi.
+    // Natija asl rasmdan katta chiqsa yoki rasm ochilmasa — asl rasm qaytariladi.
+    function rasmniSiqish(dataUrl) {
+        return new Promise(resolve => {
+            if (typeof dataUrl !== 'string' || !/^data:image\/(png|jpe?g|webp|bmp)/i.test(dataUrl)) {
+                resolve(dataUrl);
+                return;
+            }
+            let img = new Image();
+            img.onload = () => {
+                try {
+                    let k = Math.min(1, RASM_MAX_OLCHAM / Math.max(img.naturalWidth, img.naturalHeight));
+                    let w = Math.max(1, Math.round(img.naturalWidth * k));
+                    let h = Math.max(1, Math.round(img.naturalHeight * k));
+                    let canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    let yangi = canvas.toDataURL('image/webp', RASM_SIFAT);
+                    if (!yangi.startsWith('data:image/webp')) {
+                        // WebP qo'llab-quvvatlanmaydi — JPEG (shaffof joylar oq bo'ladi)
+                        ctx.globalCompositeOperation = 'destination-over';
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, w, h);
+                        yangi = canvas.toDataURL('image/jpeg', RASM_SIFAT);
+                    }
+                    resolve(yangi.length < dataUrl.length ? yangi : dataUrl);
+                } catch (e) {
+                    resolve(dataUrl);
+                }
+            };
+            img.onerror = () => resolve(dataUrl);
+            img.src = dataUrl;
+        });
+    }
+
+    // Bir martalik tozalash: avval siqilmasdan saqlangan katta rasmlarni localStorage'dagi
+    // barcha JSON yozuvlar ichidan topib siqadi (xotira to'lib "exceeded the quota" xatosi
+    // chiqmasligi uchun). Siqadigan narsa bo'lmasa null qaytaradi — init() kutmasdan ishlaydi.
+    function saqlanganRasmlarniSiqish() {
+        let kalitlar = [];
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                let kalit = localStorage.key(i);
+                let qiymat = localStorage.getItem(kalit);
+                if (qiymat && qiymat.length > RASM_SIQISH_CHEGARASI && qiymat.includes('data:image/')) kalitlar.push(kalit);
+            }
+        } catch (e) { return null; }
+        if (kalitlar.length === 0) return null;
+
+        function aylan(obyekt, vazifalar) {
+            if (Array.isArray(obyekt) || (obyekt && typeof obyekt === 'object')) {
+                Object.keys(obyekt).forEach(k => {
+                    let v = obyekt[k];
+                    if (typeof v === 'string') {
+                        if (v.length > RASM_SIQISH_CHEGARASI && /^data:image\/(png|jpe?g|webp|bmp)/i.test(v)) {
+                            vazifalar.push(rasmniSiqish(v).then(yangi => {
+                                if (yangi !== v) { obyekt[k] = yangi; return true; }
+                                return false;
+                            }));
+                        }
+                    } else {
+                        aylan(v, vazifalar);
+                    }
+                });
+            }
+        }
+
+        return Promise.all(kalitlar.map(kalit => {
+            let data;
+            try { data = JSON.parse(localStorage.getItem(kalit)); } catch (e) { return false; }
+            let vazifalar = [];
+            aylan(data, vazifalar);
+            return Promise.all(vazifalar).then(natijalar => {
+                if (!natijalar.some(Boolean)) return false;
+                try { localStorage.setItem(kalit, JSON.stringify(data)); return true; } catch (e) { return false; }
+            });
+        })).then(natijalar => {
+            let soni = natijalar.filter(Boolean).length;
+            if (soni > 0) console.info(`[Xotira] ${soni} ta yozuvdagi katta rasmlar siqildi.`);
+            return soni;
+        });
+    }
+
+    // Xotira (localStorage) to'lsa setItem xato otadi va bu xato bo'lim init()'ini yoki saqlash
+    // tugmasini butunlay sindiradi. Endi xato ushlanadi: bo'lim ishlashda davom etadi,
+    // foydalanuvchiga esa nima bo'lgani ko'rsatiladi (shu o'zgarish saqlanmagan bo'ladi).
+    (function () {
+        try {
+            let asl = Storage.prototype.setItem;
+            Storage.prototype.setItem = function (kalit, qiymat) {
+                try {
+                    return asl.call(this, kalit, qiymat);
+                } catch (e) {
+                    let toldi = e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014);
+                    if (!toldi) throw e;
+                    console.error(`[Xotira] "${kalit}" saqlanmadi — brauzer xotirasi to'lgan.`, e);
+                    if (typeof showToast === 'function') {
+                        try { showToast("⚠️ Brauzer xotirasi to'lgan — o'zgarish saqlanmadi! Keraksiz rasmlar yoki modellarni o'chiring."); } catch (e2) {}
+                    }
+                    return undefined;
+                }
+            };
+        } catch (e) {}
+    })();
