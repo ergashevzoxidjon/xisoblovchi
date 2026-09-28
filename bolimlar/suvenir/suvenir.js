@@ -151,8 +151,9 @@
                     { field: 'xalqacha', label: "Xalqacha (dona narxi)" },
                     { field: 'reyka', label: "Reyka (metr narxi)" },
                     { field: 'ploter', label: "Ploter qilish (kv.m narxi)" },
+                    { field: 'mantajka', label: "Mantajka yopishtirish (kv.m narxi)", faqat: 'orakal' },
                     { field: 'ustanovka', label: "Ustanovka (bir martalik xizmat narxi)" }
-                ];
+                ].filter(r => !r.faqat || r.faqat === currentManagingProduct);
                 rows += extraRows.map(r => `
                     <tr>
                         <td>-</td>

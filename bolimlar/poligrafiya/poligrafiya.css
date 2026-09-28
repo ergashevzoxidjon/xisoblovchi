@@ -111,3 +111,69 @@
 .poli-gsm-type-select[data-ptype="Ofset"] { border-left: 4px solid #64748b; }
 .poli-gsm-type-select[data-ptype="Dizayn qog'ozi"] { border-left: 4px solid #7c3aed; }
 .poli-gsm-empty { text-align: center; color: var(--text-muted); padding: 28px 16px; font-size: 0.85rem; background: #faf9f4; border-radius: var(--radius); border: 1.5px dashed var(--border); }
+
+/* --- Diplom: tanlangan ramka va ramka katalogi (modal) --- */
+.dp-ramka-tanlangan {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 10px 12px; margin: -4px 0 14px;
+    border: 1.5px solid var(--primary); border-radius: 10px; background: rgba(0, 144, 212, 0.05);
+}
+.dp-ramka-tanlangan img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+.dp-ramka-tanlangan-matn { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; }
+.dp-ramka-tanlangan-matn span { font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono); }
+.dp-ramka-tanlangan .btn { height: 34px; padding: 0 12px; }
+
+.dp-ramka-overlay {
+    position: fixed; inset: 0; background: rgba(18,20,28,0.5);
+    opacity: 0; visibility: hidden; transition: opacity 0.15s ease;
+    z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.dp-ramka-overlay.open { opacity: 1; visibility: visible; }
+.dp-ramka-modal {
+    background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow);
+    width: 760px; max-width: 100%; max-height: 85vh; display: flex; flex-direction: column;
+}
+.dp-ramka-modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 18px; border-bottom: 2px solid var(--ink); flex-shrink: 0;
+}
+.dp-ramka-modal-header h3 { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink); }
+.dp-ramka-modal-body { padding: 18px; overflow-y: auto; }
+.dp-ramka-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.dp-ramka-card {
+    display: flex; flex-direction: column; align-items: stretch; gap: 6px; text-align: center;
+    padding: 10px; background: #fff; border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer;
+    font: inherit; color: inherit;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.dp-ramka-card:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); }
+.dp-ramka-card.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 144, 212, 0.14); }
+.dp-ramka-card:disabled { opacity: 0.45; cursor: not-allowed; }
+.dp-ramka-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: #f1f5f9; }
+.dp-ramka-nomi { font-weight: 700; font-size: 0.88rem; }
+.dp-ramka-narx { font-family: var(--font-mono); font-weight: 700; font-size: 0.82rem; color: var(--primary); }
+.dp-ramka-card:disabled .dp-ramka-narx { color: var(--text-muted); }
+
+/* --- Diplom admin: ramka modellari --- */
+.dp-admin-ramkalar { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 12px; }
+.dp-admin-ramka { display: flex; gap: 12px; padding: 12px; background: #fff; border: 1.5px solid var(--border); border-radius: 12px; }
+.dp-admin-ramka-rasm { position: relative; width: 96px; height: 96px; flex-shrink: 0; cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.dp-admin-ramka-rasm img { width: 100%; height: 100%; object-fit: cover; }
+.dp-admin-ramka-rasm input { display: none; }
+.dp-admin-ramka-rasm span {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 0; text-align: center;
+    font-size: 0.7rem; font-weight: 700; color: #fff; background: rgba(18,20,28,0.6);
+}
+.dp-admin-ramka-maydon { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.dp-admin-ramka-maydon input[type="text"] { height: 36px; }
+.dp-admin-ramka-narxlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.dp-admin-ramka-narxlar .input-unit input { min-width: 0; width: 100%; }
+.dp-admin-ramka-narxlar .form-group { margin-bottom: 0; }
+.dp-admin-ramka-narxlar label { font-size: 0.72rem; }
+@media (max-width: 560px) {
+    .dp-admin-ramkalar { grid-template-columns: 1fr; }
+    .dp-admin-ramka { flex-direction: column; }
+}
+
+/* --- Katalog admin: abloshka / ichki blok qog'ozlari yonma-yon --- */
+.kt-admin-qogozlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }

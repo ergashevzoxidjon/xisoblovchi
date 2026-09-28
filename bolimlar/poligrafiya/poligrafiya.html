@@ -18,6 +18,8 @@
             <div class="product-card" onclick="openCalc('kubarik', 'Kubarik')"><div class="icon">🧊</div><h3>Kubarik</h3></div>
             <div class="product-card" onclick="openCalc('konvert', 'Konvert')"><div class="icon">✉️</div><h3>Konvert</h3></div>
             <div class="product-card" onclick="openCalc('otkritka', 'Otkritka')"><div class="icon">💌</div><h3>Otkritka</h3></div>
+            <div class="product-card" onclick="openCalc('diplom', 'Diplom')"><div class="icon">🎓</div><h3>Diplom</h3></div>
+            <div class="product-card" onclick="openCalc('katalog', 'Katalog')"><div class="icon">📚</div><h3>Katalog</h3></div>
         </div>
 <!-- @/blok -->
 
@@ -185,6 +187,151 @@
                     </div>
                     <div class="admin-card-actions">
                         <button class="btn btn-success" onclick="saveOtkritkaConfig()">💾 Otkritka sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KATALOG ADMIN PANEL BLOKI -->
+            <div id="katalogAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📐 Katalog standart o'lchamlari</div>
+                    <p class="admin-hint">Tayyor (yopiq) holatdagi o'lcham. Menejer shulardan birini bosadi yoki o'zi kiritadi.</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:420px;">
+                            <thead><tr><th style="min-width:140px;">Nomi</th><th>Eni (mm)</th><th>Bo'yi (mm)</th><th></th></tr></thead>
+                            <tbody id="ktAdminOlchamBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn" style="background:#4f46e5;" onclick="addKatalogOlcham()">+ O'lcham qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📄 Qog'ozlar</div>
+                    <p class="admin-hint">Menejer abloshka va ichki blok uchun qog'ozni shu ro'yxatlardan tanlaydi. Narx Ofsetda — <b>Ofset qog'oz bazasidan</b>,
+                        Sifravoyda — <b>Sifravoy qog'oz bazasidan</b> (shu tur va grammdagi qog'oz, masalan "Melovka 300g") olinadi.</p>
+                    <div class="kt-admin-qogozlar">
+                        <div>
+                            <div class="step-title" style="margin-top:0;">Abloshka</div>
+                            <div class="table-card" style="margin-bottom:10px;">
+                                <div class="table-scroll">
+                                <table class="admin-table" style="min-width:300px;">
+                                    <thead><tr><th style="min-width:160px;">Qog'oz turi</th><th>Gramm (gr)</th><th></th></tr></thead>
+                                    <tbody id="ktAdminAbloshkaBody"></tbody>
+                                </table>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="height:34px;" onclick="addKatalogAbloshka()">+ Qog'oz</button>
+                        </div>
+                        <div>
+                            <div class="step-title" style="margin-top:0;">Ichki blok</div>
+                            <div class="table-card" style="margin-bottom:10px;">
+                                <div class="table-scroll">
+                                <table class="admin-table" style="min-width:300px;">
+                                    <thead><tr><th style="min-width:160px;">Qog'oz turi</th><th>Gramm (gr)</th><th></th></tr></thead>
+                                    <tbody id="ktAdminIchkiBody"></tbody>
+                                </table>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="height:34px;" onclick="addKatalogIchki()">+ Qog'oz</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📎 Mahkamlash usullari</div>
+                    <p class="admin-hint">Narx — bitta katalogga (so'm/dona). Sahifa soni abloshka bilan birga; "karrali" — sahifa soni shu songa
+                        bo'linishi shart (Stepler — 4).</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:620px;">
+                            <thead><tr><th style="min-width:120px;">Usul</th><th>Narx (so'm/dona)</th><th>Eng kam sahifa</th><th>Eng ko'p sahifa</th><th>Karrali</th></tr></thead>
+                            <tbody id="ktAdminMahkamlashBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🧴 Abloshka pardozlash</div>
+                    <p class="admin-hint">Laminatsiya — <b>majburiy</b>, menejer Glyans yoki Matoviyni tanlaydi (so'm / A3 varaq; abloshka A3 varaq ekvivalentiga
+                        aylantiriladi). 3D lak — ixtiyoriy, dona narxi + bir martalik klishe. Tisneniya narxi — umumiy <b>Pardozlash xizmatlari</b>dan.</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group"><label>Glyans laminatsiya</label><div class="input-unit"><input type="number" id="ktAdminLamGlyans" min="0"><span>so'm/A3</span></div></div>
+                        <div class="form-group"><label>Matoviy laminatsiya</label><div class="input-unit"><input type="number" id="ktAdminLamMatoviy" min="0"><span>so'm/A3</span></div></div>
+                        <div class="form-group"><label>3D lak</label><div class="input-unit"><input type="number" id="ktAdminLakNarx" min="0"><span>so'm/dona</span></div></div>
+                        <div class="form-group"><label>3D lak klishesi</label><div class="input-unit"><input type="number" id="ktAdminLakKlishe" min="0"><span>so'm</span></div></div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">⚙️ Pechat va zapas</div>
+                    <p class="admin-hint">Adad ofset minimal tirajidan kam bo'lsa — Sifravoy pechat, aks holda menejer Ofset yoki Sifravoyni tanlaydi.</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group"><label>Ofset minimal tiraji</label><div class="input-unit"><input type="number" id="ktAdminOfsetMin" min="0"><span>dona</span></div></div>
+                        <div class="form-group"><label>Ofset zapas</label><div class="input-unit"><input type="number" id="ktAdminOfsetZapas" min="0"><span>varaq/forma</span></div></div>
+                        <div class="form-group"><label>Sifravoy zapas</label><div class="input-unit"><input type="number" id="ktAdminSifravoyZapas" min="0"><span>varaq</span></div></div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveKatalogConfig()">💾 Katalog sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIPLOM ADMIN PANEL BLOKI -->
+            <div id="diplomAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📐 Diplom o'lchamlari</div>
+                    <p class="admin-hint">Menejer shu o'lchamlardan birini bosadi yoki o'zi kiritadi. Ramka narxlari ham shu o'lchamlar bo'yicha
+                        kiritiladi; nostandart o'lchamda diplom sig'adigan eng kichik o'lcham narxi olinadi.</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:420px;">
+                            <thead><tr><th style="min-width:140px;">Nomi</th><th>Eni (mm)</th><th>Bo'yi (mm)</th><th></th></tr></thead>
+                            <tbody id="dpAdminOlchamBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn" style="background:#4f46e5;" onclick="addDiplomOlcham()">+ O'lcham qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">📄 Diplom qog'ozlari</div>
+                    <p class="admin-hint">Narx — <b>bitta varaq uchun, qog'oz + Sifravoy pechat</b> (1 va 2 tomonlama). Diplom varaqning
+                        pechat maydoniga joylashtiriladi.</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:860px;">
+                            <thead><tr><th style="min-width:160px;">Qog'oz nomi</th><th>Varaq eni</th><th>Varaq bo'yi</th><th>Pechat maydoni eni</th><th>Pechat maydoni bo'yi</th><th>1 tomon (so'm/varaq)</th><th>2 tomon (so'm/varaq)</th><th></th></tr></thead>
+                            <tbody id="dpAdminQogozBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn" style="background:#4f46e5;" onclick="addDiplomQogoz()">+ Qog'oz qo'shish</button>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🖼️ Ramka katalogi</div>
+                    <p class="admin-hint">Menejer "Ramka" ni bosganda shu modellar katalogi ochiladi. Har bir model uchun har o'lchamdagi
+                        <b>dona narxi</b> (0 — shu o'lchamda mavjud emas). Tanlangan ramka narxi har bir diplomga qo'shiladi.</p>
+                    <div id="dpAdminRamkalar" class="dp-admin-ramkalar"></div>
+                    <div class="admin-card-actions" style="margin-top:12px;">
+                        <button type="button" class="btn" style="background:#4f46e5;" onclick="addDiplomRamka()">+ Ramka modeli</button>
+                    </div>
+                </div>
+
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">⚙️ Umumiy</div>
+                    <p class="admin-hint">Laminatsiya narxi — umumiy <b>Pardozlash xizmatlari</b>dan (SRA3 varaq — A3 narxi, har varaqqa).</p>
+                    <div class="admin-form-grid">
+                        <div class="form-group">
+                            <label>Zapas</label>
+                            <div class="input-unit"><input type="number" id="dpAdminZapas" min="0"><span>varaq</span></div>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveDiplomConfig()">💾 Diplom sozlamalarini saqlash</button>
                     </div>
                 </div>
             </div>
@@ -539,4 +686,18 @@
                 </div>
             </div>
 
+<!-- @/blok -->
+
+<!-- Qalqib chiquvchi oynalar -->
+<!-- @blok modal -->
+<!-- DIPLOM — RAMKA MODELLARI KATALOGI (MODAL) -->
+<div id="diplomRamkaOverlay" class="dp-ramka-overlay" onclick="closeDiplomRamkaKatalog()">
+    <div class="dp-ramka-modal" onclick="event.stopPropagation()">
+        <div class="dp-ramka-modal-header">
+            <h3 id="diplomRamkaSarlavha">🖼️ Ramka modellari</h3>
+            <button class="quote-cart-close" onclick="closeDiplomRamkaKatalog()">✕</button>
+        </div>
+        <div id="diplomRamkaBody" class="dp-ramka-modal-body"></div>
+    </div>
+</div>
 <!-- @/blok -->

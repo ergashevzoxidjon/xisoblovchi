@@ -355,12 +355,13 @@
 
     const reklamaExtraOptionsConfig = {
         baner:         { xalqacha: true,  reyka: true,  ustanovka: true, ploter: false },
-        orakal:        { xalqacha: false, reyka: false, ustanovka: true, ploter: true  },
+        orakal:        { xalqacha: false, reyka: false, ustanovka: true, ploter: true, mantajka: true },
         setka_orakal:  { xalqacha: false, reyka: false, ustanovka: true, ploter: false },
         tumanka:       { xalqacha: false, reyka: false, ustanovka: true, ploter: true  },
         xolst:         { xalqacha: false, reyka: true,  ustanovka: false, ploter: false }
     };
-    let reklamaExtraPrices = { xalqacha: 1000, reyka: 5000, ustanovka: 50000, ploter: 3000 };
+    // mantajka — Orakalni montaj plyonkasiga (mantajka) yopishtirish, so'm / kv.m
+    let reklamaExtraPrices = { xalqacha: 1000, reyka: 5000, ustanovka: 50000, ploter: 3000, mantajka: 5000 };
 
     // ====================== MAKSIMAL CHOP ENI (stanok cheklovi) ======================
     // Stanok bir bo'lakda (ulanishsiz) shu kenglikkacha chop etadi. Mahsulotning IKKALA tomoni ham
@@ -434,7 +435,8 @@
     }
 
     function editReklamaExtraPrice(field) {
-        let labels = { xalqacha: "Xalqacha narxi (so'm/dona)", reyka: "Reyka narxi (so'm/metr)", ustanovka: "Ustanovka narxi (so'm, bir martalik)" };
+        let labels = { xalqacha: "Xalqacha narxi (so'm/dona)", reyka: "Reyka narxi (so'm/metr)", ploter: "Ploter narxi (so'm/kv.m)",
+            mantajka: "Mantajka yopishtirish narxi (so'm/kv.m)", ustanovka: "Ustanovka narxi (so'm, bir martalik)" };
         let oldPrice = reklamaExtraPrices[field] || 0;
         let newPrice = prompt(`Yangi ${labels[field]} kiriting:`, oldPrice);
         if (newPrice !== null && !isNaN(parseFloat(newPrice))) {
@@ -479,6 +481,14 @@ function generateFormHtml_reklama(type) {
                         </label>
                     </div>` : '';
 
+            let mantajkaCardHtml = opt.mantajka ? `
+                    <div class="reklama-extra-card" style="margin-bottom:10px;">
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:600; font-size:0.88rem; color:var(--text-main);">
+                            <input type="checkbox" id="chkMantajka" onchange="calculate()" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0; margin:0;">
+                            🧻 Mantajka yopishtirish
+                        </label>
+                    </div>` : '';
+
             let ustanovkaCardHtml = opt.ustanovka ? `
                     <div class="reklama-extra-card">
                         <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:600; font-size:0.88rem; color:var(--text-main);">
@@ -494,12 +504,13 @@ function generateFormHtml_reklama(type) {
                         </div>
                     </div>` : '';
 
-            let extrasSectionHtml = (opt.xalqacha || opt.reyka || opt.ustanovka || opt.ploter) ? `
+            let extrasSectionHtml = (opt.xalqacha || opt.reyka || opt.ustanovka || opt.ploter || opt.mantajka) ? `
                 <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
                     <div class="step-title" style="margin-bottom:10px;">Qo'shimcha xizmatlar:</div>
                     ${xalqachaCardHtml}
                     ${reykaCardHtml}
                     ${ploterCardHtml}
+                    ${mantajkaCardHtml}
                     ${ustanovkaCardHtml}
                 </div>` : '';
 
@@ -557,6 +568,13 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
                 if (chkPloter && chkPloter.checked) {
                     baseUnitPrice += sqMetr * (reklamaExtraPrices.ploter || 0);
                     extraParts.push(`Ploter qilingan`);
+                }
+
+                // Mantajka yopishtirish — kv.m bo'yicha (admin 1 kv.m narxini kiritadi)
+                let chkMantajka = document.getElementById('chkMantajka');
+                if (chkMantajka && chkMantajka.checked) {
+                    baseUnitPrice += sqMetr * (reklamaExtraPrices.mantajka || 0);
+                    extraParts.push(`Mantajka yopishtirilgan`);
                 }
 
                 let chkUstanovka = document.getElementById('chkUstanovka');

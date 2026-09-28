@@ -18,7 +18,7 @@ umumiy/
   admin-ux.js               ← admin panel: yuqori panel, tez o'tish, saqlanmagan o'zgarishlar, Ctrl+S
   ishga-tushirish.js        ← oxirgi yuklanadi: init() ni chaqiradi
 bolimlar/<nomi>/<nomi>.html|.css|.js
-  poligrafiya  (Flayer, Listovka, Doorhanger, Buklet, Bloknot, Paket, Kalendar, Papka, Kubarik, Konvert, Otkritka)
+  poligrafiya  (Flayer, Listovka, Doorhanger, Buklet, Bloknot, Paket, Kalendar, Papka, Kubarik, Konvert, Otkritka, Diplom, Katalog)
   textile      (Futbolka ... Shoper, Bayroqlar)
   suvenir      (Ruchka, Termos, ... Zontik, Koja papkalar, Guvohnomalar)
   reklama      (Baner, Orakal, ..., Roll Up, Pauk, PopUp, PromoStoyka, Tablichka, Nastolniy tablichka, Stend)

@@ -1,5 +1,5 @@
     let defaultPrices = {
-        flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000, konvert: 1500, otkritka: 2000,
+        flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000, konvert: 1500, otkritka: 2000, diplom: 3000, katalog: 15000,
         futbolka: 45000, kepka: 25000, svitshot: 75000, xudi: 95000, jiletka: 85000, shoper: 20000,
         ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000, koja_papka: 60000, guvohnoma: 25000,
         baner: 35000, orakal: 45000, setka_orakal: 50000, tumanka: 40000, xolst: 85000,
@@ -21,7 +21,9 @@
             { key: 'papka', name: 'Papka', icon: '📁' },
             { key: 'kubarik', name: 'Kubarik', icon: '🧊' },
             { key: 'konvert', name: 'Konvert', icon: '✉️' },
-            { key: 'otkritka', name: 'Otkritka', icon: '💌' }
+            { key: 'otkritka', name: 'Otkritka', icon: '💌' },
+            { key: 'diplom', name: 'Diplom', icon: '🎓' },
+            { key: 'katalog', name: 'Katalog', icon: '📚' }
         ],
         textile: [
             { key: 'futbolka', name: 'Futbolka', icon: '👕' },
@@ -985,7 +987,9 @@
         let isPaket = (key === 'paket');
         let isVaraqli = (key === 'konvert');
         let isOtkritka = (key === 'otkritka');
-        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli && !isOtkritka;
+        let isDiplom = (key === 'diplom');
+        let isKatalog = (key === 'katalog');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli && !isOtkritka && !isDiplom && !isKatalog;
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
         let isReklamaStend = reklamaStendTypes.includes(key);
@@ -1001,6 +1005,8 @@
         document.getElementById('paketAdminBox').style.display = isPaket ? 'block' : 'none';
         document.getElementById('varaqliAdminBox').style.display = isVaraqli ? 'block' : 'none';
         document.getElementById('otkritkaAdminBox').style.display = isOtkritka ? 'block' : 'none';
+        document.getElementById('diplomAdminBox').style.display = isDiplom ? 'block' : 'none';
+        document.getElementById('katalogAdminBox').style.display = isKatalog ? 'block' : 'none';
         // Baner/Orakal/... — maksimal chop eni (reklama.js)
         if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
@@ -1018,7 +1024,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isTextile || isReklamaStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isDiplom || isKatalog || isTextile || isReklamaStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1075,6 +1081,14 @@
         }
         if (isOtkritka) {
             renderAdminOtkritka();
+            return;
+        }
+        if (isDiplom) {
+            renderAdminDiplom();
+            return;
+        }
+        if (isKatalog) {
+            renderAdminKatalog();
             return;
         }
         if (isPoligrafiya) {
@@ -1320,6 +1334,12 @@ function generateForm(type) {
     else if (type === 'otkritka') {
         html = buildOtkritkaForm();
     }
+    else if (type === 'diplom') {
+        html = buildDiplomForm();
+    }
+    else if (type === 'katalog') {
+        html = buildKatalogForm();
+    }
     else if (type === 'doorhanger') {
         html = buildDoorhangerForm();
     }
@@ -1371,6 +1391,16 @@ function generateForm(type) {
 
     if (type === 'otkritka') {
         renderOtkritkaOptions();
+        return;
+    }
+
+    if (type === 'diplom') {
+        renderDiplomOptions();
+        return;
+    }
+
+    if (type === 'katalog') {
+        renderKatalogOptions();
         return;
     }
 
@@ -1474,6 +1504,20 @@ function calculateIchki() {
         }
         else if (activeProductType === 'otkritka') {
             let res = calculateOtkritka(qty);
+            baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
+        else if (activeProductType === 'katalog') {
+            let res = calculateKatalog(qty);
+            baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
+        else if (activeProductType === 'diplom') {
+            let res = calculateDiplom(qty);
             baseUnitPrice = res.unitPrice;
             details = res.details;
             costItems = res.costItems || [];
