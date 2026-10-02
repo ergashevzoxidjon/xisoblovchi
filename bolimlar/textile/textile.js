@@ -721,7 +721,7 @@
 // Kepka va Shoper — faqat OLD tomonga pechat tushadi (kepkaning old qismi, shoperning old yuzasi);
 // orqa tomon bu mahsulotlarda amalda ishlatilmaydi, shuning uchun ularga orqa tomon o'lcham
 // maydoni umuman ko'rsatilmaydi.
-const textileSingleSidedTypes = ['kepka', 'shoper'];
+const textileSingleSidedTypes = ['kepka', 'shoper', 'sumka'];
 
 function generateFormHtml_textile(type) {
     let html = '';

@@ -11,12 +11,15 @@
         konvert: "110x220mm",
         otkritka: "100x150mm",
         diplom: "210x297mm",
-        katalog: "210x297mm"
+        katalog: "210x297mm",
+        vizitka: "90x50mm",
+        stiker: "50x50mm"
     };
 
     let poligrafiyaSideTypes = {
         flayer: 1.6, listovka: 1.6, doorhanger: 1.6, buklet: 1.6, bloknot: 1.6,
-        paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6, konvert: 1.6, otkritka: 1.6, diplom: 1.6, katalog: 1.6
+        paket: 1.6, kalendar: 1.6, papka: 1.6, kubarik: 1.6, konvert: 1.6, otkritka: 1.6, diplom: 1.6, katalog: 1.6,
+        vizitka: 1.6, stiker: 1.6
     };
 
     // Bloknot narxi endi (deyarli) to'liq real ishlab chiqarish xarajatlaridan hisoblanadi:
@@ -114,6 +117,14 @@
             { gsm: 200, paperType: 'Melovka', isDefault: false },
             { gsm: 300, paperType: 'Melovka', isDefault: false }
         ],
+        vizitka: [
+            { gsm: 300, paperType: 'Karton', isDefault: true },
+            { gsm: 350, paperType: 'Karton', isDefault: false }
+        ],
+        stiker: [
+            { gsm: 80, paperType: 'Ofset', isDefault: true },
+            { gsm: 115, paperType: 'Melovka', isDefault: false }
+        ],
         doorhanger: [
             { gsm: 250, paperType: 'Karton', isDefault: false },
             { gsm: 300, paperType: 'Karton', isDefault: true },
@@ -139,11 +150,13 @@
     //   yoyilganOlcham — bichish (yoyilgan) o'lchami, masalan Konvert 110x220 → 230x330mm.
     //                    Bo'sh bo'lsa, tayyor o'lcham (poligrafiyaSizeLabels) bo'yicha hisoblanadi.
     //   ishlovNomi/ishlovNarxi — qo'shimcha ishlov (vyrubka+skleyka, bigovka), so'm/dona, marjasiz.
-    const POLI_DVIGATEL_TURLARI = ['flayer', 'listovka', 'buklet'];
+    const POLI_DVIGATEL_TURLARI = ['flayer', 'listovka', 'buklet', 'vizitka', 'stiker'];
     let poligrafiyaMahsulotSozlama = {
         flayer:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 },
         listovka: { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 },
-        buklet:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: 'Bigovka (buklash)', ishlovNarxi: 0 }
+        buklet:   { ofsetMinTiraj: 1000, yoyilganOlcham: '', ishlovNomi: 'Bigovka (buklash)', ishlovNarxi: 0 },
+        vizitka:  { ofsetMinTiraj: 5000, yoyilganOlcham: '', ishlovNomi: '', ishlovNarxi: 0 },
+        stiker:   { ofsetMinTiraj: 5000, yoyilganOlcham: '', ishlovNomi: 'Kesish (vyrubka)', ishlovNarxi: 0 }
     };
 
     function poliSozlama(type) {

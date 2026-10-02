@@ -1,7 +1,7 @@
     let defaultPrices = {
-        flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000, konvert: 1500, otkritka: 2000, diplom: 3000, katalog: 15000,
-        futbolka: 45000, kepka: 25000, svitshot: 75000, xudi: 95000, jiletka: 85000, shoper: 20000,
-        ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000, koja_papka: 60000, guvohnoma: 25000,
+        flayer: 300, listovka: 250, doorhanger: 450, buklet: 800, bloknot: 6000, paket: 4000, kalendar: 12000, papka: 7000, kubarik: 15000, konvert: 1500, otkritka: 2000, diplom: 3000, katalog: 15000, vizitka: 500, stiker: 1000,
+        futbolka: 45000, kepka: 25000, svitshot: 75000, xudi: 95000, jiletka: 85000, shoper: 20000, sumka: 25000, polo: 55000, longsliv: 85000, lenta: 8000,
+        ruchka: 3000, yejidnevnik: 35000, termos: 60000, brelok: 8000, bakal: 25000, suv_idishlar: 30000, naborlar: 150000, beyjik: 12000, plagetkalar: 70000, powerbanklar: 90000, koja_papka: 60000, guvohnoma: 25000, znachok: 5000,
         baner: 35000, orakal: 45000, setka_orakal: 50000, tumanka: 40000, xolst: 85000,
         // Roll Up/Pauk/PopUp/PromoStoyka narxi o'lcham variantidan (reklamaStendSizeDatabase) to'g'ridan-to'g'ri
         // olinadi — bu yerdagi qiymatlar faqat ehtiyot uchun (variant topilmasa ishlatiladi).
@@ -23,7 +23,9 @@
             { key: 'konvert', name: 'Konvert', icon: '✉️' },
             { key: 'otkritka', name: 'Otkritka', icon: '💌' },
             { key: 'diplom', name: 'Diplom', icon: '🎓' },
-            { key: 'katalog', name: 'Katalog', icon: '📚' }
+            { key: 'katalog', name: 'Katalog', icon: '📚' },
+            { key: 'vizitka', name: 'Vizitka', icon: '💼' },
+            { key: 'stiker', name: 'Stiker', icon: '🏷️' }
         ],
         textile: [
             { key: 'futbolka', name: 'Futbolka', icon: '👕' },
@@ -32,6 +34,10 @@
             { key: 'xudi', name: 'Xudi', icon: '🧥' },
             { key: 'jiletka', name: 'Jiletka', icon: '🥼' },
             { key: 'shoper', name: 'Shoper', icon: '👜' },
+            { key: 'sumka', name: 'Sumkalar', icon: '🎒' },
+            { key: 'polo', name: 'Polo', icon: '👕' },
+            { key: 'longsliv', name: 'Longsliv', icon: '🧥' },
+            { key: 'lenta', name: 'Lenta', icon: '🎗️' },
             // Bayroqlar: Tekstil bo'limida ko'rsatiladi, lekin material/rang-tiraj dvigatelidan
             // TUBDAN farqli o'z alohida hisoblash mexanizmiga ega (qarang: textile.js "BAYROQLAR"
             // bo'limi) — shuning uchun quyida har joyda `key !== 'bayroqlar'` bilan ajratib olinadi.
@@ -54,7 +60,8 @@
             { key: 'soat', name: 'Soat', icon: '⌚' },
             { key: 'zontik', name: 'Zontik', icon: '☂️' },
             { key: 'koja_papka', name: 'Koja papkalar', icon: '💼' },
-            { key: 'guvohnoma', name: 'Guvohnomalar', icon: '📇' }
+            { key: 'guvohnoma', name: 'Guvohnomalar', icon: '📇' },
+            { key: 'znachok', name: 'Znachok', icon: '📍' }
         ],
         reklama: [
             { key: 'baner', name: 'Baner', icon: '🖼️' },
@@ -89,7 +96,7 @@
     // arxitektura — batafsili reklama.js da). Material (Glyans/Matoviy) tanlovi narxga ta'sir qilmaydi.
     const reklamaStendTypes = ['rollup', 'pauk', 'popup', 'promostoyka', 'tablichka', 'nastolniy_tablichka', 'stend'];
     const hasSizesTypes = []; // razmerlar (Kichik/O'rta/Katta) bo'yicha ustama qo'llaniladigan turlar (hozircha hech biri ishlatmaydi)
-    const oneSidedOnlySouvenirs = ['plagetkalar', 'naborlar', 'statuetka', 'soat', 'kardxolder', 'zontik']; // faqat bir tomonlama pechat qilinadigan turlar (ikki tomonlama variant ko'rsatilmaydi)
+    const oneSidedOnlySouvenirs = ['plagetkalar', 'naborlar', 'statuetka', 'soat', 'kardxolder', 'zontik', 'znachok']; // faqat bir tomonlama pechat qilinadigan turlar (ikki tomonlama variant ko'rsatilmaydi)
     // Standart "UF Pechat / Sifravoy Pechat" juftligi o'rniga boshqacha chop turlari to'plamidan foydalanadigan suvenir turlari.
     // Ichki holatda 'uv' | 'dtf' | 'gravirovka' kalitlaridan foydalaniladi (narxlar ham shu nomlar bilan saqlanadi),
     // faqat mijoz/admin ko'radigan yorliq matni har xil bo'lishi mumkin. 'uv' kaliti yo'q bo'lsa, UF Pechat varianti umuman ko'rsatilmaydi.
@@ -907,7 +914,7 @@
                 </div>
                 <div class="admin-cat-grid">
                     ${items.map(item => `
-                        <div class="admin-cat-card" data-cat-name="${item.name.toLowerCase()}" onclick="openProductManager('${item.key}', '${item.name}')">
+                        <div class="admin-cat-card" data-cat-name="${item.name.toLowerCase()}" onclick="openProductManager('${item.key}', '${item.name.replace(/'/g, "\\'")}')">
                             <span class="admin-cat-icon-badge">${item.icon}</span>
                             <span class="admin-cat-name">${item.name}</span>
                             <span class="admin-cat-go">→</span>
