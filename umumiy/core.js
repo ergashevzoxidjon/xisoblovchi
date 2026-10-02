@@ -1174,6 +1174,7 @@
     }
 
     function filterProducts() {
+        if (typeof boshSahifaFiltr === 'function' && boshSahifaFiltr()) return;
         let input = document.getElementById('searchInput').value.toLowerCase();
         let cards = document.getElementsByClassName('product-card');
         for (let card of cards) {

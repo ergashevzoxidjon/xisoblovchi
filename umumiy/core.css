@@ -1387,3 +1387,66 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 .vm-pardoz-group { display: flex; gap: 8px; flex-wrap: wrap; flex-basis: 100%; }
 .ok-admin-xizmat { display: grid; grid-template-columns: 1fr 150px; gap: 6px; margin-top: 4px; }
 .ok-admin-xizmat .input-unit input { min-width: 0; width: 100%; }
+
+/* ====================== BOSH SAHIFA (yangi ko'rinish) — umumiy/bosh-sahifa.js ====================== */
+#selectionScreen.home { max-width: 1120px; margin: 0 auto; }
+
+.home-hero { padding: 8px 2px 18px; }
+.home-hero-kicker { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--magenta); margin-bottom: 4px; }
+.home-hero-title { font-family: var(--font-display); font-size: clamp(2rem, 4.6vw, 3rem); font-weight: 800; line-height: 1.05; color: var(--ink); letter-spacing: 0.01em; }
+.home-hero-sub { margin-top: 6px; color: var(--text-muted); font-size: 0.95rem; }
+
+.home-search { position: relative; }
+.home-search input { padding: 16px 52px 16px 48px; font-size: 1.05rem; border-radius: 14px; box-shadow: 0 6px 18px -8px rgba(18,20,28,0.18); }
+.home-search-icon { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); font-size: 1.05rem; opacity: 0.6; pointer-events: none; }
+.home-search-kbd { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; color: var(--text-muted); background: #f1efe6; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: 1px 8px; pointer-events: none; }
+.home-search input:focus ~ .home-search-kbd { opacity: 0; }
+
+.home-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 6px; }
+.home-chip { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-main); font-size: 0.86rem; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer; transition: 0.15s; }
+.home-chip span { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; color: var(--text-muted); background: #f1efe6; border-radius: 999px; padding: 1px 7px; }
+.home-chip:hover { border-color: var(--primary); }
+.home-chip.faol { background: var(--ink); border-color: var(--ink); color: #fff; }
+.home-chip.faol span { background: rgba(255,255,255,0.18); color: #fff; }
+
+.home-recent { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0 2px; }
+.home-recent-label { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-right: 2px; }
+.home-recent-btn { display: inline-flex; align-items: center; gap: 7px; background: #fff7d6; border: 1px solid #ecd988; color: var(--ink); font-size: 0.84rem; font-weight: 600; padding: 5px 12px 5px 9px; border-radius: 10px; cursor: pointer; transition: 0.15s; }
+.home-recent-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+/* Bo'lim paneli */
+.home-sec { --acc: var(--primary); --acc-soft: rgba(0,144,212,0.12); background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--acc); border-radius: 16px; padding: 18px 18px 8px; margin-top: 18px; box-shadow: 0 1px 0 rgba(18,20,28,0.03); }
+.home-sec-cyan    { --acc: var(--primary); --acc-soft: rgba(0,144,212,0.12); }
+.home-sec-magenta { --acc: var(--magenta); --acc-soft: rgba(227,28,121,0.11); }
+.home-sec-yellow  { --acc: #e0b000;        --acc-soft: rgba(245,197,24,0.22); }
+.home-sec-ink     { --acc: var(--ink);     --acc-soft: rgba(18,20,28,0.08); }
+.home-sec-green   { --acc: #05966e;        --acc-soft: rgba(5,150,110,0.13); }
+.home-sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.home-sec-badge { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--acc-soft); font-size: 1.05rem; }
+.home-sec-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); text-transform: uppercase; }
+.home-sec-count { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; color: var(--text-muted); background: #f1efe6; padding: 2px 10px; border-radius: 999px; }
+
+.home-sec .product-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.home-sec .product-card { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 10px; padding: 14px; min-height: 96px; border-radius: 14px; background: #fcfbf7; }
+.home-sec .product-card::before, .home-sec .product-card::after { display: none; }
+.home-sec .product-card .icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--acc-soft); font-size: 1.35rem; transition: transform 0.18s ease; }
+.home-sec .product-card h3 { font-size: 0.9rem; line-height: 1.25; }
+.home-sec .product-card:hover { border-color: var(--acc); background: #fff; transform: translateY(-3px); box-shadow: 0 10px 22px -12px rgba(18,20,28,0.35); }
+.home-sec .product-card:hover .icon { transform: scale(1.1) rotate(-4deg); }
+.home-sec .product-card:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.home-sec-green .product-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-bottom: 0; }
+.home-sec-green .product-grid + .product-grid { margin-top: 0; }
+.home-sec-green .product-card { flex-direction: row; align-items: center; min-height: 0; }
+
+.home-empty { text-align: center; padding: 48px 16px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+.home-empty div { font-size: 2rem; }
+.home-empty b { color: var(--ink); font-size: 1.05rem; }
+
+@media (max-width: 640px) {
+    .home-sec { padding: 14px 12px 4px; border-left-width: 4px; border-radius: 14px; }
+    .home-sec .product-grid { grid-template-columns: repeat(2, 1fr); }
+    .home-sec-green .product-grid { grid-template-columns: 1fr; }
+    .home-search-kbd { display: none; }
+    .home-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+    .home-chip { white-space: nowrap; }
+}
