@@ -252,7 +252,7 @@
 
                     <div class="form-row" id="souvenirFieldsRow">
                         <div class="form-group">
-                            <label>Rasm Yuklash (Lokal):</label>
+                            <label>Asosiy rasm <span style="color:#e11d48;">*</span> (majburiy):</label>
                             <div class="image-upload-row">
                                 <div class="image-upload-preview" id="newPenImagePreviewBox">
                                     <img id="newPenImagePreview" alt="" style="display:none;" onerror="this.src=placeholderImg('Rasm yo\'q', 150, 150)">
@@ -260,6 +260,9 @@
                                 </div>
                                 <input type="file" id="newPenFile" accept="image/*" onchange="previewPenImage(this)">
                             </div>
+                            <label style="margin-top:10px;">Qo'shimcha rasmlar <span style="font-weight:400;color:var(--text-muted);">(ixtiyoriy, 12 tagacha — menejer model yonida ko'radi)</span>:</label>
+                            <input type="file" id="newPenExtraFiles" accept="image/*" multiple onchange="addPenExtraImages(this)">
+                            <div class="pen-extra-list" id="penExtraImagesList"></div>
                         </div>
 
                         <div class="form-group">

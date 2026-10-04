@@ -314,6 +314,76 @@
         if (placeholder) placeholder.style.display = 'none';
     }
 
+    // Modelning qo'shimcha rasmlari (asosiy rasmdan tashqari, 12 tagacha) — admin tahrirlash holati
+    const PEN_QOSHIMCHA_RASM_MAX = 12;
+    let penExtraImagesState = [];
+
+    function renderPenExtraImages() {
+        const box = document.getElementById('penExtraImagesList');
+        if (!box) return;
+        box.innerHTML = penExtraImagesState.map((src, i) => `
+            <div class="pen-extra-item">
+                <img src="${src}" alt="">
+                <button type="button" title="O'chirish" onclick="removePenExtraImage(${i})">✕</button>
+            </div>
+        `).join('');
+    }
+
+    async function addPenExtraImages(inputEl) {
+        const files = Array.from(inputEl.files || []);
+        for (const f of files) {
+            if (penExtraImagesState.length >= PEN_QOSHIMCHA_RASM_MAX) {
+                showToast(`⚠️ Qo'shimcha rasm ${PEN_QOSHIMCHA_RASM_MAX} tadan oshmasin.`);
+                break;
+            }
+            try { penExtraImagesState.push(await convertBase64(f)); } catch (e) { /* o'qilmagan rasm o'tkazib yuboriladi */ }
+        }
+        inputEl.value = '';
+        renderPenExtraImages();
+    }
+
+    function removePenExtraImage(i) {
+        penExtraImagesState.splice(i, 1);
+        renderPenExtraImages();
+    }
+
+    // Menejer uchun: tanlangan modelning barcha rasmlari (asosiy + qo'shimcha)
+    function penGalleryImages(pen) {
+        if (!pen) return [];
+        const list = [pen.image, ...(Array.isArray(pen.images) ? pen.images : [])].filter(Boolean);
+        return list;
+    }
+
+    function renderPenGallery() {
+        const box = document.getElementById('penGalleryGroup');
+        if (!box) return;
+        const list = penGalleryImages(selectedPen);
+        if (!selectedPen || list.length < 2) { box.style.display = 'none'; box.innerHTML = ''; return; }
+        box.style.display = 'flex';
+        box.innerHTML = `
+            <img class="pen-gallery-main" id="penGalleryMain" src="${list[0]}" alt="${selectedPen.name}" onclick="openPenGalleryZoom(this.src)">
+            <div class="pen-gallery-thumbs">
+                ${list.map((src, i) => `<img class="${i === 0 ? 'active' : ''}" src="${src}" alt="" onclick="showPenGalleryImage(${i})">`).join('')}
+            </div>
+        `;
+    }
+
+    function showPenGalleryImage(i) {
+        const list = penGalleryImages(selectedPen);
+        const main = document.getElementById('penGalleryMain');
+        if (!main || !list[i]) return;
+        main.src = list[i];
+        document.querySelectorAll('#penGalleryGroup .pen-gallery-thumbs img').forEach((el, k) => el.classList.toggle('active', k === i));
+    }
+
+    function openPenGalleryZoom(src) {
+        const ov = document.createElement('div');
+        ov.className = 'pen-zoom-overlay';
+        ov.onclick = () => ov.remove();
+        ov.innerHTML = `<img src="${src}" alt="">`;
+        document.body.appendChild(ov);
+    }
+
     function colorNameToHex(name) {
         const map = {
             "qora": "#000000", "oq": "#ffffff", "qizil": "#e11d48", "ko'k": "#2563eb", "kok": "#2563eb",
@@ -797,7 +867,8 @@
         } else if (editIdx >= 0 && pensDatabase[currentManagingProduct][editIdx]) {
             image = pensDatabase[currentManagingProduct][editIdx].image;
         } else {
-            image = placeholderImg('Model', 150, 150);
+            showToast("⚠️ Asosiy rasmni yuklang — rasm majburiy!");
+            return;
         }
 
         // basePrice / printPrices maydonlari eski kod va hisobotlar uchun saqlanadi,
@@ -815,7 +886,8 @@
             colors: colors,
             lentas: lentas,
             details: naborDetails,
-            tiers: tiers
+            tiers: tiers,
+            images: penExtraImagesState.slice(0, PEN_QOSHIMCHA_RASM_MAX)
         };
 
         if (editIdx >= 0) {
@@ -872,6 +944,9 @@
         tierChipsState = normalizeTierList(pen.tiers);
         renderTierEditor();
 
+        penExtraImagesState = Array.isArray(pen.images) ? pen.images.slice() : [];
+        renderPenExtraImages();
+
         document.getElementById('penFormTitle').innerText = `✏️ Modelni Tahrirlash (${pen.id})`;
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
         document.getElementById('btnCancelEdit').style.display = "inline-flex";
@@ -915,6 +990,9 @@
 
         tierChipsState = [];
         renderTierEditor();
+
+        penExtraImagesState = [];
+        renderPenExtraImages();
 
         document.getElementById('penFormTitle').innerText = "➕ Yangi Model Qo'shish";
         document.getElementById('btnSavePen').innerText = "💾 Saqlash";
@@ -985,6 +1063,7 @@
         renderColorOptions();
         renderLentaOptions();
         renderNaborDetails();
+        renderPenGallery();
         calculate();
     }
 
@@ -1217,6 +1296,7 @@ function generateForm_suvenir(type, form, rightCol) {
                 html = `
                     <div class="step-title">1. Modelni tanlang (${activeDb.length} ta mavjud):</div>
                     <div class="pen-grid" id="penGrid"></div>
+                    <div class="pen-gallery" id="penGalleryGroup" style="display:none;"></div>
 
                     <div id="naborDetailsGroup" style="display:none; margin-bottom:12px;">
                         <div class="step-title" style="margin-bottom:8px;">📦 Nabor tarkibi:</div>

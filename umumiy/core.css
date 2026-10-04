@@ -1451,3 +1451,17 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
     .home-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
     .home-chip { white-space: nowrap; }
 }
+
+/* ====================== MODEL QO'SHIMCHA RASMLARI ====================== */
+.pen-extra-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pen-extra-item { position: relative; width: 64px; height: 64px; border: 1px solid var(--border, #ddd); border-radius: 8px; overflow: hidden; background: #fff; }
+.pen-extra-item img { width: 100%; height: 100%; object-fit: cover; }
+.pen-extra-item button { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.65rem; line-height: 18px; cursor: pointer; }
+.pen-gallery { align-items: center; gap: 14px; margin: 4px 0 14px; padding: 10px; border: 1px solid var(--border, #ddd); border-radius: 12px; background: #fcfbf7; }
+.pen-gallery-main { width: 180px; height: 180px; object-fit: contain; border-radius: 10px; background: #fff; cursor: zoom-in; flex: none; }
+.pen-gallery-thumbs { display: flex; flex-wrap: wrap; gap: 8px; }
+.pen-gallery-thumbs img { width: 56px; height: 56px; object-fit: cover; border: 2px solid transparent; border-radius: 8px; cursor: pointer; background: #fff; }
+.pen-gallery-thumbs img.active { border-color: var(--primary); }
+.pen-zoom-overlay { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; background: rgba(0,0,0,0.8); cursor: zoom-out; }
+.pen-zoom-overlay img { max-width: 92vw; max-height: 92vh; border-radius: 8px; }
+@media (max-width: 640px) { .pen-gallery { flex-direction: column; align-items: flex-start; } .pen-gallery-main { width: 100%; height: 220px; } }
