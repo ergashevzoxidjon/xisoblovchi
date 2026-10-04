@@ -636,7 +636,7 @@
             <div class="quote-offer-doc">
                 <div class="quote-offer-header">
                     <div>
-                        <div class="quote-offer-brand">Poligrafiya & Suvenir ERP</div>
+                        <div class="quote-offer-brand"><img src="umumiy/logo.png" alt="myprint.uz"></div>
                         <div class="quote-offer-sub">Tijoriy taklif</div>
                     </div>
                     <div class="quote-offer-date">${todayStr}</div>
@@ -725,7 +725,7 @@
             <div class="quote-offer-doc">
                 <div class="quote-offer-header">
                     <div>
-                        <div class="quote-offer-brand">Poligrafiya & Suvenir ERP</div>
+                        <div class="quote-offer-brand"><img src="umumiy/logo.png" alt="myprint.uz"></div>
                         <div class="quote-offer-sub">Tijoriy taklif (arxivdan) — ${quoteStatusLabel(rec.status)}</div>
                     </div>
                     <div class="quote-offer-date">${new Date(rec.date).toLocaleDateString('uz-UZ')}</div>
