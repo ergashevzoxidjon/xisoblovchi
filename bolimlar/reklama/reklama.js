@@ -499,7 +499,7 @@ function generateFormHtml_reklama(type) {
                             <label style="display:block; font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-bottom:6px;">O'rnatish balandligi (metr):</label>
                             <input type="number" id="inpUstanovkaHeight" value="2" min="0.1" step="0.1" oninput="calculate()" style="width:100%; height:40px; padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:0.9rem; outline:none; background:#fff; box-sizing:border-box;">
                             <div id="ustanovkaWarning" style="display:none; margin-top:10px; padding:10px 12px; background:#fef3c7; color:#92400e; border:1px solid #fde68a; border-radius:8px; font-size:0.8rem; line-height:1.4;">
-                                ⚠️ 2 metrdan balandroqqa o'rnatish uchun Xosim bilan kelishib oling.
+                                ⚠️ 2 metrdan balandroqqa o'rnatish uchun mutaxassis bilan kelishib oling.
                             </div>
                         </div>
                     </div>` : '';
