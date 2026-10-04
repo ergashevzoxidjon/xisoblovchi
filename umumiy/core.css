@@ -66,6 +66,9 @@ h2 { font-size: 1.4rem; }
     text-transform: uppercase;
 }
 .regmark { flex-shrink: 0; }
+.header-logo { height: 46px; width: auto; display: block; }
+.header-versiya { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0; text-transform: none; }
+@media (max-width: 640px) { .header-logo { height: 36px; } }
 
 .btn {
     background: var(--primary);
