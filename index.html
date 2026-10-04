@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 0b8edb0dc3bb7153 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 2bf32791e1775d12 -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -640,6 +640,54 @@
 
                 <div class="admin-card-actions" style="margin-top:16px;">
                     <button class="btn btn-success" onclick="saveVaraqliConfig()">💾 Sozlamalarni saqlash</button>
+                </div>
+            </div>
+
+            <!-- STIKER ADMIN PANEL BLOKI -->
+            <div id="stikerAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🏷️ Stiker — pechat sozlamalari</div>
+                    <p class="admin-hint">Stiker Samokleyka qog'ozida chop etiladi, varaqqa barcha tomonidan 2 mm qoldirib joylanadi.
+                        <b>Ofset</b> faqat quyidagi tirajdan boshlab; kam adadda hisob Raqamli pechatda. Samokleyka turlari va narxlari
+                        quyida — yangi tur istalgan vaqtda qo'shiladi.</p>
+                    <div class="form-row">
+                        <div class="form-group"><label>Ofsetda qilinadigan eng kam adad (dona):</label><input type="number" id="stAdminMinTiraj" min="0"></div>
+                        <div class="form-group"><label>Raqamli: zapas varaq (dona):</label><input type="number" id="stAdminZapas" min="0"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Raqamli varaq — pechat maydoni eni (mm):</label><input type="number" id="stAdminRqEni" min="1"></div>
+                        <div class="form-group"><label>Pechat maydoni bo'yi (mm):</label><input type="number" id="stAdminRqBoyi" min="1"></div>
+                    </div>
+                </div>
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🏷️ Samokleyka turlari</div>
+                    <p class="admin-hint"><b>Ofset</b> — bitta SRA3 (320×450) varaq narxi, faqat qog'oz. <b>Raqamli</b> — bitta varaq narxi,
+                        qog'oz + pechat. 0 — shu usulda mavjud emas. Menejer shu ro'yxatdan tanlaydi.</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:560px;">
+                            <thead><tr><th style="min-width:200px;">Tur nomi</th><th>Ofset (so'm / SRA3 varaq)</th><th>Raqamli (so'm / varaq)</th><th></th></tr></thead>
+                            <tbody id="stAdminQogozBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn" style="background:#4f46e5;" onclick="addStikerQogoz()">+ Samokleyka turi qo'shish</button>
+                </div>
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">✂️ Kesish narxlari (shakl bo'yicha)</div>
+                    <p class="admin-hint"><b>Ploter</b> — bitta A3 varaqni kesish narxi. <b>Pichoq</b> — Visochka tanlanganda shaklning bir martalik pichoq narxi
+                        (visochka xarajati esa Ofset pechat → Pardozlash xizmatlaridan olinadi).</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:520px;">
+                            <thead><tr><th>Shakl</th><th>Ploter (so'm / A3 varaq)</th><th>Pichoq (bir martalik, so'm)</th></tr></thead>
+                            <tbody id="stAdminShakllar"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveStikerConfig()">💾 Stiker sozlamalarini saqlash</button>
+                    </div>
                 </div>
             </div>
 
@@ -1723,11 +1771,11 @@
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
 <script src="umumiy/yordamchi.js?v=898d3563"></script>
-<script src="umumiy/core.js?v=7a8473bb"></script>
+<script src="umumiy/core.js?v=b9530c68"></script>
 <script src="bolimlar/ofset/ofset.js?v=0d5e344d"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
 <script src="bolimlar/qogoz/qogoz.js?v=8ff2dcb5"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=73ea0199"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=4e03d672"></script>
 <script src="bolimlar/textile/textile.js?v=514a584c"></script>
 <script src="bolimlar/suvenir/suvenir.js?v=411f6471"></script>
 <script src="bolimlar/reklama/reklama.js?v=ef76a422"></script>

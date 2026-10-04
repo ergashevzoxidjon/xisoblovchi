@@ -996,7 +996,8 @@
         let isOtkritka = (key === 'otkritka');
         let isDiplom = (key === 'diplom');
         let isKatalog = (key === 'katalog');
-        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli && !isOtkritka && !isDiplom && !isKatalog;
+        let isStiker = (key === 'stiker');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isStiker && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli && !isOtkritka && !isDiplom && !isKatalog;
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
         let isReklamaStend = reklamaStendTypes.includes(key);
@@ -1014,6 +1015,7 @@
         document.getElementById('otkritkaAdminBox').style.display = isOtkritka ? 'block' : 'none';
         document.getElementById('diplomAdminBox').style.display = isDiplom ? 'block' : 'none';
         document.getElementById('katalogAdminBox').style.display = isKatalog ? 'block' : 'none';
+        document.getElementById('stikerAdminBox').style.display = isStiker ? 'block' : 'none';
         // Baner/Orakal/... — maksimal chop eni (reklama.js)
         if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
@@ -1031,7 +1033,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isDiplom || isKatalog || isTextile || isReklamaStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isDiplom || isKatalog || isStiker || isTextile || isReklamaStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1096,6 +1098,10 @@
         }
         if (isKatalog) {
             renderAdminKatalog();
+            return;
+        }
+        if (isStiker) {
+            renderAdminStiker();
             return;
         }
         if (isPoligrafiya) {
@@ -1348,6 +1354,9 @@ function generateForm(type) {
     else if (type === 'katalog') {
         html = buildKatalogForm();
     }
+    else if (type === 'stiker') {
+        html = buildStikerForm();
+    }
     else if (type === 'doorhanger') {
         html = buildDoorhangerForm();
     }
@@ -1404,6 +1413,11 @@ function generateForm(type) {
 
     if (type === 'diplom') {
         renderDiplomOptions();
+        return;
+    }
+
+    if (type === 'stiker') {
+        renderStikerOptions();
         return;
     }
 
@@ -1519,6 +1533,13 @@ function calculateIchki() {
         }
         else if (activeProductType === 'katalog') {
             let res = calculateKatalog(qty);
+            baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
+        else if (activeProductType === 'stiker') {
+            let res = calculateStiker(qty);
             baseUnitPrice = res.unitPrice;
             details = res.details;
             costItems = res.costItems || [];

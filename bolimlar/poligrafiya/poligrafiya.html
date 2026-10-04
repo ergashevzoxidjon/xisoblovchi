@@ -127,6 +127,54 @@
                 </div>
             </div>
 
+            <!-- STIKER ADMIN PANEL BLOKI -->
+            <div id="stikerAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🏷️ Stiker — pechat sozlamalari</div>
+                    <p class="admin-hint">Stiker Samokleyka qog'ozida chop etiladi, varaqqa barcha tomonidan 2 mm qoldirib joylanadi.
+                        <b>Ofset</b> faqat quyidagi tirajdan boshlab; kam adadda hisob Raqamli pechatda. Samokleyka turlari va narxlari
+                        quyida — yangi tur istalgan vaqtda qo'shiladi.</p>
+                    <div class="form-row">
+                        <div class="form-group"><label>Ofsetda qilinadigan eng kam adad (dona):</label><input type="number" id="stAdminMinTiraj" min="0"></div>
+                        <div class="form-group"><label>Raqamli: zapas varaq (dona):</label><input type="number" id="stAdminZapas" min="0"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Raqamli varaq — pechat maydoni eni (mm):</label><input type="number" id="stAdminRqEni" min="1"></div>
+                        <div class="form-group"><label>Pechat maydoni bo'yi (mm):</label><input type="number" id="stAdminRqBoyi" min="1"></div>
+                    </div>
+                </div>
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🏷️ Samokleyka turlari</div>
+                    <p class="admin-hint"><b>Ofset</b> — bitta SRA3 (320×450) varaq narxi, faqat qog'oz. <b>Raqamli</b> — bitta varaq narxi,
+                        qog'oz + pechat. 0 — shu usulda mavjud emas. Menejer shu ro'yxatdan tanlaydi.</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:560px;">
+                            <thead><tr><th style="min-width:200px;">Tur nomi</th><th>Ofset (so'm / SRA3 varaq)</th><th>Raqamli (so'm / varaq)</th><th></th></tr></thead>
+                            <tbody id="stAdminQogozBody"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <button type="button" class="btn" style="background:#4f46e5;" onclick="addStikerQogoz()">+ Samokleyka turi qo'shish</button>
+                </div>
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">✂️ Kesish narxlari (shakl bo'yicha)</div>
+                    <p class="admin-hint"><b>Ploter</b> — bitta A3 varaqni kesish narxi. <b>Pichoq</b> — Visochka tanlanganda shaklning bir martalik pichoq narxi
+                        (visochka xarajati esa Ofset pechat → Pardozlash xizmatlaridan olinadi).</p>
+                    <div class="table-card" style="margin-bottom:10px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:520px;">
+                            <thead><tr><th>Shakl</th><th>Ploter (so'm / A3 varaq)</th><th>Pichoq (bir martalik, so'm)</th></tr></thead>
+                            <tbody id="stAdminShakllar"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn btn-success" onclick="saveStikerConfig()">💾 Stiker sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- OTKRITKA ADMIN PANEL BLOKI -->
             <div id="otkritkaAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
