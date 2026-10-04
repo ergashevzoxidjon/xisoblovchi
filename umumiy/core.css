@@ -1437,7 +1437,10 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 .home-sec .product-card:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 .home-sec-green .product-grid { margin-bottom: 0; }
 .home-sec-green .product-grid > .product-card { flex-basis: 240px; }
-.home-sec-green .product-grid + .product-grid { margin-top: 0; }
+.home-sec-green { display: flex; flex-wrap: wrap; column-gap: 10px; align-items: flex-start; }
+.home-sec-green .home-sec-head { flex: 0 0 100%; }
+.home-sec-green .product-grid { flex: 1 1 240px; min-width: 0; }
+.home-sec-green .product-grid > .product-card { flex-basis: 100%; }
 .home-sec-green .product-card { flex-direction: row; align-items: center; min-height: 0; }
 
 .home-empty { text-align: center; padding: 48px 16px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
