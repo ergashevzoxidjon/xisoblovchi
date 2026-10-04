@@ -1389,7 +1389,7 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 .ok-admin-xizmat .input-unit input { min-width: 0; width: 100%; }
 
 /* ====================== BOSH SAHIFA (yangi ko'rinish) — umumiy/bosh-sahifa.js ====================== */
-#selectionScreen.home { max-width: 1120px; margin: 0 auto; }
+#selectionScreen.home { max-width: none; margin: 0 auto; }
 
 .home-hero { padding: 8px 2px 18px; }
 .home-hero-kicker { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--magenta); margin-bottom: 4px; }
@@ -1426,7 +1426,8 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 .home-sec-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); text-transform: uppercase; }
 .home-sec-count { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; color: var(--text-muted); background: #f1efe6; padding: 2px 10px; border-radius: 999px; }
 
-.home-sec .product-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.home-sec .product-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.home-sec .product-grid > .product-card { flex: 1 1 168px; min-width: 0; }
 .home-sec .product-card { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 10px; padding: 14px; min-height: 96px; border-radius: 14px; background: #fcfbf7; }
 .home-sec .product-card::before, .home-sec .product-card::after { display: none; }
 .home-sec .product-card .icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--acc-soft); font-size: 1.35rem; transition: transform 0.18s ease; }
@@ -1434,7 +1435,8 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 .home-sec .product-card:hover { border-color: var(--acc); background: #fff; transform: translateY(-3px); box-shadow: 0 10px 22px -12px rgba(18,20,28,0.35); }
 .home-sec .product-card:hover .icon { transform: scale(1.1) rotate(-4deg); }
 .home-sec .product-card:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
-.home-sec-green .product-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-bottom: 0; }
+.home-sec-green .product-grid { margin-bottom: 0; }
+.home-sec-green .product-grid > .product-card { flex-basis: 240px; }
 .home-sec-green .product-grid + .product-grid { margin-top: 0; }
 .home-sec-green .product-card { flex-direction: row; align-items: center; min-height: 0; }
 
@@ -1444,8 +1446,8 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 
 @media (max-width: 640px) {
     .home-sec { padding: 14px 12px 4px; border-left-width: 4px; border-radius: 14px; }
-    .home-sec .product-grid { grid-template-columns: repeat(2, 1fr); }
-    .home-sec-green .product-grid { grid-template-columns: 1fr; }
+    .home-sec .product-grid > .product-card { flex-basis: calc(50% - 5px); }
+    .home-sec-green .product-grid > .product-card { flex-basis: 100%; }
     .home-search-kbd { display: none; }
     .home-chips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
     .home-chip { white-space: nowrap; }
