@@ -7,7 +7,8 @@ Bosmaxona uchun narx hisoblash va buyurtma tizimi. Server yo'q: brauzerda `index
 
 ```
 index.html                  ← AVTOMATIK YIG'ILADI — qo'lda tahrirlamang!
-yigish.bat / yigish.ps1     ← bo'lim HTML qismlaridan index.html ni yig'adi
+.deploy/yigish.py          ← bo'lim HTML qismlaridan index.html ni yig'adi
+.deploy/deploy.json        ← deploy agent sozlamalari (server, yig'ish buyrug'i)
 umumiy/
   index.template.html       ← sahifa skeleti (login, sarlavha, kalkulyator, admin, hisobotlar)
   core.css                  ← umumiy uslublar
@@ -30,12 +31,12 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 ## Qoidalar
 
 1. **`index.html` ni hech qachon to'g'ridan-to'g'ri tahrirlamang.** HTML o'zgarishi →
-   `bolimlar/<nomi>/<nomi>.html` yoki `umumiy/index.template.html`, so'ng `yigish.bat`
-   (yoki `powershell -NoProfile -ExecutionPolicy Bypass -File yigish.ps1`).
-   `yigish.ps1` index.html qo'lda o'zgartirilganini sezsa to'xtaydi.
-2. JS/CSS alohida fayl sifatida yuklanadi, lekin `yigish.ps1` har bir havolaga fayl mazmunidan versiya qo'shadi
+   `bolimlar/<nomi>/<nomi>.html` yoki `umumiy/index.template.html`, so'ng `python3 .deploy/yigish.py`
+   (Windows: `py .deploy\yigish.py`). Yig'uvchi index.html qo'lda o'zgartirilganini sezsa to'xtaydi
+   (`--majburiy` bilan ustidan yozadi).
+2. JS/CSS alohida fayl sifatida yuklanadi, lekin yig'uvchi har bir havolaga fayl mazmunidan versiya qo'shadi
    (`core.js?v=1a2b3c4d`) — brauzer keshdagi eski faylni ishlatmasligi uchun. Shuning uchun **JS/CSS o'zgargandan
-   keyin ham `yigish.bat`** ni ishga tushiring (avto-push buni o'zi qiladi).
+   keyin ham yig'uvchini** ishga tushiring (deploy agent buni o'zi qiladi).
 3. Bo'lim HTML fayli `<!-- @blok NOMI -->` ... `<!-- @/blok -->` bloklaridan iborat; shablondagi
    `<!-- @include bolim/NOMI -->` o'rniga qo'yiladi (grid — bosh sahifa kartochkalari,
    admin — admin panel bloklari, modal — qalqib chiquvchi oyna).
@@ -90,11 +91,14 @@ bolimlar/<nomi>/<nomi>.html|.css|.js
 - Admin panelda har qanday `save...` nomli tugma `admin-ux.js` tomonidan "saqlandi" deb hisoblanadi — yangi
   saqlash tugmasi nomini ham `save` bilan boshlang.
 
-## Avto-push
+## Deploy agent
 
-`avto-push.ps1` — Windows vazifasi ("Xisoblovchi avto-push", har 10 daqiqa, `AVTO-SOZLASH.bat`). Faqat haqiqiy
-o'zgarishni, fayllar 2 daqiqa tinch turgach, bitta ma'noli commit bilan yuklaydi; `avto-push.log` hech qachon commit
-qilinmaydi. Katta ishni qo'lda, tushunarli xabar bilan commit qilish afzal.
+Avto-push/avto-pull skriptlari olib tashlangan — GitHub sinxronlash, yig'ish va serverga chiqarishni
+Claude'ning **deploy-agent** skilli bajaradi ("deploy qil", "githubga yubor", "githubdan ol").
+- Sozlamalar: `.deploy/deploy.json`. GitHub token: `.deploy/github_token.txt` (gitignore'da, hech qachon commit qilinmaydi).
+- Tartib: pull → `python3 .deploy/yigish.py` → commit → push → server (cPanel Git: *Update from Remote*).
+- Server: Hostmaster cPanel, `/home/mylogo/xisoblovchi.mylogo.uz`, Passenger (`passenger_wsgi.py`) fayllarni
+  har so'rovda diskdan o'qiydi — odatda restart kerak emas; `passenger_wsgi.py` o'zgarsa `tmp/restart.txt` ga touch.
 
 ## Yangi mahsulot qo'shish
 
@@ -102,7 +106,7 @@ qilinmaydi. Katta ishni qo'lda, tushunarli xabar bilan commit qilish afzal.
 2. Bosh sahifa kartochkasi → `bolimlar/<nomi>/<nomi>.html` dagi `grid` bloki.
 3. Forma/hisob → `bolimlar/<nomi>/<nomi>.js`; kerak bo'lsa `core.js` dagi `generateForm()`/`calculateIchki()`
    tarqatuvchisiga shox qo'shing. Saqlanadigan sozlama bo'lsa — yuklashni o'sha bo'limning `init()` iga yozing.
-4. HTML o'zgargan bo'lsa `yigish.bat`.
+4. HTML o'zgargan bo'lsa `python3 .deploy/yigish.py`.
 
 ## Tekshirish
 

@@ -20,11 +20,6 @@ desktop.ini
 *.zip
 *.rar
 
-# Avto-push jurnali va qulfi - HECH QACHON commit qilinmaydi
-# (eski avto-push o'z logini commit qilib, minglab keraksiz commit yaratgan)
-avto-push.log
-.avto-push.lock
-
 # Mahalliy ish qurollari
 push.bat
 pull.bat
@@ -32,5 +27,7 @@ pull.bat
 # Claude Code mahalliy sozlamalari
 .claude/
 
-# Deploy agent (tokenlar, kalitlar)
-.deploy/
+# Deploy agent: token va kalitlar yashirin; faqat sozlama va yig'uvchi GitHub'ga boradi
+.deploy/*
+!.deploy/deploy.json
+!.deploy/yigish.py

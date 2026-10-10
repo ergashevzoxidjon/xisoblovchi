@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (yigish.bat). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng yigish.bat ni ishga tushiring. yigish-hash: 5f90d69fae6fbadb -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 63ca829340f978a9 -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +22,7 @@
 <div id="loginGateScreen" style="position:fixed; inset:0; z-index:9999; background:var(--bg-main); display:flex; align-items:center; justify-content:center; padding:20px;">
     <div style="width:100%; max-width:380px; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:32px 28px;">
         <div style="margin-bottom:10px;">
-            <img src="umumiy/logo.png?v=017fcc81" alt="myprint.uz — print. design. ads." style="height:64px; width:auto; display:block;">
+            <img src="umumiy/logo.png?v=e2ed989f" alt="myprint.uz — print. design. ads." style="height:64px; width:auto; display:block;">
         </div>
 
         <!-- 1-QADAM: rol tanlash — Admin yoki Menejer kartochkasi -->
@@ -60,7 +60,7 @@
 
 <div class="container" id="appContainer" style="display:none;">
     <div class="header">
-        <h1 onclick="goToLoginLandingScreen()" style="cursor:pointer;" title="Bosh sahifaga qaytish"><img class="header-logo" src="umumiy/logo.png?v=017fcc81" alt="myprint.uz — print. design. ads."> <span class="header-versiya">v3.8</span></h1>
+        <h1 onclick="goToLoginLandingScreen()" style="cursor:pointer;" title="Bosh sahifaga qaytish"><img class="header-logo" src="umumiy/logo.png?v=e2ed989f" alt="myprint.uz — print. design. ads."> <span class="header-versiya">v3.8</span></h1>
         <div style="display:flex; align-items:center; gap:10px;">
             <button class="btn btn-outline" id="globalBackBtn" onclick="goBackScreen()">⬅️ Orqaga</button>
             <span id="currentUserBadge" onclick="logoutUser()" style="display:none; cursor:pointer; font-size:0.78rem; font-weight:600; color:var(--text-muted); background:var(--bg-soft, #f1f5f9); padding:6px 12px; border-radius:8px; white-space:nowrap;" title="Chiqish uchun bosing"></span>
