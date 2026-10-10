@@ -10,9 +10,11 @@
     "user": "mylogo",
     "path": "/home/mylogo/xisoblovchi.mylogo.uz",
     "cpanel_git_repo": "xisoblovchi",
-    "deploy_method": "cpanel-git-ui",
-    "deploy_cmd": "cd /home/mylogo/xisoblovchi.mylogo.uz && git pull origin main"
+    "deploy_method": "cpanel-uapi-browser",
+    "deploy_cmd": "cd /home/mylogo/xisoblovchi.mylogo.uz && git pull origin main",
+    "deploy_howto": "Claude brauzerida cPanel sessiyasi ichida: fetch(<cpsess>/execute/VersionControl/update?repository_root=<path>&branch=main); tekshiruv: VersionControl/retrieve -> last_update.identifier"
   },
   "restart": "faqat passenger_wsgi.py o'zgarsa: mkdir -p tmp && touch tmp/restart.txt",
-  "url": "https://xisoblovchi.mylogo.uz"
+  "url": "http://xisoblovchi.mylogo.uz",
+  "note": "https sertifikati yaroqsiz (ERR_CERT_AUTHORITY_INVALID) - cPanel SSL/TLS Status -> AutoSSL"
 }
