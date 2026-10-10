@@ -31,3 +31,6 @@ pull.bat
 
 # Claude Code mahalliy sozlamalari
 .claude/
+
+# Deploy agent (tokenlar, kalitlar)
+.deploy/
