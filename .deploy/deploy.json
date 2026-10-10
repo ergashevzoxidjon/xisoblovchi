@@ -15,6 +15,6 @@
     "deploy_howto": "Claude brauzerida cPanel sessiyasi ichida: fetch(<cpsess>/execute/VersionControl/update?repository_root=<path>&branch=main); tekshiruv: VersionControl/retrieve -> last_update.identifier"
   },
   "restart": "faqat passenger_wsgi.py o'zgarsa: mkdir -p tmp && touch tmp/restart.txt",
-  "url": "http://xisoblovchi.mylogo.uz",
-  "note": "https sertifikati yaroqsiz (ERR_CERT_AUTHORITY_INVALID) - cPanel SSL/TLS Status -> AutoSSL"
+  "url": "https://xisoblovchi.mylogo.uz",
+  "ssl": "Let's Encrypt (cPanel AutoSSL, avtomatik yangilanadi)"
 }
