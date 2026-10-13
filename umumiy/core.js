@@ -997,10 +997,12 @@
         let isDiplom = (key === 'diplom');
         let isKatalog = (key === 'katalog');
         let isStiker = (key === 'stiker');
-        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isStiker && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli && !isOtkritka && !isDiplom && !isKatalog;
+        let isVizitka = (key === 'vizitka');
+        let isPoligrafiya = poligrafiyaKeys.includes(key) && !isStiker && !isVizitka && !isBloknot && !isPapka && !isKalendar && !isKubarik && !isPaket && !isVaraqli && !isOtkritka && !isDiplom && !isKatalog;
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
-        let isReklamaStend = reklamaStendTypes.includes(key);
+        let isStend = (key === 'stend');
+        let isReklamaStend = reklamaStendTypes.includes(key) && !isStend;
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
         document.getElementById('qogozAdminBox').style.display = isQogoz ? 'block' : 'none';
@@ -1016,10 +1018,12 @@
         document.getElementById('diplomAdminBox').style.display = isDiplom ? 'block' : 'none';
         document.getElementById('katalogAdminBox').style.display = isKatalog ? 'block' : 'none';
         document.getElementById('stikerAdminBox').style.display = isStiker ? 'block' : 'none';
+        document.getElementById('vizitkaAdminBox').style.display = isVizitka ? 'block' : 'none';
         // Baner/Orakal/... — maksimal chop eni (reklama.js)
         if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
         document.getElementById('reklamaStendAdminBox').style.display = isReklamaStend ? 'block' : 'none';
+        document.getElementById('stendAdminBox').style.display = isStend ? 'block' : 'none';
         document.getElementById('bayroqAdminBox').style.display = isBayroq ? 'block' : 'none';
 
         let isDoorhanger = (key === 'doorhanger');
@@ -1033,7 +1037,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isDiplom || isKatalog || isStiker || isTextile || isReklamaStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isDiplom || isKatalog || isStiker || isVizitka || isTextile || isReklamaStend || isStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1057,6 +1061,10 @@
         }
         if (isDigital) {
             renderAdminDigitalPaperTable();
+            return;
+        }
+        if (isStend) {
+            renderAdminStend();
             return;
         }
         if (isReklamaStend) {
@@ -1102,6 +1110,10 @@
         }
         if (isStiker) {
             renderAdminStiker();
+            return;
+        }
+        if (isVizitka) {
+            renderAdminVizitka();
             return;
         }
         if (isPoligrafiya) {
@@ -1321,6 +1333,9 @@ function generateForm(type) {
     else if (textileKeys.includes(type)) {
         html = generateFormHtml_textile(type);
     }
+    else if (type === 'stend') {
+        html = buildStendForm();
+    }
     else if (reklamaStendTypes.includes(type)) {
         html = generateFormHtml_reklamaStend(type);
     }
@@ -1356,6 +1371,9 @@ function generateForm(type) {
     }
     else if (type === 'stiker') {
         html = buildStikerForm();
+    }
+    else if (type === 'vizitka') {
+        html = buildVizitkaForm();
     }
     else if (type === 'doorhanger') {
         html = buildDoorhangerForm();
@@ -1421,8 +1439,18 @@ function generateForm(type) {
         return;
     }
 
+    if (type === 'vizitka') {
+        renderVizitkaOptions();
+        return;
+    }
+
     if (type === 'katalog') {
         renderKatalogOptions();
+        return;
+    }
+
+    if (type === 'stend') {
+        renderStendOptions();
         return;
     }
 
@@ -1493,6 +1521,13 @@ function calculateIchki() {
             let r = calculateResult_bayroq(qty);
             details = r.details; baseUnitPrice = r.baseUnitPrice;
         }
+        else if (activeProductType === 'stend') {
+            let res = calculateResult_stend(qty);
+            baseUnitPrice = res.baseUnitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
         else if (reklamaStendTypes.includes(activeProductType)) {
             let r = calculateResult_reklamaStend(activeProductType, qty);
             details = r.details; baseUnitPrice = r.baseUnitPrice;
@@ -1534,6 +1569,13 @@ function calculateIchki() {
         else if (activeProductType === 'katalog') {
             let res = calculateKatalog(qty);
             baseUnitPrice = res.unitPrice;
+            details = res.details;
+            costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
+        else if (activeProductType === 'vizitka') {
+            let res = calculateVizitka(qty, baseCost);
+            baseUnitPrice = res.baseUnitPrice;
             details = res.details;
             costItems = res.costItems || [];
             hisobYaroqsiz = !!res.hisobYaroqsiz;

@@ -1,8 +1,15 @@
+    // Chop etish turi menejer tomonidan tanlanmaydigan (faqat ma'lumot sifatida ko'rsatiladigan) turlar
+    const printTypeInfoOnly = ['soat'];
+
     const printTypeSchemes = {
         // UF Pechat / UF DTF Pechat / Gravirovka — har birining narxi alohida, Sifravoy pechat yo'q.
         // Bu sxema quyidagi suvenir turlarida bir xil ishlaydi: Ruchka, Termos, Brelok, Bakal,
         // Suv idishlar, Powerbanklar, Fleshka, Statuetka, Kardxolder.
         statuetka: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        // Plagetkalar — Sifravoy pechat yo'q: faqat UF, UF DTF va Gravirovka
+        plagetkalar: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
+        // Soat — chop etish turi tanlanmaydi, menejerga faqat ma'lumot sifatida ko'rsatiladi
+        soat: { uv: 'UF Pechat' },
         zontik: { dtf: 'DTF', gravirovka: 'Vinil pechat' },
         fleshka: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
         kardxolder: { uv: 'UF Pechat', dtf: 'UF DTF Pechat', gravirovka: 'Gravirovka' },
@@ -1162,6 +1169,14 @@
         }
 
         let printScheme = printTypeSchemes[activeProductType];
+        if (printScheme && printTypeInfoOnly.includes(activeProductType)) {
+            let nomlar = [];
+            if (printScheme.uv && selectedPen.allowUv !== false) nomlar.push(printScheme.uv);
+            if (printScheme.dtf && selectedPen.allowDtf !== false) nomlar.push(printScheme.dtf);
+            if (printScheme.gravirovka && selectedPen.allowGravirovka !== false) nomlar.push(printScheme.gravirovka);
+            group.innerHTML = `<span class="print-type-info">ℹ️ ${nomlar.join(' / ') || printScheme.uv}</span>`;
+            return;
+        }
         if (printScheme) {
             let schemeHtml = '';
             if (printScheme.uv && selectedPen.allowUv !== false) schemeHtml += `<button class="opt-btn ${selectedPrintType === 'uv' ? 'active' : ''}" onclick="selectPenPrint('uv')">${printScheme.uv}</button>`;
@@ -1313,7 +1328,7 @@ function generateForm_suvenir(type, form, rightCol) {
                         <div class="lenta-grid" id="lentaButtonsContainer"></div>
                     </div>
 
-                    <div class="step-title">2. Chop etish turi:</div>
+                    <div class="step-title">2. Chop etish turi:${printTypeInfoOnly.includes(type) ? ' <span class="paket-step-hint">(ma&#39;lumot — tanlanmaydi)</span>' : ''}</div>
                     <div class="options-group" id="printTypeGroup"></div>
 
                     ${sizeStepHtml}

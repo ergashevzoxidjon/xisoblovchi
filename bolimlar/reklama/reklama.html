@@ -42,6 +42,43 @@
                 </div>
             </div>
 
+            <!-- STEND ADMIN PANEL BLOKI -->
+            <div id="stendAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🧱 Stend — material va chop etish narxlari</div>
+                    <p class="admin-hint">Narx = maydon (kv.m) × (material narxi + chop narxi) + turning qo'shimcha narxi. Narxlar — marjasiz tannarx.
+                        Menejer kiritgan X×Y o'lcham material varag'iga (aylantirib ham) sig'masa, "Siz kiritgan o'lcham reklama mahsuloti sig'maydi" xabari chiqadi.</p>
+                    <div class="form-row">
+                        <div class="form-group"><label>Material varag'i eni (mm):</label><input type="number" id="stendAdminVaraqEni" min="1"></div>
+                        <div class="form-group"><label>Material varag'i bo'yi (mm):</label><input type="number" id="stendAdminVaraqBoyi" min="1"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="table-card" style="flex:1; min-width:260px;">
+                            <table class="admin-table"><thead><tr><th>Material</th><th>Narxi (so'm / kv.m)</th></tr></thead><tbody id="stendAdminMaterialBody"></tbody></table>
+                        </div>
+                        <div class="table-card" style="flex:1; min-width:260px;">
+                            <table class="admin-table"><thead><tr><th>Chop etish turi</th><th>Narxi (so'm / kv.m)</th></tr></thead><tbody id="stendAdminChopBody"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📋 Stend turlari</div>
+                    <p class="admin-hint">Har bir tur uchun qaysi materiallar va chop etish turlari mavjudligini belgilang. Belgilanmagani menejerda o'chiq tugma bo'ladi.</p>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:900px;">
+                            <thead><tr><th style="min-width:150px;">Tur nomi</th><th style="min-width:260px;">Materiallar</th><th style="min-width:260px;">Chop etish turlari</th><th style="min-width:120px;">Qo'shimcha (so'm/dona)</th><th style="text-align:center;">Standart</th><th></th></tr></thead>
+                            <tbody id="stendAdminTurlar"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn" style="background:#4f46e5;" onclick="addStendTur()">+ Yangi stend turi</button>
+                        <button class="btn btn-success" onclick="saveStendConfig()">💾 Stend sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- REKLAMA STEND (Roll Up / Pauk / PopUp / PromoStoyka) ADMIN PANEL BLOKI -->
             <div id="reklamaStendAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom: 16px;">
@@ -60,7 +97,7 @@
                 </div>
 
                 <div class="add-pen-card">
-                    <div class="add-pen-card-title">📐 O'lchamlar va Narxlari</div>
+                    <div class="add-pen-card-title" id="reklamaStendSizesTitle">📐 O'lchamlar va Narxlari</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Har bir o'lcham qatoriga, yuqoridagi oraliqlarning har biriga mos narxni kiriting. <strong>Bazaviy narx</strong> — hech qanday oraliq sozlanmagan yoki mos kelmasa ishlatiladigan zaxira narx. "Standart" ustunida mijoz ekranida avtomatik tanlanadigan o'lchamni belgilang. Material (Glyans/Matoviy) tanlovi narxga ta'sir qilmaydi.</p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">

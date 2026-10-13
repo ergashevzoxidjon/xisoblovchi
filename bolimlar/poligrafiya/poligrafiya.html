@@ -127,6 +127,31 @@
                 </div>
             </div>
 
+            <!-- VIZITKA ADMIN PANEL BLOKI -->
+            <div id="vizitkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">💼 Vizitka turlari</div>
+                    <p class="admin-hint">Har bir tur o'z <b>qog'oz turi va grammajiga</b> ega, shuningdek shu turga <b>ruxsat berilgan chop etish turlari</b> belgilanadi.
+                        Menejer turni tanlaydi, so'ng faqat ruxsat berilgan chop turlarini ko'radi. Hozircha <b>Sifravoy va Ofset</b> hisoblanadi;
+                        UF pechat, Tisneniya, 3D lak va 3D tilla hisobi keyinroq qo'shiladi (hozir tanlansa — "mutaxassisga bog'laning").</p>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:900px;">
+                            <thead><tr><th style="min-width:150px;">Tur nomi</th><th style="min-width:110px;">Qog'oz turi</th><th style="min-width:90px;">Grammaj</th><th style="min-width:420px;">Ruxsat berilgan chop etish turlari</th><th style="text-align:center;">Standart</th><th></th></tr></thead>
+                            <tbody id="vzAdminTurlar"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Ofsetda hisoblanadigan eng kam adad (dona):</label><input type="number" id="vzAdminMinTiraj" min="0" step="50"><small>Kam adadda hisob Sifravoy pechatda. 0 — cheklov yo'q.</small></div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn" style="background:#4f46e5;" onclick="addVizitkaTur()">+ Yangi tur</button>
+                        <button class="btn btn-success" onclick="saveVizitkaConfig()">💾 Vizitka sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- STIKER ADMIN PANEL BLOKI -->
             <div id="stikerAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
@@ -448,8 +473,11 @@
             <div id="kubarikAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title">🧊 Kubarik — umumiy sozlamalar</div>
-                    <p class="admin-hint">Kubarik Bloknot kabi hisoblanadi: qog'oz narxi Ofset bo'limi bazasidan (A3 ofset) olinadi.
-                        Kerakli A3 varoq = adad × varaq soni ÷ 1 A3 dagi bo'lak + zapas.</p>
+                    <p class="admin-hint">Kubarik Ofsetda hisoblanadi, qog'oz narxi Ofset bo'limi bazasidan olinadi.
+                        Ichki varaqlar: kerakli A3 varoq = adad × varaq soni ÷ 1 A3 dagi bo'lak + zapas.
+                        Quti (idish): admin qog'oz, format (A3/A2/A1) va 1 varaqqa sig'adigan quti sonini kiritadi;
+                        quti uchun <b>laminatsiya va visochka majburiy</b> (Ofset → Pardozlash xizmatlari narxidan),
+                        <b>yig'ish</b> xarajati ham har kubarikka qo'shiladi.</p>
                     <div class="admin-form-grid">
                         <div class="form-group">
                             <label>O'lcham</label>
@@ -457,7 +485,7 @@
                             <small>Mijozga ko'rsatiladi</small>
                         </div>
                         <div class="form-group">
-                            <label>1 A3 varaqdagi bo'lak</label>
+                            <label>1 A3 varaqdagi ichki bo'lak (yangi turlar uchun standart)</label>
                             <div class="input-unit"><input type="number" id="kubarikA3Bolak" min="1"><span>dona</span></div>
                             <small>90x90 uchun 12 (3 × 4)</small>
                         </div>
@@ -474,13 +502,18 @@
                         1+0 ofset pechat (forma + bosma) qo'shiladi. Narxlar — marjasiz tannarx, so'm/dona.</p>
                     <div class="table-card" style="margin-bottom:14px;">
                         <div class="table-scroll">
-                        <table class="admin-table" style="min-width:1080px;">
+                        <table class="admin-table" style="min-width:1500px;">
                             <thead>
                                 <tr>
                                     <th style="min-width:110px;">Nomi</th>
                                     <th style="min-width:110px;">Qog'oz turi</th>
                                     <th style="min-width:80px;">Grammaj</th>
                                     <th style="min-width:90px;">Varaq soni</th>
+                                    <th style="min-width:100px;">1 A3 dagi ichki bo'lak</th>
+                                    <th style="min-width:110px;">Quti qog'ozi</th>
+                                    <th style="min-width:90px;">Quti grammaji</th>
+                                    <th style="min-width:80px;">Quti formati</th>
+                                    <th style="min-width:100px;">1 varaqda quti</th>
                                     <th style="text-align:center;">Pechatli</th>
                                     <th style="min-width:140px;">Qo'shimcha nomi</th>
                                     <th style="min-width:110px;">Qo'shimcha (so'm)</th>
@@ -634,6 +667,20 @@
                         <div class="form-group">
                             <label>3D lak klishesi (bir martalik):</label>
                             <input type="number" min="0" id="bloknotLak3dKlishePrice" value="50000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📕 Qattiq Muqova (ixtiyoriy qo'shimcha ishlov)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Menejer belgilaydi (checkbox). Narx har bir bloknotga qo'shiladi. Hisoblash usuli keyinroq
+                        aniqlanadi — hozircha narxni qo'lda kiriting (0 — narxga qo'shilmaydi).
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Qattiq muqova (so'm/dona):</label>
+                            <input type="number" min="0" id="bloknotQattiqMuqovaPrice" value="0">
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 63ca829340f978a9 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 5394f97e4c60f1ae -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <title>myprint.uz ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="umumiy/core.css?v=6248715f">
+    <link rel="stylesheet" href="umumiy/core.css?v=ef967e82">
     <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=2c67bfec">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
     <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
@@ -642,6 +642,31 @@
                 </div>
             </div>
 
+            <!-- VIZITKA ADMIN PANEL BLOKI -->
+            <div id="vizitkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">💼 Vizitka turlari</div>
+                    <p class="admin-hint">Har bir tur o'z <b>qog'oz turi va grammajiga</b> ega, shuningdek shu turga <b>ruxsat berilgan chop etish turlari</b> belgilanadi.
+                        Menejer turni tanlaydi, so'ng faqat ruxsat berilgan chop turlarini ko'radi. Hozircha <b>Sifravoy va Ofset</b> hisoblanadi;
+                        UF pechat, Tisneniya, 3D lak va 3D tilla hisobi keyinroq qo'shiladi (hozir tanlansa — "mutaxassisga bog'laning").</p>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:900px;">
+                            <thead><tr><th style="min-width:150px;">Tur nomi</th><th style="min-width:110px;">Qog'oz turi</th><th style="min-width:90px;">Grammaj</th><th style="min-width:420px;">Ruxsat berilgan chop etish turlari</th><th style="text-align:center;">Standart</th><th></th></tr></thead>
+                            <tbody id="vzAdminTurlar"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Ofsetda hisoblanadigan eng kam adad (dona):</label><input type="number" id="vzAdminMinTiraj" min="0" step="50"><small>Kam adadda hisob Sifravoy pechatda. 0 — cheklov yo'q.</small></div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn" style="background:#4f46e5;" onclick="addVizitkaTur()">+ Yangi tur</button>
+                        <button class="btn btn-success" onclick="saveVizitkaConfig()">💾 Vizitka sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- STIKER ADMIN PANEL BLOKI -->
             <div id="stikerAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
@@ -963,8 +988,11 @@
             <div id="kubarikAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title">🧊 Kubarik — umumiy sozlamalar</div>
-                    <p class="admin-hint">Kubarik Bloknot kabi hisoblanadi: qog'oz narxi Ofset bo'limi bazasidan (A3 ofset) olinadi.
-                        Kerakli A3 varoq = adad × varaq soni ÷ 1 A3 dagi bo'lak + zapas.</p>
+                    <p class="admin-hint">Kubarik Ofsetda hisoblanadi, qog'oz narxi Ofset bo'limi bazasidan olinadi.
+                        Ichki varaqlar: kerakli A3 varoq = adad × varaq soni ÷ 1 A3 dagi bo'lak + zapas.
+                        Quti (idish): admin qog'oz, format (A3/A2/A1) va 1 varaqqa sig'adigan quti sonini kiritadi;
+                        quti uchun <b>laminatsiya va visochka majburiy</b> (Ofset → Pardozlash xizmatlari narxidan),
+                        <b>yig'ish</b> xarajati ham har kubarikka qo'shiladi.</p>
                     <div class="admin-form-grid">
                         <div class="form-group">
                             <label>O'lcham</label>
@@ -972,7 +1000,7 @@
                             <small>Mijozga ko'rsatiladi</small>
                         </div>
                         <div class="form-group">
-                            <label>1 A3 varaqdagi bo'lak</label>
+                            <label>1 A3 varaqdagi ichki bo'lak (yangi turlar uchun standart)</label>
                             <div class="input-unit"><input type="number" id="kubarikA3Bolak" min="1"><span>dona</span></div>
                             <small>90x90 uchun 12 (3 × 4)</small>
                         </div>
@@ -989,13 +1017,18 @@
                         1+0 ofset pechat (forma + bosma) qo'shiladi. Narxlar — marjasiz tannarx, so'm/dona.</p>
                     <div class="table-card" style="margin-bottom:14px;">
                         <div class="table-scroll">
-                        <table class="admin-table" style="min-width:1080px;">
+                        <table class="admin-table" style="min-width:1500px;">
                             <thead>
                                 <tr>
                                     <th style="min-width:110px;">Nomi</th>
                                     <th style="min-width:110px;">Qog'oz turi</th>
                                     <th style="min-width:80px;">Grammaj</th>
                                     <th style="min-width:90px;">Varaq soni</th>
+                                    <th style="min-width:100px;">1 A3 dagi ichki bo'lak</th>
+                                    <th style="min-width:110px;">Quti qog'ozi</th>
+                                    <th style="min-width:90px;">Quti grammaji</th>
+                                    <th style="min-width:80px;">Quti formati</th>
+                                    <th style="min-width:100px;">1 varaqda quti</th>
                                     <th style="text-align:center;">Pechatli</th>
                                     <th style="min-width:140px;">Qo'shimcha nomi</th>
                                     <th style="min-width:110px;">Qo'shimcha (so'm)</th>
@@ -1154,6 +1187,20 @@
                 </div>
 
                 <div class="add-pen-card" style="margin-bottom: 16px;">
+                    <div class="add-pen-card-title">📕 Qattiq Muqova (ixtiyoriy qo'shimcha ishlov)</div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Menejer belgilaydi (checkbox). Narx har bir bloknotga qo'shiladi. Hisoblash usuli keyinroq
+                        aniqlanadi — hozircha narxni qo'lda kiriting (0 — narxga qo'shilmaydi).
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Qattiq muqova (so'm/dona):</label>
+                            <input type="number" min="0" id="bloknotQattiqMuqovaPrice" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-pen-card" style="margin-bottom: 16px;">
                     <div class="add-pen-card-title">ℹ️ Mijozga Ko'rsatiladigan Ma'lumot</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
                         Hisoblash sahifasida ma'lumot blokida chiqadi. O'lcham avtomatik qo'shiladi.
@@ -1269,6 +1316,43 @@
                 </div>
             </div>
 
+            <!-- STEND ADMIN PANEL BLOKI -->
+            <div id="stendAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" style="margin-bottom:16px;">
+                    <div class="add-pen-card-title">🧱 Stend — material va chop etish narxlari</div>
+                    <p class="admin-hint">Narx = maydon (kv.m) × (material narxi + chop narxi) + turning qo'shimcha narxi. Narxlar — marjasiz tannarx.
+                        Menejer kiritgan X×Y o'lcham material varag'iga (aylantirib ham) sig'masa, "Siz kiritgan o'lcham reklama mahsuloti sig'maydi" xabari chiqadi.</p>
+                    <div class="form-row">
+                        <div class="form-group"><label>Material varag'i eni (mm):</label><input type="number" id="stendAdminVaraqEni" min="1"></div>
+                        <div class="form-group"><label>Material varag'i bo'yi (mm):</label><input type="number" id="stendAdminVaraqBoyi" min="1"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="table-card" style="flex:1; min-width:260px;">
+                            <table class="admin-table"><thead><tr><th>Material</th><th>Narxi (so'm / kv.m)</th></tr></thead><tbody id="stendAdminMaterialBody"></tbody></table>
+                        </div>
+                        <div class="table-card" style="flex:1; min-width:260px;">
+                            <table class="admin-table"><thead><tr><th>Chop etish turi</th><th>Narxi (so'm / kv.m)</th></tr></thead><tbody id="stendAdminChopBody"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="add-pen-card">
+                    <div class="add-pen-card-title">📋 Stend turlari</div>
+                    <p class="admin-hint">Har bir tur uchun qaysi materiallar va chop etish turlari mavjudligini belgilang. Belgilanmagani menejerda o'chiq tugma bo'ladi.</p>
+                    <div class="table-card" style="margin-bottom:14px;">
+                        <div class="table-scroll">
+                        <table class="admin-table" style="min-width:900px;">
+                            <thead><tr><th style="min-width:150px;">Tur nomi</th><th style="min-width:260px;">Materiallar</th><th style="min-width:260px;">Chop etish turlari</th><th style="min-width:120px;">Qo'shimcha (so'm/dona)</th><th style="text-align:center;">Standart</th><th></th></tr></thead>
+                            <tbody id="stendAdminTurlar"></tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="admin-card-actions">
+                        <button class="btn" style="background:#4f46e5;" onclick="addStendTur()">+ Yangi stend turi</button>
+                        <button class="btn btn-success" onclick="saveStendConfig()">💾 Stend sozlamalarini saqlash</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- REKLAMA STEND (Roll Up / Pauk / PopUp / PromoStoyka) ADMIN PANEL BLOKI -->
             <div id="reklamaStendAdminBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom: 16px;">
@@ -1287,7 +1371,7 @@
                 </div>
 
                 <div class="add-pen-card">
-                    <div class="add-pen-card-title">📐 O'lchamlar va Narxlari</div>
+                    <div class="add-pen-card-title" id="reklamaStendSizesTitle">📐 O'lchamlar va Narxlari</div>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Har bir o'lcham qatoriga, yuqoridagi oraliqlarning har biriga mos narxni kiriting. <strong>Bazaviy narx</strong> — hech qanday oraliq sozlanmagan yoki mos kelmasa ishlatiladigan zaxira narx. "Standart" ustunida mijoz ekranida avtomatik tanlanadigan o'lchamni belgilang. Material (Glyans/Matoviy) tanlovi narxga ta'sir qilmaydi.</p>
                     <div class="table-card" style="margin-bottom: 16px;">
                         <div class="table-scroll">
@@ -1770,14 +1854,14 @@
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
 <script src="umumiy/yordamchi.js?v=898d3563"></script>
-<script src="umumiy/core.js?v=e69fc6e8"></script>
+<script src="umumiy/core.js?v=e2b60437"></script>
 <script src="bolimlar/ofset/ofset.js?v=0d5e344d"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
 <script src="bolimlar/qogoz/qogoz.js?v=8ff2dcb5"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=4e03d672"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=9ba17203"></script>
 <script src="bolimlar/textile/textile.js?v=514a584c"></script>
-<script src="bolimlar/suvenir/suvenir.js?v=411f6471"></script>
-<script src="bolimlar/reklama/reklama.js?v=7f0d17e8"></script>
+<script src="bolimlar/suvenir/suvenir.js?v=d6ec351e"></script>
+<script src="bolimlar/reklama/reklama.js?v=56fc21c3"></script>
 <script src="umumiy/custom-products.js?v=09afcfda"></script>
 <script src="umumiy/full-calc.js?v=4ef1771f"></script>
 <script src="umumiy/admin-ux.js?v=78336b6d"></script>
