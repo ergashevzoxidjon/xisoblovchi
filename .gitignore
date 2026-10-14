@@ -31,3 +31,6 @@ pull.bat
 .deploy/*
 !.deploy/deploy.json
 !.deploy/yigish.py
+
+# Serverga yuklangan rasmlar (passenger_wsgi.py) — kodga kirmaydi, serverda qoladi
+uploads/

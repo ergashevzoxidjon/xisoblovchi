@@ -342,7 +342,8 @@ h2 { font-size: 1.4rem; }
 .back-btn { margin-bottom: 20px; }
 
 .calc-grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; }
-@media (max-width: 950px) { .calc-grid { grid-template-columns: 1fr; } }
+.calc-grid.calc-grid-teng { grid-template-columns: 1.2fr 1fr; } /* Ofset va Raqamli pechat kalkulyatorlari */
+@media (max-width: 950px) { .calc-grid, .calc-grid.calc-grid-teng { grid-template-columns: 1fr; } }
 
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
@@ -1474,3 +1475,28 @@ input[type="color"]::-moz-color-swatch { border: 1.5px solid rgba(0,0,0,0.15); b
 
 .reklama-model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
 .reklama-model-razmer { margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: #f1f5f9; font-size: 0.85rem; line-height: 1.4; white-space: pre-line; }
+
+/* ====================== ADMIN: NARXLARNI TEKSHIRISH ====================== */
+.narx-tek { margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border, #e2e8f0); background: #fff; }
+.narx-tek > summary { cursor: pointer; font-size: 0.92rem; line-height: 1.5; }
+.narx-tek-ogoh { border-color: #f59e0b; background: #fffbeb; }
+.narx-tek-malumot { background: #f8fafc; }
+.narx-tek-yaxshi { border-color: #10b981; background: #ecfdf5; color: #047857; font-weight: 600; }
+.narx-tek-guruh { margin-top: 12px; }
+.narx-tek-guruh-nomi { font-weight: 700; font-size: 0.85rem; margin-bottom: 6px; }
+.narx-tek-qator { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px dashed #e2e8f0; font-size: 0.86rem; }
+.narx-tek-qator .btn { height: 30px; padding: 0 12px; font-size: 0.8rem; white-space: nowrap; }
+.narx-tek-keyin { opacity: 0.8; }
+@media (max-width: 640px) { .narx-tek-qator { flex-direction: column; align-items: flex-start; } }
+
+/* ====================== MAHSULOT HAQIDA (menejer) ====================== */
+.mahsulot-malumot { margin-bottom: 16px; border: 1px solid var(--border, #e2e8f0); border-radius: 12px; background: #fff; }
+.mahsulot-malumot > summary { cursor: pointer; padding: 10px 16px; font-weight: 600; font-size: 0.92rem; }
+.mahsulot-malumot-ichki { padding: 0 16px 14px; }
+.mahsulot-malumot-matn { margin-top: 10px; font-size: 0.9rem; line-height: 1.55; white-space: pre-line; }
+
+/* ====================== MARJA NAZORATI ====================== */
+.marja-nazorat { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: 0.84rem; line-height: 1.5; }
+.marja-nazorat .btn { height: 30px; padding: 0 12px; font-size: 0.8rem; margin-top: 6px; }
+.marja-tasdiq-overlay { position: fixed; inset: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(15,23,42,0.55); }
+.marja-tasdiq-oyna { width: 100%; max-width: 340px; padding: 22px; border-radius: 14px; background: var(--surface, #fff); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }

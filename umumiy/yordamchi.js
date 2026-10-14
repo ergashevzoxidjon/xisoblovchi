@@ -296,10 +296,12 @@
             fileReader.readAsDataURL(file);
             fileReader.onload = () => {
                 let natija = fileReader.result;
+                // Siqilgan rasm serverga yuboriladi (rasm-ombori.js, agar admin yoqqan bo'lsa); bo'lmasa data-URL qoladi
+                const saqla = d => (typeof rasmniServergaYuklash === 'function' ? rasmniServergaYuklash(d) : Promise.resolve(d));
                 if (file && /^image\/(png|jpe?g|webp|bmp)$/i.test(file.type)) {
-                    rasmniSiqish(natija).then(resolve, () => resolve(natija));
+                    rasmniSiqish(natija).then(saqla, () => saqla(natija)).then(resolve, () => resolve(natija));
                 } else {
-                    resolve(natija);
+                    saqla(natija).then(resolve, () => resolve(natija));
                 }
             };
             fileReader.onerror = (error) => reject(error);

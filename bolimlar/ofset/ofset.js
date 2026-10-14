@@ -626,7 +626,7 @@
 function generateForm_ofset(type, form, rightCol) {
             form.className = "";
             let parentGrid = document.querySelector('.calc-grid');
-            parentGrid.style.gridTemplateColumns = "1.2fr 1fr";
+            parentGrid.classList.add('calc-grid-teng');
 
             printSidesOfset = 1;
             selectedOfsetMachine = 'AUTO';

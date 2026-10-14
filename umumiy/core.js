@@ -375,6 +375,7 @@
 
     function logoutUser() {
         if (typeof logAudit === 'function' && currentUser) logAudit('Tizimdan chiqildi', currentUser.name);
+        if (typeof marjaTasdiqniTozala === 'function') marjaTasdiqniTozala();
         currentUser = null;
         try { sessionStorage.removeItem('erp_current_user_id'); } catch (e) {}
         updateCurrentUserBadge();
@@ -532,6 +533,7 @@
     }
 
     function addToQuoteCart() {
+        if (typeof marjaRuxsatBormi === 'function' && !marjaRuxsatBormi()) return; // minimal marjadan past — admin tasdig'i kerak
         if (!currentCalcResult || !currentCalcResult.totalPrice) {
             showToast("⚠️ Avval mahsulotni hisoblang!");
             return;
@@ -935,6 +937,9 @@
         if (searchInput) searchInput.value = '';
         let emptyState = document.getElementById('adminCatEmptyState');
         if (emptyState) emptyState.style.display = 'none';
+        if (typeof narxTekshiruvChiz === 'function') narxTekshiruvChiz();
+        if (typeof rasmOmboriChiz === 'function') rasmOmboriChiz();
+        if (typeof marjaChegaraChiz === 'function') marjaChegaraChiz();
     }
 
     // Admin Panel bosh ekranidagi qidiruv — mahsulot nomi bo'yicha kartalarni filtrlaydi,
@@ -980,6 +985,7 @@
 
     function openProductManagerIchki(key, name) {
         currentManagingProduct = key;
+        if (typeof mahsulotMalumotiAdminChiz === 'function') mahsulotMalumotiAdminChiz(key);
         document.getElementById('adminCategorySelection').style.display = 'none';
         document.getElementById('adminSpecificProductManager').style.display = 'block';
         document.getElementById('currentManagingTitle').innerText = `${name} — Bazasini Boshqarish`;
@@ -1182,6 +1188,7 @@
     }
 
     function closeProductManager() {
+        if (typeof narxTekshiruvChiz === 'function') narxTekshiruvChiz(); // saqlangan narxlar hisobga olinsin
         document.getElementById('adminCategorySelection').style.display = 'block';
         document.getElementById('adminSpecificProductManager').style.display = 'none';
     }
@@ -1235,6 +1242,7 @@
         document.getElementById('currentProductName').innerText = type === 'sifravoy_pechat' ? 'Raqamli Pechat Kalkulyatori' : (type === 'ofset_pechat' ? 'Ofset Pechat Kalkulyatori' : (name + " — Hisoblash Moduli"));
         try {
             generateForm(type);
+            if (typeof mahsulotMalumotiKorsat === 'function') mahsulotMalumotiKorsat(type);
         } catch (e) {
             console.error(`"${type}" kalkulyator formasini chizishda xato:`, e);
             document.getElementById('dynamicForm').innerHTML =
@@ -1245,13 +1253,14 @@
     }
 
     async function copyResult() {
+        if (typeof marjaRuxsatBormi === 'function' && !marjaRuxsatBormi()) return; // minimal marjadan past — admin tasdig'i kerak
         let text = `${currentCalcResult.name}\n\n`;
         text += `ℹ️ Tafsilot: ${currentCalcResult.details}\n`;
         text += `🔹 Miqdori: ${currentCalcResult.qty} dona\n`;
         text += `🔹 Birlik narxi: ${currentCalcResult.unitPrice.toLocaleString()} so'm\n`;
         text += `💰 Jami Summa: ${currentCalcResult.totalPrice.toLocaleString()} so'm`;
 
-        if (currentCalcResult.imageUrl && currentCalcResult.imageUrl.startsWith('data:image')) {
+        if (currentCalcResult.imageUrl && /^(data:image|uploads\/|https?:)/.test(currentCalcResult.imageUrl)) {
             try {
                 let response = await fetch(currentCalcResult.imageUrl);
                 let blob = await response.blob();
@@ -1298,7 +1307,8 @@ function generateForm(type) {
         if (tableContainerId) tableContainerId.style.display = 'none';
         let ofsetContainerId = document.getElementById('ofsetTableContainer');
         if (ofsetContainerId) ofsetContainerId.style.display = 'none';
-        document.querySelector('.calc-grid').style.gridTemplateColumns = "1.3fr 0.7fr";
+        // Ustun kengligi CSS orqali (telefonda bitta ustunga o'tishi uchun inline style ishlatilmaydi)
+        document.querySelector('.calc-grid').classList.remove('calc-grid-teng');
     }
 
         rightCol.className = "right-panel-col";
@@ -1472,6 +1482,7 @@ function generateForm(type) {
 function calculate() {
     try {
         calculateIchki();
+        if (typeof marjaNazoratYangila === 'function') marjaNazoratYangila(); // marja minimal chegaradan pastmi (marja-nazorat.js)
     } catch (e) {
         console.error(`"${activeProductType}" hisob-kitobida xato:`, e);
         let el = document.getElementById('resDetails');

@@ -387,6 +387,7 @@
             localStorage.setItem('erp_reklama_stend_qty_tiers', JSON.stringify(reklamaStendQtyTiers));
             if (typeof logAudit === 'function') logAudit("Reklama modellari o'zgartirildi", `Mahsulot: ${type}, ${list.length} ta model, ${tiers.length} ta oraliq`);
             renderAdminReklamaStendSizeTable(type);
+            if (typeof narxTasdiqla === 'function') narxTasdiqla('reklama_' + type);
             showToast("💾 Modellar va narxlar saqlandi!");
             return;
         }
@@ -414,6 +415,7 @@
         localStorage.setItem('erp_reklama_stend_qty_tiers', JSON.stringify(reklamaStendQtyTiers));
         if (typeof logAudit === 'function') logAudit("Reklama stend o'lchamlari o'zgartirildi", `Mahsulot: ${type}, ${updated.length} ta o'lcham, ${tiers.length} ta oraliq`);
         renderAdminReklamaStendSizeTable(type);
+        if (typeof narxTasdiqla === 'function') narxTasdiqla('reklama_' + type);
         showToast("💾 O'lchamlar va narxlar saqlandi!");
     }
 

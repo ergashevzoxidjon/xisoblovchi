@@ -17,9 +17,21 @@ umumiy/
   custom-products.js        ← admin qo'shadigan "maxsus" mahsulotlar
   full-calc.js              ← 👁️ to'liq hisob-kitob modali
   admin-ux.js               ← admin panel: yuqori panel, tez o'tish, saqlanmagan o'zgarishlar, Ctrl+S
-  ishga-tushirish.js        ← oxirgi yuklanadi: init() ni chaqiradi
+  narx-tekshiruv.js         ← admin: "🔎 Narxlarni tekshirish" (kiritilmagan va boshlang'ich narxlar ro'yxati)
+  rasm-ombori.js            ← rasmlarni serverda saqlash (admin kaliti), rasmniServergaYuklash()
+  mahsulot-malumoti.js      ← har qanday mahsulot uchun rasm + ma'lumot ("ℹ️ Mahsulot haqida")
+  marja-nazorat.js          ← minimal marja chegarasi va admin PIN tasdig'i
+  ishga-tushirish.js        ← oxirgi yuklanadi: init() ni chaqiradi, service worker'ni ro'yxatdan o'tkazadi
+manifest.webmanifest, sw.js ← PWA (oflayn ishlash, telefonga o'rnatish); ikonkalar umumiy/icons/
+passenger_wsgi.py           ← serverda statik sayt + rasm API (POST /api/rasm, GET /api/holat, /uploads/)
+testlar/                    ← hisob-kitob regressiya testlari (testlar/index.html, qarang: "Testlar")
 bolimlar/<nomi>/<nomi>.html|.css|.js
-  poligrafiya  (Flayer, Listovka, Doorhanger, Buklet, Bloknot, Paket, Kalendar, Papka, Kubarik, Konvert, Otkritka, Diplom, Katalog)
+  poligrafiya  (Flayer, Listovka, Doorhanger, Buklet, Bloknot, Paket, Kalendar, Papka, Kubarik, Konvert, Otkritka, Diplom, Katalog, Vizitka, Stiker)
+               JS 13 ta faylga bo'lingan (bitta global ko'lam, shu tartibda yuklanadi): asos, bloknot, varaqli (Konvert+Otkritka),
+               diplom, katalog, paket, kubarik, papka, kalendar, vizitka, stiker, dvigatel (Doorhanger + umumiy dvigatel),
+               poligrafiya (faqat ro'yxatdan o'tkazish — oxirida). Har bir qism oxirida POLI_QISMLAR ga o'zini yozadi;
+               qism yuklanmasa bo'lim "ishlamayapti" bo'ladi. Yangi qism qo'shsangiz: shablondagi <script> ro'yxatiga va
+               poligrafiya.js dagi POLI_KUTILGAN_QISMLAR ga ham kiriting.
   textile      (Futbolka ... Shoper, Bayroqlar)
   suvenir      (Ruchka, Termos, ... Zontik, Koja papkalar, Guvohnomalar)
   reklama      (Baner, Orakal, ..., Roll Up, Pauk, PopUp, PromoStoyka, Tablichka, Nastolniy tablichka, Stend)
@@ -99,6 +111,30 @@ Claude'ning **deploy-agent** skilli bajaradi ("deploy qil", "githubga yubor", "g
 - Tartib: pull → `python3 .deploy/yigish.py` → commit → push → server (cPanel Git: *Update from Remote*).
 - Server: Hostmaster cPanel, `/home/mylogo/xisoblovchi.mylogo.uz`, Passenger (`passenger_wsgi.py`) fayllarni
   har so'rovda diskdan o'qiydi — odatda restart kerak emas; `passenger_wsgi.py` o'zgarsa `tmp/restart.txt` ga touch.
+
+## Testlar
+
+Hisob formulalariga (Ofset/Raqamli dvigatel, pardozlash, Stiker/Kubarik/Vizitka...) tegilganda `python -m http.server 8000`
+va brauzerda `http://localhost:8000/testlar/` ni oching: 40 ta holat ilovani **toza xotira bilan** (saqlangan narxlarga
+tegmasdan) hisoblab, `testlar/kutilgan.js` dagi qiymat bilan solishtiradi. Qizil qator — narx kutilmagan o'zgargan.
+Formula ATAYLAB o'zgargan bo'lsa: `?yozib` bilan oching, chiqqan qiymatni `kutilgan.js` ga ko'chiring. Yangi holat —
+`testlar/holatlar.js` ga qator qo'shing. (Kutilgan qiymatlar — namuna/snapshot, "to'g'ri narx" kafolati emas.)
+
+## Admin yordamchilari
+
+- **Narxlarni tekshirish** (`narx-tekshiruv.js`): yangi mahsulot/sozlama qo'shsangiz, uning "kiritilmagan narx" va
+  "boshlang'ich (taxminiy) narx" tekshiruvini `narxMuammolari()` ga qo'shing. Taxminiy narxlar "tasdiqlandi" bo'ladi:
+  config localStorage'da saqlanganda (Stiker, Kubarik) yoki `narxTasdiqla('<kalit>')` chaqirilganda (Reklama).
+- **Mahsulot rasmi/ma'lumoti** (`mahsulot-malumoti.js`): hamma mahsulot admin sahifasida avtomatik chiqadi, ma'lumot
+  `erp_mahsulot_malumoti` da.
+- **Rasmlar serverda** (`rasm-ombori.js` + `passenger_wsgi.py`): admin kalitni kiritsa, `convertBase64()` siqilgan rasmni
+  serverga yuboradi va qisqa manzil ("uploads/....webp") qaytaradi; xato bo'lsa data-URL qoladi. Kalit serverda
+  `/home/mylogo/.xisoblovchi_token` faylida (gitga kirmaydi). `uploads/` gitignore'da. `<img>.src` mutlaq manzil
+  qaytaradi — saqlashdan oldin `rasmManzilNisbiy()` dan o'tkazing.
+- **Marja nazorati** (`marja-nazorat.js`): menejer minimal marjadan past kiritsa, `addToQuoteCart()` va `copyResult()`
+  admin PIN tasdig'ini talab qiladi (`marjaRuxsatBormi()`). Yangi "natijani chiqaradigan" tugma qo'shsangiz — shuni chaqiring.
+- **Telefon ko'rinishi**: `.calc-grid` ustunlarini `style` bilan emas, CSS sinfi (`calc-grid-teng`) bilan boshqaring —
+  inline style telefon uchun media-qoidani bekor qiladi.
 
 ## Yangi mahsulot qo'shish
 

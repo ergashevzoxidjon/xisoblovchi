@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#12141c">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="umumiy/icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="umumiy/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="myprint ERP">
     <title>myprint.uz ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -93,6 +99,7 @@
     <!-- KALKULYATOR EKRANI -->
     <div id="calcScreen" class="screen">
         <h2 id="currentProductName" style="margin-bottom: 20px; color: var(--primary);"></h2>
+        <div id="mahsulotMalumotiBox" style="display:none;"></div>
         
         <div class="calc-grid">
             <div id="dynamicForm"></div>
@@ -109,6 +116,9 @@
             <div style="margin-bottom:12px;">
                 <button class="btn btn-warning" id="addCustomProductBtn" style="white-space:nowrap;" onclick="openAddCustomProduct()">➕ Yangi mahsulot qo'shish</button>
             </div>
+            <div id="narxTekshiruvBox"></div>
+            <div id="marjaChegaraBox"></div>
+            <div id="rasmOmboriBox"></div>
             <div id="adminCategoryGridContainer"></div>
             <div id="adminCatEmptyState" class="admin-cat-empty" style="display:none;">🔍 Hech narsa topilmadi. Qidiruvni tekshiring.</div>
 
@@ -222,6 +232,8 @@
             <!-- @include reklama/admin -->
             <!-- @include textile/admin -->
             <!-- @include suvenir/admin -->
+
+            <div id="mahsulotMalumotiAdminBox"></div>
 
             <div class="add-pen-card" id="adminModelAddForm">
                 <div class="add-pen-card-head">
@@ -528,6 +540,18 @@
 <script src="bolimlar/ofset/ofset.js"></script>
 <script src="bolimlar/sifravoy/sifravoy.js"></script>
 <script src="bolimlar/qogoz/qogoz.js"></script>
+<script src="bolimlar/poligrafiya/asos.js"></script>
+<script src="bolimlar/poligrafiya/bloknot.js"></script>
+<script src="bolimlar/poligrafiya/varaqli.js"></script>
+<script src="bolimlar/poligrafiya/diplom.js"></script>
+<script src="bolimlar/poligrafiya/katalog.js"></script>
+<script src="bolimlar/poligrafiya/paket.js"></script>
+<script src="bolimlar/poligrafiya/kubarik.js"></script>
+<script src="bolimlar/poligrafiya/papka.js"></script>
+<script src="bolimlar/poligrafiya/kalendar.js"></script>
+<script src="bolimlar/poligrafiya/vizitka.js"></script>
+<script src="bolimlar/poligrafiya/stiker.js"></script>
+<script src="bolimlar/poligrafiya/dvigatel.js"></script>
 <script src="bolimlar/poligrafiya/poligrafiya.js"></script>
 <script src="bolimlar/textile/textile.js"></script>
 <script src="bolimlar/suvenir/suvenir.js"></script>
@@ -535,6 +559,10 @@
 <script src="umumiy/custom-products.js"></script>
 <script src="umumiy/full-calc.js"></script>
 <script src="umumiy/admin-ux.js"></script>
+<script src="umumiy/narx-tekshiruv.js"></script>
+<script src="umumiy/rasm-ombori.js"></script>
+<script src="umumiy/mahsulot-malumoti.js"></script>
+<script src="umumiy/marja-nazorat.js"></script>
 <script src="umumiy/bosh-sahifa.js"></script>
 <script src="umumiy/ishga-tushirish.js"></script>
 </body>

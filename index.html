@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 5394f97e4c60f1ae -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 28cee7b77042074d -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#12141c">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="umumiy/icons/favicon-32.png?v=e2ec3177">
+    <link rel="apple-touch-icon" href="umumiy/icons/apple-touch-icon.png?v=1496cedc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="myprint ERP">
     <title>myprint.uz ERP v3.8 - To'liq Versiya</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="umumiy/core.css?v=ef967e82">
+    <link rel="stylesheet" href="umumiy/core.css?v=3ef894a1">
     <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=2c67bfec">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
     <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
@@ -164,6 +170,7 @@
     <!-- KALKULYATOR EKRANI -->
     <div id="calcScreen" class="screen">
         <h2 id="currentProductName" style="margin-bottom: 20px; color: var(--primary);"></h2>
+        <div id="mahsulotMalumotiBox" style="display:none;"></div>
         
         <div class="calc-grid">
             <div id="dynamicForm"></div>
@@ -180,6 +187,9 @@
             <div style="margin-bottom:12px;">
                 <button class="btn btn-warning" id="addCustomProductBtn" style="white-space:nowrap;" onclick="openAddCustomProduct()">➕ Yangi mahsulot qo'shish</button>
             </div>
+            <div id="narxTekshiruvBox"></div>
+            <div id="marjaChegaraBox"></div>
+            <div id="rasmOmboriBox"></div>
             <div id="adminCategoryGridContainer"></div>
             <div id="adminCatEmptyState" class="admin-cat-empty" style="display:none;">🔍 Hech narsa topilmadi. Qidiruvni tekshiring.</div>
 
@@ -1535,6 +1545,8 @@
                 </div>
             </div>
 
+            <div id="mahsulotMalumotiAdminBox"></div>
+
             <div class="add-pen-card" id="adminModelAddForm">
                 <div class="add-pen-card-head">
                     <div class="add-pen-card-title" id="penFormTitle">➕ Yangi Model Qo'shish</div>
@@ -1853,19 +1865,35 @@
 </div>
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
-<script src="umumiy/yordamchi.js?v=898d3563"></script>
-<script src="umumiy/core.js?v=e2b60437"></script>
-<script src="bolimlar/ofset/ofset.js?v=0d5e344d"></script>
-<script src="bolimlar/sifravoy/sifravoy.js?v=cd801944"></script>
+<script src="umumiy/yordamchi.js?v=333a4bc1"></script>
+<script src="umumiy/core.js?v=25bb6c49"></script>
+<script src="bolimlar/ofset/ofset.js?v=298f1b18"></script>
+<script src="bolimlar/sifravoy/sifravoy.js?v=b0547654"></script>
 <script src="bolimlar/qogoz/qogoz.js?v=8ff2dcb5"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=9ba17203"></script>
-<script src="bolimlar/textile/textile.js?v=514a584c"></script>
+<script src="bolimlar/poligrafiya/asos.js?v=23451f70"></script>
+<script src="bolimlar/poligrafiya/bloknot.js?v=ccde9b65"></script>
+<script src="bolimlar/poligrafiya/varaqli.js?v=6712ce4b"></script>
+<script src="bolimlar/poligrafiya/diplom.js?v=34fe06b2"></script>
+<script src="bolimlar/poligrafiya/katalog.js?v=9fce835b"></script>
+<script src="bolimlar/poligrafiya/paket.js?v=206246dd"></script>
+<script src="bolimlar/poligrafiya/kubarik.js?v=15094100"></script>
+<script src="bolimlar/poligrafiya/papka.js?v=79663e9f"></script>
+<script src="bolimlar/poligrafiya/kalendar.js?v=79ffcc2b"></script>
+<script src="bolimlar/poligrafiya/vizitka.js?v=440d0401"></script>
+<script src="bolimlar/poligrafiya/stiker.js?v=42a89197"></script>
+<script src="bolimlar/poligrafiya/dvigatel.js?v=59b53255"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=1764a64b"></script>
+<script src="bolimlar/textile/textile.js?v=5932e434"></script>
 <script src="bolimlar/suvenir/suvenir.js?v=d6ec351e"></script>
-<script src="bolimlar/reklama/reklama.js?v=56fc21c3"></script>
+<script src="bolimlar/reklama/reklama.js?v=ea8e461a"></script>
 <script src="umumiy/custom-products.js?v=09afcfda"></script>
 <script src="umumiy/full-calc.js?v=4ef1771f"></script>
 <script src="umumiy/admin-ux.js?v=78336b6d"></script>
-<script src="umumiy/bosh-sahifa.js?v=8706bfc5"></script>
-<script src="umumiy/ishga-tushirish.js?v=d058089e"></script>
+<script src="umumiy/narx-tekshiruv.js?v=e37704da"></script>
+<script src="umumiy/rasm-ombori.js?v=371b0fbc"></script>
+<script src="umumiy/mahsulot-malumoti.js?v=c916af6a"></script>
+<script src="umumiy/marja-nazorat.js?v=26bd8db7"></script>
+<script src="umumiy/bosh-sahifa.js?v=5d4b5c3e"></script>
+<script src="umumiy/ishga-tushirish.js?v=487055e5"></script>
 </body>
 </html>

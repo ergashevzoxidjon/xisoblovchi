@@ -15,3 +15,15 @@
         init();
     }
 })();
+
+// ====================== PWA: oflayn ishlash va telefonga o'rnatish ======================
+// sw.js saytning ildizida turadi (butun sayt uchun amal qiladi). Brauzer qo'llab-quvvatlamasa, file:// da yoki
+// sinov oynasida (srcdoc) ochilgan bo'lsa — jimgina o'tkazib yuboriladi, ilovaning o'zi bundan mustaqil ishlaydi.
+(function () {
+    try {
+        if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(e => console.warn("[PWA] Service worker ro'yxatdan o'tmadi:", e && e.message));
+        });
+    } catch (e) { /* PWA ixtiyoriy */ }
+})();

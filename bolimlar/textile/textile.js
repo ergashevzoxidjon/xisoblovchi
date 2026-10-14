@@ -1107,6 +1107,7 @@ function saveBayroqItem() {
     let price = parseFloat(document.getElementById('bayroqPriceInput').value) || 0;
     let imageUrl = document.getElementById('bayroqImagePreview').src || '';
     if (!imageUrl.startsWith('data:') && !imageUrl.startsWith('http')) imageUrl = '';
+    if (typeof rasmManzilNisbiy === 'function') imageUrl = rasmManzilNisbiy(imageUrl); // server rasmi — ko'chma (nisbiy) manzil bilan saqlanadi
 
     if (!name) { showToast("⚠️ Nomini kiriting!"); return; }
     if (price <= 0) { showToast("⚠️ Narxini kiriting!"); return; }

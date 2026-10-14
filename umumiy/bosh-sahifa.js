@@ -4,6 +4,8 @@
 // "oxirgi ishlatilganlar". Xato bo'lsa eski ko'rinish saqlanib qoladi.
 (function () {
     const SAQLASH_KALITI = 'erp_bosh_oxirgilar';
+    // "Oxirgilar" qatori hozircha o'chirilgan — qayta yoqish uchun true qiling (tanlovlar baribir eslab qolinadi)
+    const OXIRGILARNI_KORSAT = false;
     const BOLIMLAR = [
         { id: 'poligrafiya', grids: ['grid-poligrafiya'], nom: 'Poligrafiya', belgi: '🖨️', rang: 'cyan' },
         { id: 'textile',     grids: ['grid-textile'],     nom: 'Tekstil',     belgi: '👕', rang: 'magenta' },
@@ -153,6 +155,7 @@
     function oxirgilarniChiz() {
         let box = document.getElementById('homeRecent');
         if (!box) return;
+        if (!OXIRGILARNI_KORSAT) { box.innerHTML = ''; box.style.display = 'none'; return; }
         let kartalar = Array.from(document.querySelectorAll('#selectionScreen .product-card'));
         let topilgan = oxirgilar.map(oc => kartalar.find(c => c.getAttribute('onclick') === oc)).filter(Boolean);
         if (!topilgan.length) { box.innerHTML = ''; box.style.display = 'none'; return; }
