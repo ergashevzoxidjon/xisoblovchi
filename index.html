@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 28cee7b77042074d -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 9106cc252ca28a32 -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="umumiy/core.css?v=3ef894a1">
-    <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=2c67bfec">
+    <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=f2eaed61">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
     <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
     <link rel="stylesheet" href="bolimlar/sifravoy/sifravoy.css?v=0813f0c4">
@@ -999,7 +999,7 @@
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title">🧊 Kubarik — umumiy sozlamalar</div>
                     <p class="admin-hint">Kubarik Ofsetda hisoblanadi, qog'oz narxi Ofset bo'limi bazasidan olinadi.
-                        Ichki varaqlar: kerakli A3 varoq = adad × varaq soni ÷ 1 A3 dagi bo'lak + zapas.
+                        Ichki qog'oz: kerakli A3 varoq = adad × (1 kubarikka A3 soni) + zapas.
                         Quti (idish): admin qog'oz, format (A3/A2/A1) va 1 varaqqa sig'adigan quti sonini kiritadi;
                         quti uchun <b>laminatsiya va visochka majburiy</b> (Ofset → Pardozlash xizmatlari narxidan),
                         <b>yig'ish</b> xarajati ham har kubarikka qo'shiladi.</p>
@@ -1010,13 +1010,29 @@
                             <small>Mijozga ko'rsatiladi</small>
                         </div>
                         <div class="form-group">
-                            <label>1 A3 varaqdagi ichki bo'lak (yangi turlar uchun standart)</label>
+                            <label>1 A3 varaqdagi ichki bo'lak (faqat "1 kubarikka A3" kiritilmagan eski turlar uchun)</label>
                             <div class="input-unit"><input type="number" id="kubarikA3Bolak" min="1"><span>dona</span></div>
                             <small>90x90 uchun 12 (3 × 4)</small>
                         </div>
                         <div class="form-group">
                             <label>Zapas (tirajga bir marta)</label>
                             <div class="input-unit"><input type="number" id="kubarikZapas" min="0"><span>A3 varaq</span></div>
+                            <small>Ichki qog'ozga</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Minimal adad</label>
+                            <div class="input-unit"><input type="number" id="kubarikMinAdad" min="1"><span>dona</span></div>
+                            <small>Undan kam bo'lsa "Mutaxassis bilan bog'laning" chiqadi</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Quti zapasi (tirajga bir marta)</label>
+                            <div class="input-unit"><input type="number" id="kubarikIdishZapas" min="0"><span>varaq</span></div>
+                            <small>Quti varag'iga (karton)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Quti laminatsiya turlari</label>
+                            <textarea id="kubarikLamTurlari" rows="4" placeholder="Glyanets = 0"></textarea>
+                            <small>Har qatorda: Nomi = ustama (so'm / 1 varaq). Asosiy narx — Ofset → Pardozlash xizmatlari.</small>
                         </div>
                     </div>
                 </div>
@@ -1027,14 +1043,17 @@
                         1+0 ofset pechat (forma + bosma) qo'shiladi. Narxlar — marjasiz tannarx, so'm/dona.</p>
                     <div class="table-card" style="margin-bottom:14px;">
                         <div class="table-scroll">
-                        <table class="admin-table" style="min-width:1500px;">
+                        <table class="admin-table" style="min-width:1850px;">
                             <thead>
                                 <tr>
-                                    <th style="min-width:110px;">Nomi</th>
+                                    <th style="min-width:110px;">Rasm</th>
+                                    <th style="min-width:200px;">Nomi</th>
+                                    <th style="min-width:90px;">O'lcham</th>
                                     <th style="min-width:110px;">Qog'oz turi</th>
                                     <th style="min-width:80px;">Grammaj</th>
                                     <th style="min-width:90px;">Varaq soni</th>
-                                    <th style="min-width:100px;">1 A3 dagi ichki bo'lak</th>
+                                    <th style="min-width:100px;">1 kubarikka A3 soni</th>
+                                    <th style="text-align:center;">Quti bor</th>
                                     <th style="min-width:110px;">Quti qog'ozi</th>
                                     <th style="min-width:90px;">Quti grammaji</th>
                                     <th style="min-width:80px;">Quti formati</th>
@@ -1866,8 +1885,8 @@
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
 <script src="umumiy/yordamchi.js?v=333a4bc1"></script>
-<script src="umumiy/core.js?v=25bb6c49"></script>
-<script src="bolimlar/ofset/ofset.js?v=298f1b18"></script>
+<script src="umumiy/core.js?v=578ef26d"></script>
+<script src="bolimlar/ofset/ofset.js?v=788efad9"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=b0547654"></script>
 <script src="bolimlar/qogoz/qogoz.js?v=8ff2dcb5"></script>
 <script src="bolimlar/poligrafiya/asos.js?v=23451f70"></script>
@@ -1876,13 +1895,13 @@
 <script src="bolimlar/poligrafiya/diplom.js?v=34fe06b2"></script>
 <script src="bolimlar/poligrafiya/katalog.js?v=9fce835b"></script>
 <script src="bolimlar/poligrafiya/paket.js?v=206246dd"></script>
-<script src="bolimlar/poligrafiya/kubarik.js?v=15094100"></script>
+<script src="bolimlar/poligrafiya/kubarik.js?v=5f4ace0c"></script>
 <script src="bolimlar/poligrafiya/papka.js?v=79663e9f"></script>
 <script src="bolimlar/poligrafiya/kalendar.js?v=79ffcc2b"></script>
 <script src="bolimlar/poligrafiya/vizitka.js?v=440d0401"></script>
 <script src="bolimlar/poligrafiya/stiker.js?v=42a89197"></script>
 <script src="bolimlar/poligrafiya/dvigatel.js?v=59b53255"></script>
-<script src="bolimlar/poligrafiya/poligrafiya.js?v=1764a64b"></script>
+<script src="bolimlar/poligrafiya/poligrafiya.js?v=0c491b11"></script>
 <script src="bolimlar/textile/textile.js?v=5932e434"></script>
 <script src="bolimlar/suvenir/suvenir.js?v=d6ec351e"></script>
 <script src="bolimlar/reklama/reklama.js?v=ea8e461a"></script>

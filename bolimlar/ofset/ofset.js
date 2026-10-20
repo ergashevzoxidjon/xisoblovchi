@@ -559,13 +559,14 @@
     // (A3) varoq soni tashqaridan `workingSheetsNeeded` sifatida hisoblab beriladi, bu funksiya
     // esa faqat qaysi xom (yetkazib beriladigan) qog'oz variantini tanlash va real qog'oz/forma/
     // bosma narxini calculateOfsetForMachine bilan bir xil formulalar asosida hisoblaydi.
-    function calculateOfsetJobFixedSheets(machName, tiraj, side, paperType, gsm, workingSheetsNeeded, forceChujoy) {
+    function calculateOfsetJobFixedSheets(machName, tiraj, side, paperType, gsm, workingSheetsNeeded, forceChujoy, faqatXomKey) {
         if (!workingSheetsNeeded || workingSheetsNeeded <= 0) return null;
         let bestVariant = null;
         let minPerPieceCost = Infinity;
 
         let availablePapersForSelection = ofsetRawPapers.filter(p => p.name === paperType && p.gsm === gsm);
         let workingSheets = getOfsetWorkingSheets(machName);
+        if (faqatXomKey) workingSheets = workingSheets.filter(ws => ws.rawKey === faqatXomKey); // masalan Kubarik qutisi: faqat 700x1000 xom varoq (35x50)
         let platePrices = { 'SRA3': ofsetMachineSettings.plateA3, 'A3': ofsetMachineSettings.plateA3, 'A2': ofsetMachineSettings.plateA2, 'A1': ofsetMachineSettings.plateA1 };
 
         for (let paperObj of availablePapersForSelection) {

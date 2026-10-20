@@ -116,9 +116,13 @@
                 try {
                     let parsed = JSON.parse(savedKubarik);
                     if (parsed && typeof parsed === 'object') {
+                        // versiya < 2: eski turlar (Oq/Rangli/Kleyli/Pechatli) yangi 3 ta turga (idishlik 90x90, 90x130,
+                        // termokleylik) almashtirildi — eski turlar ishlatilmaydi, qolgan sozlamalar saqlanadi.
+                        let yangi = parsed.versiya >= 3;
                         kubarikConfig = {
                             ...kubarikConfig, ...parsed,
-                            turlar: Array.isArray(parsed.turlar) ? parsed.turlar : kubarikConfig.turlar
+                            versiya: 3,
+                            turlar: (yangi && Array.isArray(parsed.turlar)) ? parsed.turlar : kubarikConfig.turlar
                         };
                     }
                 } catch (e) {

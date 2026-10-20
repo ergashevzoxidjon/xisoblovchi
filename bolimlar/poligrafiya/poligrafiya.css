@@ -177,3 +177,11 @@
 
 /* --- Katalog admin: abloshka / ichki blok qog'ozlari yonma-yon --- */
 .kt-admin-qogozlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+
+/* Kubarik tur rasmi */
+.kub-rasm { margin: 4px 0 8px; }
+.kub-rasm img { display: block; width: 100%; max-width: 280px; max-height: 200px; object-fit: contain; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card, #fff); }
+.kub-admin-rasm { position: relative; display: block; width: 88px; height: 66px; cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.kub-admin-rasm img { width: 100%; height: 100%; object-fit: cover; }
+.kub-admin-rasm input { display: none; }
+.kub-admin-rasm span { position: absolute; left: 0; right: 0; bottom: 0; padding: 2px 0; text-align: center; font-size: 0.68rem; font-weight: 700; color: #fff; background: rgba(18,20,28,0.6); }

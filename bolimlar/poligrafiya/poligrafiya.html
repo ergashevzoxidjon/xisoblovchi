@@ -474,7 +474,7 @@
                 <div class="add-pen-card" style="margin-bottom:16px;">
                     <div class="add-pen-card-title">🧊 Kubarik — umumiy sozlamalar</div>
                     <p class="admin-hint">Kubarik Ofsetda hisoblanadi, qog'oz narxi Ofset bo'limi bazasidan olinadi.
-                        Ichki varaqlar: kerakli A3 varoq = adad × varaq soni ÷ 1 A3 dagi bo'lak + zapas.
+                        Ichki qog'oz: kerakli A3 varoq = adad × (1 kubarikka A3 soni) + zapas.
                         Quti (idish): admin qog'oz, format (A3/A2/A1) va 1 varaqqa sig'adigan quti sonini kiritadi;
                         quti uchun <b>laminatsiya va visochka majburiy</b> (Ofset → Pardozlash xizmatlari narxidan),
                         <b>yig'ish</b> xarajati ham har kubarikka qo'shiladi.</p>
@@ -485,13 +485,29 @@
                             <small>Mijozga ko'rsatiladi</small>
                         </div>
                         <div class="form-group">
-                            <label>1 A3 varaqdagi ichki bo'lak (yangi turlar uchun standart)</label>
+                            <label>1 A3 varaqdagi ichki bo'lak (faqat "1 kubarikka A3" kiritilmagan eski turlar uchun)</label>
                             <div class="input-unit"><input type="number" id="kubarikA3Bolak" min="1"><span>dona</span></div>
                             <small>90x90 uchun 12 (3 × 4)</small>
                         </div>
                         <div class="form-group">
                             <label>Zapas (tirajga bir marta)</label>
                             <div class="input-unit"><input type="number" id="kubarikZapas" min="0"><span>A3 varaq</span></div>
+                            <small>Ichki qog'ozga</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Minimal adad</label>
+                            <div class="input-unit"><input type="number" id="kubarikMinAdad" min="1"><span>dona</span></div>
+                            <small>Undan kam bo'lsa "Mutaxassis bilan bog'laning" chiqadi</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Quti zapasi (tirajga bir marta)</label>
+                            <div class="input-unit"><input type="number" id="kubarikIdishZapas" min="0"><span>varaq</span></div>
+                            <small>Quti varag'iga (karton)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Quti laminatsiya turlari</label>
+                            <textarea id="kubarikLamTurlari" rows="4" placeholder="Glyanets = 0"></textarea>
+                            <small>Har qatorda: Nomi = ustama (so'm / 1 varaq). Asosiy narx — Ofset → Pardozlash xizmatlari.</small>
                         </div>
                     </div>
                 </div>
@@ -502,14 +518,17 @@
                         1+0 ofset pechat (forma + bosma) qo'shiladi. Narxlar — marjasiz tannarx, so'm/dona.</p>
                     <div class="table-card" style="margin-bottom:14px;">
                         <div class="table-scroll">
-                        <table class="admin-table" style="min-width:1500px;">
+                        <table class="admin-table" style="min-width:1850px;">
                             <thead>
                                 <tr>
-                                    <th style="min-width:110px;">Nomi</th>
+                                    <th style="min-width:110px;">Rasm</th>
+                                    <th style="min-width:200px;">Nomi</th>
+                                    <th style="min-width:90px;">O'lcham</th>
                                     <th style="min-width:110px;">Qog'oz turi</th>
                                     <th style="min-width:80px;">Grammaj</th>
                                     <th style="min-width:90px;">Varaq soni</th>
-                                    <th style="min-width:100px;">1 A3 dagi ichki bo'lak</th>
+                                    <th style="min-width:100px;">1 kubarikka A3 soni</th>
+                                    <th style="text-align:center;">Quti bor</th>
                                     <th style="min-width:110px;">Quti qog'ozi</th>
                                     <th style="min-width:90px;">Quti grammaji</th>
                                     <th style="min-width:80px;">Quti formati</th>

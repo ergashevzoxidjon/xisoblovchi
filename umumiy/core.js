@@ -1621,9 +1621,12 @@ function calculateIchki() {
         }
         else if (activeProductType === 'kubarik') {
             let res = calculateKubarik(qty);
+            let kubTur = kubarikTuri();
+            if (kubTur && kubTur.rasm) previewImgUrl = kubTur.rasm; // buyurtma/taklifnomada turning rasmi
             baseUnitPrice = res.unitPrice;
             details = res.details;
             costItems = res.costItems || [];
+            hisobYaroqsiz = !!res.hisobYaroqsiz;
         }
         else if (activeProductType === 'doorhanger') {
             let res = calculateDoorhanger(qty);
