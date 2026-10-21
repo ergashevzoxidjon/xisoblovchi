@@ -41,3 +41,6 @@ small, .admin-hint { font-size: 0.82rem; line-height: 1.5; }
     .home-sec .product-card .icon { width: 36px; height: 36px; flex-shrink: 0; }
     .home-sec .product-card h3, .product-card h3 { font-size: 0.92rem; overflow-wrap: anywhere; min-width: 0; }
 }
+
+/* Ichki ekranlardagi "Orqaga" tugmasi */
+.ekran-orqaga-qator { margin-bottom: 14px; }

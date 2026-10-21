@@ -420,6 +420,9 @@
     }
 
     function updateCurrentUserBadge() {
+        // Ichki ekranlardagi "Orqaga" tugmasi rolga qarab: admin — Admin panelga, menejer — mahsulotlar ro'yxatiga
+        let orqagaMatn = currentUser && currentUser.role === 'admin' ? "⬅️ Admin panelga" : "⬅️ Mahsulotlar ro'yxatiga";
+        document.querySelectorAll('.ekran-orqaga-btn').forEach(b => { b.innerText = orqagaMatn; });
         let el = document.getElementById('currentUserBadge');
         if (!el) return;
         if (currentUser) {

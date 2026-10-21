@@ -68,10 +68,8 @@
     <div class="header">
         <h1 onclick="goToLoginLandingScreen()" style="cursor:pointer;" title="Bosh sahifaga qaytish"><img class="header-logo" src="umumiy/logo.png" alt="myprint.uz — print. design. ads."> <span class="header-versiya">v3.8</span></h1>
         <div style="display:flex; align-items:center; gap:10px;">
-            <button class="btn btn-outline" id="globalBackBtn" onclick="goBackScreen()">⬅️ Orqaga</button>
             <span id="currentUserBadge" onclick="logoutUser()" style="display:none; cursor:pointer; font-size:0.78rem; font-weight:600; color:var(--text-muted); background:var(--bg-soft, #f1f5f9); padding:6px 12px; border-radius:8px; white-space:nowrap;" title="Chiqish uchun bosing"></span>
             <button class="btn btn-warning" id="quoteCartBtn" onclick="handleQuoteButtonClick()">🧾 Tijoriy taklif<span id="quoteCartBadge" class="quote-badge" style="display:none;">0</span></button>
-            <button class="btn btn-secondary" onclick="openReportsScreen()">📊 Hisobotlar</button>
         </div>
     </div>
 
@@ -99,6 +97,7 @@
 
     <!-- KALKULYATOR EKRANI -->
     <div id="calcScreen" class="screen">
+        <div class="no-print ekran-orqaga-qator"><button class="btn btn-outline ekran-orqaga-btn" onclick="goToLoginLandingScreen()">⬅️ Orqaga</button></div>
         <h2 id="currentProductName" style="margin-bottom: 20px; color: var(--primary);"></h2>
         <div id="mahsulotMalumotiBox" style="display:none;"></div>
         
@@ -415,7 +414,8 @@
 
     <!-- TIJORIY TAKLIF EKRANI -->
     <div id="quoteScreen" class="screen">
-        <div class="no-print" style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+            <button class="btn btn-outline ekran-orqaga-btn" onclick="goToLoginLandingScreen()">⬅️ Orqaga</button>
             <button class="btn btn-success" onclick="window.print()">⬇️ Yuklab olish (PDF)</button>
         </div>
         <div id="quoteOfferContent"></div>
@@ -423,6 +423,7 @@
 
     <!-- HISOBOTLAR EKRANI -->
     <div id="reportsScreen" class="screen">
+        <div class="no-print ekran-orqaga-qator"><button class="btn btn-outline ekran-orqaga-btn" onclick="goToLoginLandingScreen()">⬅️ Orqaga</button></div>
         <h2 style="margin-bottom: 20px; color: var(--text-main);">📊 Hisobotlar</h2>
 
         <div class="reports-tabs">
