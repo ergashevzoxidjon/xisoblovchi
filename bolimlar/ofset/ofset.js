@@ -193,6 +193,7 @@
             "Dizayn qog'ozi": { gsm: 0, label: "Yangi qog'oz", prices: { "sra3": 2000, "620x880": 0, "620x940": 0, "700x1000": 0 } }
         };
         let d = defaults[type] || defaults['Melovka'];
+        readOfsetQogozNarxlariUI(); // jadvaldagi saqlanmagan o'zgarishlar qator qo'shilganda yo'qolmasin
         let newItem = { name: type, gsm: d.gsm, prices: { ...d.prices } };
         if (d.label !== undefined) newItem.label = d.label;
         ofsetRawPapers.push(newItem);
@@ -205,6 +206,7 @@
             return;
         }
         if (confirm("Ushbu qog'oz qatorini o'chirmoqchimisiz?")) {
+            readOfsetQogozNarxlariUI();
             ofsetRawPapers.splice(index, 1);
             renderAdminOfsetPapersMatrix();
         }
@@ -212,7 +214,8 @@
 
     // Qog'oz narxlari (Qog'oz bo'limi → "Ofset qog'ozlari"). Mashina sozlamalariga TEGMAYDI —
     // aks holda boshqa ekranda ko'rinmay turgan forma/bosma maydonlari ham saqlanib ketardi.
-    function saveOfsetQogozNarxlari() {
+    // Jadvaldagi (hali saqlanmagan) qiymatlarni ofsetRawPapers ga o'qiydi — saqlash, qator qo'shish va o'chirishda ishlatiladi
+    function readOfsetQogozNarxlariUI() {
         ofsetRawPapers.forEach((item, index) => {
             if (item.name === 'Ofset') return;
             let isDizayn = (item.name === "Dizayn qog'ozi");
@@ -235,6 +238,10 @@
                 "700x1000": parseFloat(p1000Input.value) || 0
             };
         });
+    }
+
+    function saveOfsetQogozNarxlari() {
+        readOfsetQogozNarxlariUI();
 
         let offsetItem = ofsetRawPapers.find(p => p.name === 'Ofset');
         let singlePriceInput = document.getElementById('ofsetSinglePrice');

@@ -45,7 +45,8 @@
         showToast("✅ Qog'oz ma'lumotlari o'zgartirildi!");
     }
 
-    function saveAllDigitalPapers() {
+    // Jadvaldagi (hali saqlanmagan) qiymatlarni o'qiydi — saqlash, qator qo'shish va o'chirishda ishlatiladi
+    function readDigitalPapersUI() {
         for (let index = 0; index < digitalPapersDatabase.length; index++) {
             let nameInput = document.getElementById(`dig_name_${index}`);
             if (nameInput) {
@@ -60,6 +61,10 @@
                 };
             }
         }
+    }
+
+    function saveAllDigitalPapers() {
+        readDigitalPapersUI();
         localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
         if (typeof logAudit === 'function') logAudit("Raqamli pechat qog'ozlari o'zgartirildi", `${digitalPapersDatabase.length} ta qog'oz turi yangilandi`);
         showToast("💾 Barcha o'zgarishlar muvaffaqiyatli saqlandi!");
@@ -67,6 +72,7 @@
     }
 
     function addDigitalPaperRow() {
+        readDigitalPapersUI();
         digitalPapersDatabase.push({ name: "Yangi qog'oz", q_eni: 320, q_boyi: 450, p_eni: 310, p_boyi: 440, price1: 1000, price2: 1500 });
         localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
         renderAdminDigitalPaperTable();
@@ -75,6 +81,7 @@
 
     function deleteDigitalPaperRow(index) {
         if (confirm("Rostdan ham ushbu qog'ozni o'chirmoqchimisiz?")) {
+            readDigitalPapersUI();
             digitalPapersDatabase.splice(index, 1);
             localStorage.setItem('erp_digital_papers_db', JSON.stringify(digitalPapersDatabase));
             renderAdminDigitalPaperTable();

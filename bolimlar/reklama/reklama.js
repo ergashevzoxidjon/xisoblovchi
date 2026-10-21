@@ -356,7 +356,7 @@
         if (!reklamaStendSizeDatabase[currentManagingProduct]) reklamaStendSizeDatabase[currentManagingProduct] = [];
         let list = reklamaStendSizeDatabase[currentManagingProduct];
         let tierCount = (reklamaStendQtyTiers[currentManagingProduct] || []).length;
-        if (reklamaModelliMi(currentManagingProduct)) reklamaModelQatorlariniOqi(currentManagingProduct);
+        reklamaModelQatorlariniOqi(currentManagingProduct); // jadvaldagi saqlanmagan o'zgarishlar yo'qolmasin (hamma turda)
         list.push({ label: reklamaModelliMi(currentManagingProduct) ? 'Yangi model' : "Yangi o'lcham", price: 0, isDefault: list.length === 0, tierPrices: new Array(tierCount).fill(0),
             ...(reklamaModelliMi(currentManagingProduct) ? { rasm: '', rasmlar: [], razmerlar: '', qogozKerak: false, qogozNarxi: 0 } : {}) });
         renderAdminReklamaStendSizeTable(currentManagingProduct);
@@ -366,7 +366,7 @@
         let list = reklamaStendSizeDatabase[currentManagingProduct] || [];
         if (!list[index]) return;
         if (confirm("Ushbu qatorni o'chirmoqchimisiz?")) {
-            if (reklamaModelliMi(currentManagingProduct)) reklamaModelQatorlariniOqi(currentManagingProduct);
+            reklamaModelQatorlariniOqi(currentManagingProduct);
             let wasDefault = list[index].isDefault;
             list.splice(index, 1);
             if (wasDefault && list.length > 0) list[0].isDefault = true;

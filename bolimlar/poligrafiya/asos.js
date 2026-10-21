@@ -249,19 +249,39 @@
         showToast("💾 Mahsulot sozlamalari saqlandi!");
     }
 
+    // Formadagi (hali saqlanmagan) qiymatlarni ro'yxatga o'qiydi. Qator qo'shish/o'chirishda jadval qaytadan
+    // chiziladi — bu o'qishsiz admin kiritgan o'zgarishlar (grammaj, qog'oz turi, standart) yo'qolib ketardi.
+    function readPoligrafiyaGsmRows() {
+        let list = poligrafiyaGsmDatabase[currentManagingProduct] || [];
+        list.forEach((g, index) => {
+            let gsmInput = document.getElementById(`polgsm_gsm_${index}`);
+            if (!gsmInput) return;
+            let typeInput = document.getElementById(`polgsm_type_${index}`);
+            let defaultInput = document.getElementById(`polgsm_default_${index}`);
+            g.gsm = parseInt(gsmInput.value) || 0;
+            if (typeInput) g.paperType = typeInput.value;
+            g.isDefault = !!(defaultInput && defaultInput.checked);
+        });
+        return list;
+    }
+
     function addPoligrafiyaGsmRow() {
         if (!currentManagingProduct) return;
         if (!poligrafiyaGsmDatabase[currentManagingProduct]) poligrafiyaGsmDatabase[currentManagingProduct] = [];
-        let list = poligrafiyaGsmDatabase[currentManagingProduct];
+        let list = readPoligrafiyaGsmRows();
         // Doorhanger kabi kartonli mahsulotlarda yangi qator ham Karton bilan boshlansin —
         // qolganlarida Melovka eng ko'p ishlatiladigan standart tur.
         let defaultType = (list.length > 0 && list[list.length - 1].paperType) ? list[list.length - 1].paperType : 'Melovka';
-        list.push({ gsm: 130, paperType: defaultType, isDefault: list.length === 0 });
+        // Yangi qator mavjud (tur + grammaj) bilan bir xil bo'lib qolmasin: 130 band bo'lsa — shu turdagi eng katta grammajdan keyingisi
+        let band = list.filter(g => g.paperType === defaultType).map(g => g.gsm);
+        let yangiGsm = 130;
+        if (band.includes(yangiGsm)) yangiGsm = Math.max(...band) + 10;
+        list.push({ gsm: yangiGsm, paperType: defaultType, isDefault: !list.some(g => g.isDefault) });
         renderAdminPoligrafiyaGsmTable();
     }
 
     function deletePoligrafiyaGsmRow(index) {
-        let list = poligrafiyaGsmDatabase[currentManagingProduct] || [];
+        let list = readPoligrafiyaGsmRows();
         if (!list[index]) return;
         if (confirm("Ushbu grammajni o'chirmoqchimisiz?")) {
             let wasDefault = list[index].isDefault;
@@ -287,6 +307,15 @@
             });
         }
         if (updated.length > 0 && !updated.some(g => g.isDefault)) updated[0].isDefault = true;
+
+        // Noto'g'ri yoki takrorlangan qatorlar saqlanmasin (qog'oz bazasida qidirishda adashtiradi)
+        if (updated.some(g => !(g.gsm > 0))) { showToast("⚠️ Grammaj 0 dan katta bo'lishi kerak!"); return; }
+        let korilgan = new Set();
+        for (let g of updated) {
+            let kalit = g.paperType + '|' + g.gsm;
+            if (korilgan.has(kalit)) { showToast(`⚠️ ${g.paperType} ${g.gsm}gr ikki marta kiritilgan!`); return; }
+            korilgan.add(kalit);
+        }
 
         poligrafiyaGsmDatabase[currentManagingProduct] = updated;
         localStorage.setItem('erp_poligrafiya_gsm_db', JSON.stringify(poligrafiyaGsmDatabase));
