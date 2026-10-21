@@ -24,52 +24,12 @@
 </head>
 <body>
 
-<!-- KIRISH DARVOZASI: tizimning qolgan qismi shundan keyingina ko'rinadi -->
-<div id="loginGateScreen" style="position:fixed; inset:0; z-index:9999; background:var(--bg-main); display:flex; align-items:center; justify-content:center; padding:20px;">
-    <div style="width:100%; max-width:380px; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:32px 28px;">
-        <div style="margin-bottom:10px;">
-            <img src="umumiy/logo.png" alt="myprint.uz — print. design. ads." style="height:64px; width:auto; display:block;">
-        </div>
-
-        <!-- 1-QADAM: rol tanlash — Admin yoki Menejer kartochkasi -->
-        <div id="loginRoleStep">
-            <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 20px;">Davom etish uchun rolingizni tanlang.</p>
-            <div class="login-role-grid">
-                <div class="login-role-card login-role-admin" onclick="selectLoginRole('admin')">
-                    <div class="login-role-icon">🛡️</div>
-                    <div class="login-role-name">Admin</div>
-                    <div class="login-role-desc">To'liq boshqaruv</div>
-                </div>
-                <div class="login-role-card login-role-menejer" onclick="selectLoginRole('menejer')">
-                    <div class="login-role-icon">🧾</div>
-                    <div class="login-role-name">Menejer</div>
-                    <div class="login-role-desc">Hisob-kitob, buyurtma</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2-QADAM: tanlangan rol uchun PIN kod kiritish -->
-        <div id="loginPinStep" style="display:none;">
-            <div class="login-pin-step-head">
-                <span class="login-pin-role-badge" id="loginSelectedRoleLabel"></span>
-                <button type="button" class="login-pin-back-btn" onclick="backToLoginRoleStep()">⬅️ Boshqa rol</button>
-            </div>
-            <div class="form-group" style="margin-bottom:10px;">
-                <label>PIN kod (parol)</label>
-                <input type="password" id="loginPinInput" placeholder="••••" inputmode="numeric" autocomplete="current-password" onkeydown="if(event.key==='Enter'){ attemptLoginGate(); }">
-            </div>
-            <div id="loginErrorMsg" style="display:none; color:var(--magenta); font-size:0.82rem; font-weight:600; margin-bottom:12px;"></div>
-            <button class="btn" style="width:100%;" onclick="attemptLoginGate()">Kirish</button>
-        </div>
-    </div>
-</div>
-
 <div class="container" id="appContainer" style="display:none;">
     <div class="header">
         <h1 onclick="goToLoginLandingScreen()" style="cursor:pointer;" title="Bosh sahifaga qaytish"><img class="header-logo" src="umumiy/logo.png" alt="myprint.uz — print. design. ads."> <span class="header-versiya">v3.8</span></h1>
         <div style="display:flex; align-items:center; gap:10px;">
             <button class="btn btn-outline" id="globalBackBtn" onclick="goBackScreen()">⬅️ Orqaga</button>
-            <span id="currentUserBadge" onclick="logoutUser()" style="display:none; cursor:pointer; font-size:0.78rem; font-weight:600; color:var(--text-muted); background:var(--bg-soft, #f1f5f9); padding:6px 12px; border-radius:8px; white-space:nowrap;" title="Chiqish uchun bosing"></span>
+            <span id="currentUserBadge" style="display:none; font-size:0.78rem; font-weight:600; color:var(--text-muted); background:var(--bg-soft, #f1f5f9); padding:6px 12px; border-radius:8px; white-space:nowrap;" title="Chiqish uchun bosing"></span>
             <button class="btn btn-warning" id="quoteCartBtn" onclick="handleQuoteButtonClick()">🧾 Tijoriy taklif<span id="quoteCartBadge" class="quote-badge" style="display:none;">0</span></button>
             <button class="btn btn-secondary" onclick="openReportsScreen()">📊 Hisobotlar</button>
         </div>

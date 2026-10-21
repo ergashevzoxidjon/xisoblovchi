@@ -178,97 +178,34 @@
         renderAdminCategoryGrid();
         bolimXatolariniKorsat();
 
-        // Kirish darvozasi: shu brauzer TAB sessiyasida allaqachon kirilgan bo'lsa (sahifa yangilansa ham)
-        // qayta so'ramaymiz; aks holda tizim login ekranida qoladi (index.html da standart holat shu).
+        // Login/parol yo'q: rol havoladan aniqlanadi (qarang: rolHavoladan). Admin havolasi — Admin Panel,
+        // qolgan hamma holatda (oddiy havola ham) — menejer.
+        completeLoginGate(rolHavoladan());
+    }
+
+    // ====================== ROL HAVOLA BO'YICHA (LOGIN YO'Q) ======================
+    // Admin va Menejer uchun ALOHIDA havola:
+    //   Menejer:  <sayt>/            (yoki  <sayt>/?rol=menejer)
+    //   Admin:    <sayt>/?rol=admin  (yoki  <sayt>/?admin  yoki  <sayt>/#admin)
+    // Eslatma: bu parol emas — havolani bilgan kishi admin ko'rinishini ochadi. Narxlar va sozlamalar faqat shu
+    // brauzerning localStorage'ida turadi, shuning uchun u boshqa foydalanuvchilarning ma'lumotiga ta'sir qilmaydi.
+    function rolHavoladan() {
+        let rol = 'menejer';
         try {
-            let savedUserId = sessionStorage.getItem('erp_current_user_id');
-            if (savedUserId) {
-                let user = usersDb.find(u => u.id === savedUserId);
-                if (user) {
-                    completeLoginGate(user);
-                    return;
-                }
-            }
+            let q = new URLSearchParams(location.search);
+            let h = (location.hash || '').replace('#', '').toLowerCase();
+            if ((q.get('rol') || '').toLowerCase() === 'admin' || q.has('admin') || h === 'admin') rol = 'admin';
         } catch (e) {}
+        let user = usersDb.find(u => u.role === rol);
+        return user || (rol === 'admin' ? { id: 'u_admin', name: 'admin', pin: '', role: 'admin' } : { id: 'u_menejer', name: 'menejer', pin: '', role: 'menejer' });
     }
 
-    // ====================== KIRISH DARVOZASI (LOGIN GATE) ======================
-    // Butun tizim shu ekran ortida — avval Admin yoki Menejer kartochkasi tanlanadi,
-    // keyin o'sha rol uchun PIN kod so'raladi. PIN to'g'ri kelmaguncha #appContainer
-    // ko'rsatilmaydi.
-    let loginSelectedRole = null;
-
-    // Rol kartochkasi bosilganda — kartochkalar bosqichini yashirib, PIN kiritish
-    // blokini ochadi va tanlangan rol nomini ko'rsatadi.
-    function selectLoginRole(role) {
-        loginSelectedRole = role;
-        let roleStep = document.getElementById('loginRoleStep');
-        let pinStep = document.getElementById('loginPinStep');
-        let roleLabel = document.getElementById('loginSelectedRoleLabel');
-        let pinInput = document.getElementById('loginPinInput');
-        let errEl = document.getElementById('loginErrorMsg');
-        if (roleStep) roleStep.style.display = 'none';
-        if (pinStep) pinStep.style.display = 'block';
-        if (roleLabel) roleLabel.innerText = role === 'admin' ? '🛡️ Admin' : '🧾 Menejer';
-        if (errEl) errEl.style.display = 'none';
-        if (pinInput) { pinInput.value = ''; pinInput.focus(); }
-    }
-
-    // "⬅️ Boshqa rol" tugmasi — PIN blokini yopib, rol tanlash kartochkalariga qaytaradi.
-    function backToLoginRoleStep() {
-        loginSelectedRole = null;
-        let roleStep = document.getElementById('loginRoleStep');
-        let pinStep = document.getElementById('loginPinStep');
-        let pinInput = document.getElementById('loginPinInput');
-        let errEl = document.getElementById('loginErrorMsg');
-        if (pinStep) pinStep.style.display = 'none';
-        if (roleStep) roleStep.style.display = 'block';
-        if (pinInput) pinInput.value = '';
-        if (errEl) errEl.style.display = 'none';
-    }
-
-    function attemptLoginGate() {
-        let pinInput = document.getElementById('loginPinInput');
-        let errEl = document.getElementById('loginErrorMsg');
-        let pin = (pinInput?.value || '').trim();
-
-        function showErr(msg) {
-            if (errEl) { errEl.innerText = msg; errEl.style.display = 'block'; }
-        }
-
-        if (!loginSelectedRole) {
-            showErr('⚠️ Avval Admin yoki Menejer kartochkasini tanlang.');
-            return;
-        }
-
-        if (!pin) {
-            showErr('⚠️ PIN kodni kiriting.');
-            return;
-        }
-
-        let user = usersDb.find(u => u.role === loginSelectedRole && u.pin === pin);
-        if (!user) {
-            showErr('⚠️ PIN kod noto\'g\'ri.');
-            if (pinInput) { pinInput.value = ''; pinInput.focus(); }
-            return;
-        }
-
-        if (errEl) errEl.style.display = 'none';
-        try { sessionStorage.setItem('erp_current_user_id', user.id); } catch (e) {}
-        // logAudit o'zi currentUser'ni "kim qildi" sifatida yozadi — shuning uchun avval
-        // completeLoginGate orqali currentUser'ni o'rnatamiz, keyin audit yozuvini qo'shamiz.
-        completeLoginGate(user);
-        if (typeof logAudit === 'function') logAudit('Tizimga kirildi', `${user.role === 'admin' ? 'Admin' : 'Menejer'}`);
-    }
-
-    // Login muvaffaqiyatli bo'lgach (yoki sessiyadan tiklangach) darvozani yopib, asosiy ilovani ko'rsatadi.
-    // Rolga qarab boshlang'ich ekran ham farqlanadi: admin — to'g'ridan-to'g'ri Admin Panelga,
+    // Rolni o'rnatib, asosiy ilovani ko'rsatadi.
+    // Rolga qarab boshlang'ich ekran farqlanadi: admin — to'g'ridan-to'g'ri Admin Panelga,
     // menejer — hisoblash (mahsulotlar) ekraniga tushadi.
     function completeLoginGate(user) {
         currentUser = user;
-        let gate = document.getElementById('loginGateScreen');
         let app = document.getElementById('appContainer');
-        if (gate) gate.style.display = 'none';
         if (app) app.style.display = 'block';
         updateCurrentUserBadge();
 
@@ -351,43 +288,13 @@
         }
     }
 
+    // PIN so'ralmaydi: bo'lim faqat mos rolga (havola orqali) ochiladi. Menejer havolasida admin bo'limlari yopiq.
     function requireLogin(allowedRoles, onSuccess) {
-        // Agar shu sessiyada allaqachon mos rol bilan kirilgan bo'lsa, qayta so'ramaymiz
         if (currentUser && allowedRoles.includes(currentUser.role)) {
             onSuccess(currentUser);
             return;
         }
-        let pin = prompt("Kirish PIN kodini kiriting:", "");
-        if (pin === null) return;
-        let user = usersDb.find(u => u.pin === pin);
-        if (!user) {
-            showToast("⚠️ Noto'g'ri PIN kod!");
-            return;
-        }
-        if (!allowedRoles.includes(user.role)) {
-            showToast("⚠️ Sizda bu bo'limga kirish huquqi yo'q!");
-            return;
-        }
-        currentUser = user;
-        updateCurrentUserBadge();
-        onSuccess(user);
-    }
-
-    function logoutUser() {
-        if (typeof logAudit === 'function' && currentUser) logAudit('Tizimdan chiqildi', currentUser.name);
-        if (typeof marjaTasdiqniTozala === 'function') marjaTasdiqniTozala();
-        currentUser = null;
-        try { sessionStorage.removeItem('erp_current_user_id'); } catch (e) {}
-        updateCurrentUserBadge();
-        showScreen('selectionScreen');
-
-        // Ilovani yashirib, kirish darvozasini qayta ko'rsatamiz — chiqishdan keyin
-        // tizimning qolgan qismi yana login talab qiladi.
-        let gate = document.getElementById('loginGateScreen');
-        let app = document.getElementById('appContainer');
-        if (app) app.style.display = 'none';
-        if (gate) gate.style.display = 'flex';
-        backToLoginRoleStep();
+        showToast("⚠️ Bu bo'lim faqat admin havolasida ochiladi.");
     }
 
     function updateCurrentUserBadge() {
@@ -395,7 +302,7 @@
         if (!el) return;
         if (currentUser) {
             el.style.display = 'inline-flex';
-            el.innerText = `👤 ${currentUser.name} (${currentUser.role === 'admin' ? 'Admin' : 'Menejer'}) ✕`;
+            el.innerText = `👤 ${currentUser.role === 'admin' ? 'Admin' : 'Menejer'}`;
         } else {
             el.style.display = 'none';
         }
