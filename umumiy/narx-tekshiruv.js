@@ -93,12 +93,23 @@ function narxMuammolari() {
 
     // ---- Reklama: tayyor o'lchamli mahsulotlar (Roll Up, Pauk, PopUp, PromoStoyka, Tablichka...) ----
     sinab(() => {
-        reklamaStendTypes.filter(t => t !== 'stend').forEach(t => {
+        // Tablichka va Nastolniy tablichka — mahsulotlar katalogi (reklama.js tablichkaDatabase), o'z tekshiruvi pastda
+        reklamaStendTypes.filter(t => t !== 'stend' && !tablichkaTurlar.includes(t)).forEach(t => {
             (reklamaStendSizeDatabase[t] || []).forEach(s => {
                 let tierBor = Array.isArray(s.tierPrices) && s.tierPrices.some(v => v > 0);
                 if (!(parseFloat(s.price) > 0) && !tierBor) qosh(t, `«${s.label}» narxi kiritilmagan`, 'nol');
             });
             if (!tasdiq.includes('reklama_' + t)) qosh(t, "Boshlang'ich (demo) narxlar — haqiqiy narxlarni kiritib saqlang", 'taxminiy');
+        });
+    });
+
+    // ---- Tablichka mahsulotlari ----
+    sinab(() => {
+        tablichkaTurlar.forEach(t => {
+            (tablichkaDatabase[t] || []).forEach(it => {
+                if (tablichkaChopRuxsat(it).length === 0) qosh(t, `«${it.name}» narxi kiritilmagan`, 'nol');
+            });
+            if (!tasdiq.includes('reklama_' + t) && (tablichkaDatabase[t] || []).length > 0) qosh(t, "Boshlang'ich (demo) narxlar — haqiqiy narxlarni kiritib saqlang", 'taxminiy');
         });
     });
 

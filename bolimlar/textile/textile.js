@@ -927,9 +927,72 @@ function migrateDeadBayroqPlaceholderImages() {
     return bayroqChanged;
 }
 
+// ---------------- MA'LUMOT TUZILMASI ----------------
+// Har bir bayroq/mahsulot: { id, name (qisqa nom), info (ma'lumot, ko'p qatorli matn), imageUrl,
+//   tierlar: [{ from, to, konstruksiya, bayroq }] }
+// Narx (dona) = (Konstruksiya narxi + Bayroq (material) narxi) × Marja — miqdorga mos oraliqdan olinadi.
+// to = 0 — cheksiz ("va undan yuqori"). Konstruksiya narxi 0 bo'lsa mahsulotda konstruksiya tanlovi chiqmaydi.
+let bayroqKonstruksiyaBilan = true; // mijoz tanlovi: standart — konstruksiya BILAN
+
+// Eski ko'rinishdagi ({name: ko'p qatorli matn, price}) yozuvni yangisiga o'tkazadi. Eski narx konstruksiya
+// ajratilmagan JAMI narx edi — shuning uchun "Bayroq narxi"ga yoziladi, admin keyin konstruksiyani ajratib kiritadi.
+function bayroqMoslash(item) {
+    if (!item) return item;
+    if (!Array.isArray(item.tierlar) || item.tierlar.length === 0) {
+        let qatorlar = String(item.name || '').split('\n');
+        if (item.info === undefined) item.info = qatorlar.slice(1).map(s => s.trim()).filter(Boolean).join('\n');
+        item.name = qatorlar[0].trim().replace(/[:：]\s*$/, '') || 'Bayroq';
+        item.tierlar = [{ from: 1, to: 0, konstruksiya: 0, bayroq: parseFloat(item.price) || 0 }];
+    }
+    item.info = item.info || '';
+    // "Konstruksiya bor" belgisi: eski yozuvlarda matndan (конструкц/стойк/флагшток) yoki konstruksiya narxidan aniqlanadi
+    if (typeof item.konstruksiyaBor !== 'boolean') {
+        item.konstruksiyaBor = item.tierlar.some(t => parseFloat(t.konstruksiya) > 0)
+            || /конструкц|стойк|флагшток/i.test(item.name + ' ' + item.info);
+    }
+    delete item.price;
+    return item;
+}
+
+function bayroqTierlar(item) {
+    return ((item && item.tierlar) || [])
+        .map(t => ({
+            from: Math.max(1, parseInt(t.from) || 1),
+            to: Math.max(0, parseInt(t.to) || 0),
+            konstruksiya: Math.max(0, parseFloat(t.konstruksiya) || 0),
+            bayroq: Math.max(0, parseFloat(t.bayroq) || 0)
+        }))
+        .sort((a, b) => a.from - b.from);
+}
+
+// Miqdorga mos oraliq; mos kelmasa: eng kichikdan pastda — birinchisi, eng kattadan yuqorida — oxirgisi
+function bayroqTierFor(item, qty) {
+    let list = bayroqTierlar(item);
+    if (list.length === 0) return null;
+    let n = parseInt(qty) || 1;
+    for (let t of list) {
+        if (n >= t.from && n <= tierUpper(t)) return t;
+    }
+    return n < list[0].from ? list[0] : list[list.length - 1];
+}
+
+// Konstruksiya bor mahsulotda mijoz "konstruksiya bilan" (standart) yoki "konstruksiyasiz" tanlay oladi
+function bayroqKonstruksiyaBormi(item) {
+    return !!(item && item.konstruksiyaBor);
+}
+
+// Kartochkada ko'rsatiladigan narx: birinchi oraliq (konstruksiya bilan), bir nechta oraliq bo'lsa "dan"
+function bayroqKartaNarxi(item) {
+    let list = bayroqTierlar(item);
+    if (list.length === 0) return '—';
+    let t = list[0];
+    return (t.konstruksiya + t.bayroq).toLocaleString() + " so'm" + (list.length > 1 ? ' dan' : '');
+}
+
 // ---------------- MIJOZ (client) tomoni ----------------
 function generateFormHtml_bayroq() {
     selectedBayroqIndex = bayroqDatabase.length > 0 ? 0 : -1;
+    bayroqKonstruksiyaBilan = true;
     if (bayroqDatabase.length === 0) {
         return `<p style="color:var(--text-muted); font-size:0.85rem;">⚠️ Hali bayroq turlari kiritilmagan — Admin Panelda kiriting.</p>`;
     }
@@ -954,7 +1017,7 @@ function renderBayroqPicker() {
     const grid = document.getElementById('bayroqGrid');
     if (!grid) return;
     let q = (document.getElementById('bayroqSearchInput')?.value || '').toLowerCase();
-    let list = bayroqDatabase.filter(it => !q || bayroqShortName(it).toLowerCase().includes(q) || (it.name || '').toLowerCase().includes(q));
+    let list = bayroqDatabase.filter(it => !q || bayroqShortName(it).toLowerCase().includes(q) || (it.info || '').toLowerCase().includes(q));
     let activeItem = bayroqDatabase[selectedBayroqIndex];
     let countEl = document.getElementById('bayroqAvailableCount');
     if (countEl) countEl.textContent = bayroqDatabase.length;
@@ -962,7 +1025,6 @@ function renderBayroqPicker() {
         <div class="bayroq-card ${activeItem && activeItem.id === item.id ? 'active' : ''}" id="bayroq-card-${item.id}" onclick="selectBayroqItem('${item.id}')">
             <img src="${item.imageUrl || placeholderImg('Bayroq', 100, 75)}" alt="${bayroqShortName(item)}" onerror="this.src='${placeholderImg('No Img', 100, 75)}'">
             <div class="bayroq-card-name" title="${(item.name || '').replace(/"/g, '&quot;')}">${bayroqShortName(item)}</div>
-            <div class="bayroq-card-price">${(item.price || 0).toLocaleString()} so'm</div>
         </div>
     `).join('') : `<p style="color:var(--text-muted); font-size:0.85rem;">🔍 Hech narsa topilmadi.</p>`;
 }
@@ -971,18 +1033,32 @@ function selectBayroqItem(id) {
     let idx = bayroqDatabase.findIndex(it => it.id === id);
     if (idx < 0) return;
     selectedBayroqIndex = idx;
+    bayroqKonstruksiyaBilan = true; // yangi mahsulotda standart — konstruksiya BILAN
     document.querySelectorAll('#bayroqGrid .bayroq-card').forEach(c => c.classList.remove('active'));
     document.getElementById(`bayroq-card-${id}`)?.classList.add('active');
     calculate();
 }
 
+function setBayroqKonstruksiya(bilan) {
+    bayroqKonstruksiyaBilan = !!bilan;
+    calculate();
+}
+
+// Tanlangan mahsulotning ma'lumoti + konstruksiya tanlovi (konstruksiya narxi bor mahsulotlarda)
 function renderBayroqSpecBox() {
     let box = document.getElementById('bayroqSpecBox');
     if (!box) return;
     let item = bayroqDatabase[selectedBayroqIndex];
     if (!item) { box.innerHTML = ''; return; }
-    let safe = (item.name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
-    box.innerHTML = `<div style="white-space:pre-line; background:rgba(0,0,0,0.03); border:1px solid var(--border); border-radius:8px; padding:10px; margin:8px 0; font-size:0.78rem; color:var(--text-muted); line-height:1.5;">${safe}</div>`;
+    let esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    let konsHtml = bayroqKonstruksiyaBormi(item) ? `
+        <div class="step-title" style="margin-top:8px;">Konstruksiya</div>
+        <div class="options-group">
+            <button type="button" class="opt-btn ${bayroqKonstruksiyaBilan ? 'active' : ''}" onclick="setBayroqKonstruksiya(true)">Konstruksiya bilan</button>
+            <button type="button" class="opt-btn ${!bayroqKonstruksiyaBilan ? 'active' : ''}" onclick="setBayroqKonstruksiya(false)">Konstruksiyasiz</button>
+        </div>` : '';
+    let infoHtml = item.info ? `<div style="white-space:pre-line; background:rgba(0,0,0,0.03); border:1px solid var(--border); border-radius:8px; padding:10px; margin:8px 0; font-size:0.78rem; color:var(--text-muted); line-height:1.5;">${esc(item.info)}</div>` : '';
+    box.innerHTML = infoHtml + konsHtml;
 }
 
 function calculateResult_bayroq(qty) {
@@ -992,12 +1068,21 @@ function calculateResult_bayroq(qty) {
     if (selectedBayroqIndex < 0 || selectedBayroqIndex >= bayroqDatabase.length) selectedBayroqIndex = 0;
     let item = bayroqDatabase[selectedBayroqIndex];
     renderBayroqSpecBox();
-    let baseUnitPrice = item.price || 0;
-    let details = bayroqShortName(item);
+    let t = bayroqTierFor(item, qty);
+    if (!t) return { details: `${bayroqShortName(item)} — narx oraliqlari kiritilmagan (Admin Panel)`, baseUnitPrice: 0 };
+    let konsBor = bayroqKonstruksiyaBormi(item);
+    let kons = konsBor && bayroqKonstruksiyaBilan;
+    // Narx (dona) = Konstruksiya + Bayroq (material); marja core.js da qo'shiladi
+    let baseUnitPrice = t.bayroq + (kons ? t.konstruksiya : 0);
+    let details = bayroqShortName(item)
+        + (konsBor ? (kons ? ' | Konstruksiya bilan' : ' | Konstruksiyasiz') : '')
+        + (bayroqTierlar(item).length > 1 ? ` | Narx oralig'i: ${tierLabel(t)}` : '');
     return { details, baseUnitPrice };
 }
 
 // ---------------- ADMIN tomoni ----------------
+let bayroqAdminTierlar = [{ from: 1, to: 0, konstruksiya: 0, bayroq: 0 }]; // formadagi (saqlanmagan) oraliqlar
+
 function renderBayroqAdmin() {
     bayroqAdminSearchFilter = '';
     let searchInput = document.getElementById('bayroqAdminSearchInput');
@@ -1019,7 +1104,7 @@ function renderBayroqAdminGrid() {
 
     let list = bayroqDatabase.filter(it => !bayroqAdminSearchFilter ||
         bayroqShortName(it).toLowerCase().includes(bayroqAdminSearchFilter) ||
-        (it.name || '').toLowerCase().includes(bayroqAdminSearchFilter));
+        (it.info || '').toLowerCase().includes(bayroqAdminSearchFilter));
 
     if (bayroqDatabase.length === 0) {
         grid.innerHTML = `<div class="model-grid-empty">📭 Hozircha hech qanday bayroq qo'shilmagan.<br>Yuqoridagi formadan birinchisini qo'shing.</div>`;
@@ -1045,10 +1130,67 @@ function renderBayroqAdminGrid() {
                 </div>
             </div>
             <div class="model-card-body">
-                <div class="model-card-price">${(item.price || 0).toLocaleString()} so'm</div>
+                <div class="model-card-price">${bayroqKartaNarxi(item)}</div>
             </div>
         </div>
     `).join('');
+}
+
+// Narx oraliqlari jadvali (admin formasi)
+function renderBayroqTierRows() {
+    let box = document.getElementById('bayroqTierRows');
+    if (!box) return;
+    let konsBor = !!document.getElementById('bayroqKonsBor')?.checked;
+    box.innerHTML = bayroqAdminTierlar.map((t, i) => `
+        <div class="bayroq-tier-row ${konsBor ? '' : 'bez-konstruksiya'}">
+            <div class="form-group"><label>Dan (dona)</label><input type="number" id="bqTier_from_${i}" min="1" value="${t.from}"></div>
+            <div class="form-group"><label>Gacha (0 = cheksiz)</label><input type="number" id="bqTier_to_${i}" min="0" value="${t.to}"></div>
+            <div class="form-group bq-kons-maydon"><label>Konstruksiya narxi (so'm)</label><input type="number" id="bqTier_kons_${i}" min="0" value="${t.konstruksiya}"></div>
+            <div class="form-group"><label>Bayroq narxi (so'm)</label><input type="number" id="bqTier_bayroq_${i}" min="0" value="${t.bayroq}"></div>
+            <button type="button" class="btn btn-danger" title="Oraliqni o'chirish" onclick="deleteBayroqTierRow(${i})">✕</button>
+        </div>
+    `).join('');
+    let warn = document.getElementById('bayroqTierWarn');
+    if (warn) {
+        let msgs = tierValidationMessages(bayroqAdminTierlar);
+        if (konsBor && !bayroqAdminTierlar.some(t => t.konstruksiya > 0)) msgs.unshift("Konstruksiya narxi kiritilmagan — mijoz \"konstruksiya bilan\" tanlasa ham narx o'zgarmaydi.");
+        warn.innerHTML = msgs.map(m => `<div>⚠️ ${m}</div>`).join('');
+    }
+}
+
+// "Konstruksiya bor" belgisi o'zgarganda — formadagi qiymatlar yo'qolmasin
+function onBayroqKonsBorChange() {
+    bayroqAdminTierlar = collectBayroqTierRows();
+    renderBayroqTierRows();
+}
+
+function collectBayroqTierRows() {
+    return bayroqAdminTierlar.map((t, i) => {
+        let q = id => document.getElementById(id);
+        if (!q(`bqTier_from_${i}`)) return t;
+        return {
+            from: Math.max(1, parseInt(q(`bqTier_from_${i}`).value) || 1),
+            to: Math.max(0, parseInt(q(`bqTier_to_${i}`).value) || 0),
+            konstruksiya: Math.max(0, parseFloat(q(`bqTier_kons_${i}`).value) || 0),
+            bayroq: Math.max(0, parseFloat(q(`bqTier_bayroq_${i}`).value) || 0)
+        };
+    });
+}
+
+function addBayroqTierRow() {
+    bayroqAdminTierlar = collectBayroqTierRows();
+    let last = bayroqAdminTierlar[bayroqAdminTierlar.length - 1];
+    let from = last ? (last.to > 0 ? last.to + 1 : last.from + 1) : 1;
+    if (last && last.to === 0) last.to = Math.max(last.from, from - 1); // oldingi cheksiz oraliqni yopamiz
+    bayroqAdminTierlar.push({ from, to: 0, konstruksiya: last ? last.konstruksiya : 0, bayroq: last ? last.bayroq : 0 });
+    renderBayroqTierRows();
+}
+
+function deleteBayroqTierRow(i) {
+    bayroqAdminTierlar = collectBayroqTierRows();
+    if (bayroqAdminTierlar.length <= 1) { showToast("⚠️ Kamida bitta oraliq bo'lishi kerak"); return; }
+    bayroqAdminTierlar.splice(i, 1);
+    renderBayroqTierRows();
 }
 
 async function previewBayroqImage(inputEl) {
@@ -1067,7 +1209,14 @@ function editBayroqItem(id) {
     bayroqEditId = id;
     document.getElementById('bayroqFormTitle').innerText = "✏️ Bayroqni Tahrirlash";
     document.getElementById('bayroqNameInput').value = item.name || '';
-    document.getElementById('bayroqPriceInput').value = item.price || 0;
+    let infoEl = document.getElementById('bayroqInfoInput');
+    infoEl.value = item.info || '';
+    infoEl.style.height = 'auto';
+    infoEl.style.height = Math.max(280, infoEl.scrollHeight) + 'px'; // ma'lumot to'liq ko'rinsin (scroll kerak bo'lmasin)
+    document.getElementById('bayroqKonsBor').checked = !!item.konstruksiyaBor;
+    bayroqAdminTierlar = bayroqTierlar(item);
+    if (bayroqAdminTierlar.length === 0) bayroqAdminTierlar = [{ from: 1, to: 0, konstruksiya: 0, bayroq: 0 }];
+    renderBayroqTierRows();
     let img = document.getElementById('bayroqImagePreview');
     let placeholder = document.getElementById('bayroqImagePreviewPlaceholder');
     if (item.imageUrl) {
@@ -1089,11 +1238,15 @@ function cancelBayroqEdit() {
     let title = document.getElementById('bayroqFormTitle');
     if (title) title.innerText = "➕ Yangi Bayroq Qo'shish";
     let nameEl = document.getElementById('bayroqNameInput');
-    let priceEl = document.getElementById('bayroqPriceInput');
+    let infoEl = document.getElementById('bayroqInfoInput');
     let fileEl = document.getElementById('bayroqFileInput');
     if (nameEl) nameEl.value = '';
-    if (priceEl) priceEl.value = '';
+    if (infoEl) { infoEl.value = ''; infoEl.style.height = ''; }
     if (fileEl) fileEl.value = '';
+    let konsEl = document.getElementById('bayroqKonsBor');
+    if (konsEl) konsEl.checked = true; // yangi mahsulotda standart — konstruksiya bor
+    bayroqAdminTierlar = [{ from: 1, to: 0, konstruksiya: 0, bayroq: 0 }];
+    renderBayroqTierRows();
     let img = document.getElementById('bayroqImagePreview');
     let placeholder = document.getElementById('bayroqImagePreviewPlaceholder');
     if (img) { img.src = ''; img.style.display = 'none'; }
@@ -1104,23 +1257,27 @@ function cancelBayroqEdit() {
 
 function saveBayroqItem() {
     let name = (document.getElementById('bayroqNameInput').value || '').trim();
-    let price = parseFloat(document.getElementById('bayroqPriceInput').value) || 0;
+    let info = (document.getElementById('bayroqInfoInput').value || '').trim();
+    let konsBor = !!document.getElementById('bayroqKonsBor').checked;
+    let tierlar = collectBayroqTierRows();
+    if (!konsBor) tierlar.forEach(t => { t.konstruksiya = 0; });
     let imageUrl = document.getElementById('bayroqImagePreview').src || '';
     if (!imageUrl.startsWith('data:') && !imageUrl.startsWith('http')) imageUrl = '';
     if (typeof rasmManzilNisbiy === 'function') imageUrl = rasmManzilNisbiy(imageUrl); // server rasmi — ko'chma (nisbiy) manzil bilan saqlanadi
 
-    if (!name) { showToast("⚠️ Nomini kiriting!"); return; }
-    if (price <= 0) { showToast("⚠️ Narxini kiriting!"); return; }
+    if (!name) { showToast("⚠️ Mahsulot nomini kiriting!"); return; }
+    if (!tierlar.some(t => t.bayroq > 0)) { showToast("⚠️ Kamida bitta oraliqqa bayroq narxini kiriting!"); return; }
+    tierlar.sort((a, b) => a.from - b.from);
 
     if (bayroqEditId) {
         let item = bayroqDatabase.find(it => it.id === bayroqEditId);
         if (item) {
-            item.name = name; item.price = price;
+            item.name = name; item.info = info; item.tierlar = tierlar; item.konstruksiyaBor = konsBor;
             if (imageUrl) item.imageUrl = imageUrl;
             if (typeof logAudit === 'function') logAudit("Bayroq tahrirlandi", bayroqShortName(item));
         }
     } else {
-        let newItem = { id: bqId(), name, price, imageUrl };
+        let newItem = { id: bqId(), name, info, tierlar, imageUrl, konstruksiyaBor: konsBor };
         bayroqDatabase.push(newItem);
         if (typeof logAudit === 'function') logAudit("Yangi bayroq qo'shildi", bayroqShortName(newItem));
     }
@@ -1195,6 +1352,11 @@ function deleteBayroqItem(id) {
                     if (Array.isArray(parsed)) bayroqDatabase = parsed;
                 } catch (e) {}
             }
+
+            // Eski ({name, price}) yozuvlarni yangi tuzilmaga (nom, ma'lumot, narx oraliqlari) o'tkazish (idempotent)
+            let eskiBor = bayroqDatabase.some(it => !Array.isArray(it.tierlar) || it.tierlar.length === 0);
+            bayroqDatabase.forEach(bayroqMoslash);
+            if (eskiBor && savedBayroqDb) localStorage.setItem('erp_bayroq_db', JSON.stringify(bayroqDatabase));
 
             // O'chib qolgan via.placeholder.com rasmlarini mahalliy rasm-o'rnbosarga almashtirish (idempotent)
             migrateDeadBayroqPlaceholderImages();

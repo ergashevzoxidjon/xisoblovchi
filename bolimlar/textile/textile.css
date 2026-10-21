@@ -146,3 +146,12 @@
 .dtf-layout-info { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.6; }
 .dtf-layout-info strong { color: var(--text-main); }
 .dtf-layout-svg-wrap { display: flex; justify-content: center; }
+
+/* Bayroq admin: narx oraliqlari qatori */
+.bayroq-tier-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+.bayroq-tier-row .form-group { margin-bottom: 0; }
+.bayroq-tier-row label { font-size: 0.72rem; }
+.bayroq-tier-row input { min-width: 0; width: 100%; }
+@media (max-width: 560px) { .bayroq-tier-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bayroq-tier-row .btn { grid-column: 1 / -1; } }
+.bayroq-tier-row.bez-konstruksiya { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; }
+.bayroq-tier-row.bez-konstruksiya .bq-kons-maydon { display: none; }

@@ -6,6 +6,7 @@
 
 const MAHSULOT_MALUMOTI_KALITI = 'erp_mahsulot_malumoti';
 const MAHSULOT_QOSHIMCHA_RASM_MAX = 12;
+const MAHSULOT_ADMIN_BLOK_YASHIRIN = true;
 let mahsulotMalumoti = {};
 let mahsulotAdminHolati = null; // admin formasida tahrirlanayotgan nusxa: { kalit, rasm, rasmlar, matn }
 
@@ -61,6 +62,10 @@ function mahsulotGalereyaRasmi(i) {
 function mahsulotMalumotiAdminChiz(kalit) {
     let box = document.getElementById('mahsulotMalumotiAdminBox');
     if (!box) return;
+    // Admin sahifalarida umumiy "Mahsulot rasmlari va ma'lumoti" bloki ko'rsatilmaydi (talab bo'yicha olib tashlangan).
+    // Rasm/ma'lumot mahsulotning o'z formasida (Bayroq, Tablichka...) kiritiladi. Quyidagi tahrirlash kodi saqlab qo'yilgan:
+    // blokni qaytarish uchun MAHSULOT_ADMIN_BLOK_YASHIRIN ni false qiling.
+    if (MAHSULOT_ADMIN_BLOK_YASHIRIN) { box.innerHTML = ''; mahsulotAdminHolati = null; return; }
     let m = mahsulotMalumoti[kalit] || {};
     mahsulotAdminHolati = { kalit, rasm: m.rasm || '', rasmlar: Array.isArray(m.rasmlar) ? m.rasmlar.slice() : [], matn: m.matn || '' };
     mahsulotAdminQayta();

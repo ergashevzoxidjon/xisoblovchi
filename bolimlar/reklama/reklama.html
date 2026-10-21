@@ -116,4 +116,85 @@
                 </div>
             </div>
 
+            <!-- TABLICHKA / NASTOLNIY TABLICHKA ADMIN PANEL BLOKI (Bayroqlar kabi mahsulotlar katalogi) -->
+            <div id="tablichkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" id="tablichkaAddForm">
+                    <div class="add-pen-card-head">
+                        <div class="add-pen-card-title" id="tablichkaFormTitle">➕ Yangi mahsulot qo'shish</div>
+                        <div class="add-pen-card-sub" id="tablichkaAdminSarlavha"></div>
+                    </div>
+                    <div class="model-form-section">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:2; min-width:260px;">
+                                <label>Mahsulot nomi (title):</label>
+                                <input type="text" id="tablichkaNameInput" placeholder="Masalan: Tablichka 300x400mm">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1; min-width:280px;">
+                                <label>Ma'lumot (mijozga ko'rsatiladi — o'lcham, material va h.k.):</label>
+                                <textarea id="tablichkaInfoInput" rows="8" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" placeholder="Razmerlari: 20x30, 30x40 sm&#10;Material: ..." style="width:100%; min-height:200px; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.9rem; line-height:1.5; resize:vertical;"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>Narx oraliqlari (tiraj bo'yicha) — UF pechat va Gravirovka narxlari alohida:</label>
+                                <div id="tablichkaTierRows"></div>
+                                <div id="tablichkaTierWarn" class="admin-hint" style="margin-top:6px;"></div>
+                                <button type="button" class="btn" style="background:#4f46e5; margin-top:6px;" onclick="tablichkaOraliqQosh()">+ Oraliq qo'shish</button>
+                                <small>Narxi 0 qoldirilgan chop turi bu mahsulotda mijozga o'chiq (tanlab bo'lmaydigan) ko'rinadi. Marja keyin qo'shiladi.</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="tablichkaStandart" style="width:auto; height:auto;">
+                                    Standart mahsulot (kalkulyator ochilganda shu tanlangan turadi)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="tablichkaQogozBor" onchange="tablichkaQogozBorOzgardi()" style="width:auto; height:auto;">
+                                    Ichiga soladigan qog'oz mumkin (mijoz «kerak / kerak emas» tanlaydi)
+                                </label>
+                                <div id="tablichkaQogozMaydonlar" style="display:none; margin-top:8px;">
+                                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                        <input type="checkbox" id="tablichkaQogozKerak" style="width:auto; height:auto;"> Standart holatda «kerak»
+                                    </label>
+                                    <div class="input-unit" style="margin-top:6px; max-width:260px;"><input type="number" min="0" id="tablichkaQogozNarxi" value="0"><span>so'm/dona</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Rasm Yuklash (Lokal):</label>
+                                <div class="image-upload-row">
+                                    <div class="image-upload-preview">
+                                        <img id="tablichkaImagePreview" alt="" style="display:none;">
+                                        <span id="tablichkaImagePreviewPlaceholder">🪧</span>
+                                    </div>
+                                    <input type="file" id="tablichkaFileInput" accept="image/*" onchange="tablichkaRasmTanlash(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-outline" id="btnTablichkaBekor" style="display:none;" onclick="tablichkaBekorQilish()">Bekor qilish</button>
+                        <button class="btn" onclick="saveTablichkaItem()">💾 Saqlash</button>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="model-list-head">
+                        <div class="model-list-head-left">
+                            <h3>📋 Mahsulotlar ro'yxati</h3>
+                            <span class="model-list-count" id="tablichkaAdminCount"></span>
+                        </div>
+                    </div>
+                    <div class="model-grid" id="tablichkaAdminGrid"></div>
+                </div>
+            </div>
+
 <!-- @/blok -->

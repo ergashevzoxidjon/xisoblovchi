@@ -994,6 +994,387 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
     return { details, baseUnitPrice };
 }
 
+    // ====================== TABLICHKA MAHSULOTLARI (Bayroqlar kabi: admin mahsulot qo'shib boradi) ======================
+    // Tablichka va Nastolniy tablichka: admin har bir mahsulot uchun nom (title), rasm, ma'lumot va
+    // MIQDOR ORALIQLARINI (har biri o'z narxlari bilan) kiritadi. Chop etish turi ikkita: UF pechat va Gravirovka —
+    // har oraliqda ikkalasining narxi alohida (narxi 0 bo'lgan chop turi shu mahsulotda mavjud emas).
+    // Ichiga soladigan qog'oz — ixtiyoriy (mahsulot belgilasa): standart holat + qo'shimcha narx (so'm/dona).
+    // Narx (dona) = tanlangan chop turining oraliq narxi (+ qog'oz narxi) × Marja (core.js).
+    // Mahsulot: { id, name, info, imageUrl, tierlar: [{ from, to, uf, gravirovka }], qogozBor, qogozKerak, qogozNarxi, standart }
+    // standart — kalkulyator ochilganda shu mahsulot tanlangan turadi (birortasida bo'lmasa — birinchisi).
+    const tablichkaTurlar = ['tablichka', 'nastolniy_tablichka'];
+    const TABLICHKA_CHOP = { uf: 'UF pechat', gravirovka: 'Gravirovka' };
+    let tablichkaDatabase = { tablichka: [], nastolniy_tablichka: [] };
+    let tablichkaSelectedId = null;
+    let tablichkaChop = 'uf';       // mijoz tanlovi
+    let tablichkaQogoz = false;     // mijoz tanlovi (mahsulot tanlanganda admin belgilagan standartga qaytadi)
+    let tablichkaEditId = null;
+    let tablichkaAdminTierlar = [{ from: 1, to: 0, uf: 0, gravirovka: 0 }];
+
+    function tablichkaMi(type) { return tablichkaTurlar.includes(type); }
+    function tbId() { return 'TB-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
+    function tbEsc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+    function tablichkaTierlar(item) {
+        return ((item && item.tierlar) || [])
+            .map(t => ({
+                from: Math.max(1, parseInt(t.from) || 1),
+                to: Math.max(0, parseInt(t.to) || 0),
+                uf: Math.max(0, parseFloat(t.uf) || 0),
+                gravirovka: Math.max(0, parseFloat(t.gravirovka) || 0)
+            }))
+            .sort((a, b) => a.from - b.from);
+    }
+
+    // Miqdorga mos oraliq: mos kelmasa — eng kichikdan pastda birinchisi, eng kattadan yuqorida oxirgisi
+    function tablichkaTierFor(item, qty) {
+        let list = tablichkaTierlar(item);
+        if (list.length === 0) return null;
+        let n = parseInt(qty) || 1;
+        for (let t of list) {
+            if (n >= t.from && n <= tierUpper(t)) return t;
+        }
+        return n < list[0].from ? list[0] : list[list.length - 1];
+    }
+
+    // Mahsulotda qaysi chop turlari mavjud (hech bo'lmasa bitta oraliqda narxi bor)
+    function tablichkaChopRuxsat(item) {
+        let list = tablichkaTierlar(item);
+        return Object.keys(TABLICHKA_CHOP).filter(k => list.some(t => t[k] > 0));
+    }
+
+    function tablichkaMahsulotlari(type) { return tablichkaDatabase[type] || []; }
+    function tablichkaTanlangan(type) {
+        let list = tablichkaMahsulotlari(type);
+        return list.find(it => it.id === tablichkaSelectedId) || list.find(it => it.standart) || list[0] || null;
+    }
+
+    // Eski modellarni (reklamaStendSizeDatabase: label/rasm/razmerlar/tierPrices) yangi tuzilmaga o'tkazadi.
+    // Eski narx chop turiga bo'linmagan edi — ikkala chop turiga bir xil yoziladi, admin keyin ajratadi.
+    function tablichkaEskidanOtkazish() {
+        tablichkaTurlar.forEach(type => {
+            let tiers = reklamaStendQtyTiers[type] || [];
+            tablichkaDatabase[type] = (reklamaStendSizeDatabase[type] || []).map(m => {
+                let tp = Array.isArray(m.tierPrices) ? m.tierPrices : [];
+                let tierlar = tiers.length > 0
+                    ? tiers.map((t, i) => ({ from: t.from, to: t.to || 0, uf: tp[i] > 0 ? tp[i] : (m.price || 0), gravirovka: tp[i] > 0 ? tp[i] : (m.price || 0) }))
+                    : [{ from: 1, to: 0, uf: m.price || 0, gravirovka: m.price || 0 }];
+                return {
+                    id: tbId(), name: m.label || 'Nomsiz', info: m.razmerlar || '', imageUrl: m.rasm || '',
+                    tierlar, standart: !!m.isDefault, qogozBor: !!(m.qogozKerak || parseFloat(m.qogozNarxi) > 0), qogozKerak: !!m.qogozKerak, qogozNarxi: parseFloat(m.qogozNarxi) || 0
+                };
+            });
+        });
+    }
+
+    function saqlaTablichka() {
+        localStorage.setItem('erp_tablichka_db', JSON.stringify(tablichkaDatabase));
+    }
+
+    // ---------------- MIJOZ tomoni ----------------
+    function generateFormHtml_tablichka(type) {
+        let list = tablichkaMahsulotlari(type);
+        let boshlang = list.find(it => it.standart) || list[0];
+        tablichkaSelectedId = boshlang ? boshlang.id : null;
+        tablichkaTanlovniBoshlash(type);
+        if (list.length === 0) {
+            return `<p style="color:var(--text-muted); font-size:0.85rem;">⚠️ Hali mahsulot kiritilmagan — Admin Panelda kiriting.</p>`;
+        }
+        return `
+            <div class="step-title">1. Mahsulotni tanlang (${list.length} ta mavjud):</div>
+            <div class="bayroq-grid" id="tablichkaGrid"></div>
+            <div id="tablichkaSpecBox"></div>
+            <div class="form-group" style="margin-top:10px;">
+                <label>2. Adad (dona):</label>
+                <input type="number" id="inpQuantity" value="1" min="1" oninput="calculate()">
+            </div>
+            <div id="tablichkaTierBox" style="margin-top:12px;"></div>
+        `;
+    }
+
+    // Yangi mahsulot tanlanganda: standart chop turi — birinchi mavjud, qog'oz — admin belgilagan standart
+    function tablichkaTanlovniBoshlash(type) {
+        let item = tablichkaTanlangan(type);
+        let ruxsat = item ? tablichkaChopRuxsat(item) : [];
+        tablichkaChop = ruxsat.includes('uf') ? 'uf' : (ruxsat[0] || 'uf');
+        tablichkaQogoz = !!(item && item.qogozBor && item.qogozKerak);
+    }
+
+    function renderTablichkaPicker(type) {
+        let grid = document.getElementById('tablichkaGrid');
+        if (!grid) return;
+        let active = tablichkaTanlangan(type);
+        grid.innerHTML = tablichkaMahsulotlari(type).map(item => `
+            <div class="bayroq-card ${active && active.id === item.id ? 'active' : ''}" onclick="selectTablichka('${item.id}')">
+                <img src="${item.imageUrl || placeholderImg('Rasm yo\'q', 100, 75)}" alt="${tbEsc(item.name)}" onerror="this.src='${placeholderImg('No Img', 100, 75)}'">
+                <div class="bayroq-card-name" title="${tbEsc(item.name)}">${tbEsc(item.name)}</div>
+            </div>
+        `).join('');
+    }
+
+    function selectTablichka(id) {
+        tablichkaSelectedId = id;
+        tablichkaTanlovniBoshlash(activeProductType);
+        renderTablichkaPicker(activeProductType);
+        calculate();
+    }
+
+    function setTablichkaChop(k) { tablichkaChop = k; calculate(); }
+    function setTablichkaQogoz(v) { tablichkaQogoz = !!v; calculate(); }
+
+    // Tanlangan mahsulot ma'lumoti + chop turi + (bo'lsa) ichiga qog'oz tanlovi
+    function renderTablichkaSpecBox(type, item) {
+        let box = document.getElementById('tablichkaSpecBox');
+        if (!box) return;
+        if (!item) { box.innerHTML = ''; return; }
+        let ruxsat = tablichkaChopRuxsat(item);
+        let chopHtml = `
+            <div class="step-title" style="margin-top:8px;">Chop etish turi</div>
+            <div class="options-group">
+                ${Object.keys(TABLICHKA_CHOP).map(k => {
+                    let mumkin = ruxsat.includes(k);
+                    return `<button type="button" class="opt-btn ${k === tablichkaChop ? 'active' : ''} ${mumkin ? '' : 'opt-btn-disabled'}" ${mumkin ? '' : 'disabled title="Bu mahsulotda mavjud emas"'} onclick="setTablichkaChop('${k}')">${TABLICHKA_CHOP[k]}</button>`;
+                }).join('')}
+            </div>`;
+        let qogozHtml = item.qogozBor ? `
+            <div class="step-title" style="margin-top:8px;">Ichiga soladigan qog'oz</div>
+            <div class="options-group">
+                <button type="button" class="opt-btn ${tablichkaQogoz ? 'active' : ''}" onclick="setTablichkaQogoz(true)">📄 Kerak${item.qogozNarxi > 0 ? ` (+${Number(item.qogozNarxi).toLocaleString()} so'm)` : ''}</button>
+                <button type="button" class="opt-btn ${!tablichkaQogoz ? 'active' : ''}" onclick="setTablichkaQogoz(false)">Kerak emas</button>
+            </div>` : '';
+        let infoHtml = (item.info || '').trim() ? `<div style="white-space:pre-line; background:rgba(0,0,0,0.03); border:1px solid var(--border); border-radius:8px; padding:10px; margin:8px 0; font-size:0.78rem; color:var(--text-muted); line-height:1.5;">${tbEsc(item.info)}</div>` : '';
+        box.innerHTML = infoHtml + chopHtml + qogozHtml;
+    }
+
+    // Tanlangan chop turi bo'yicha to'liq narx jadvali (qaysi oraliqda turgani ajratiladi)
+    function renderTablichkaTierBox(item, qty) {
+        let box = document.getElementById('tablichkaTierBox');
+        if (!box) return;
+        let list = tablichkaTierlar(item);
+        if (!item || list.length < 2) { box.innerHTML = ''; return; }
+        let aktiv = tablichkaTierFor(item, qty);
+        box.innerHTML = `
+            <div style="font-size:0.85rem; font-weight:700; color:var(--primary); margin-bottom:4px;">📊 Miqdor bo'yicha narx jadvali</div>
+            <div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:6px;">Ko'proq olsangiz — dona narxi arzonlashadi.</div>
+            <table class="tier-preview-table">
+                <thead><tr><th>Miqdor</th><th style="text-align:right;">Dona narxi</th></tr></thead>
+                <tbody>${list.map(t => `
+                    <tr class="${t === aktiv ? 'tier-active' : ''}">
+                        <td>${tierLabel(t)}${t === aktiv ? ' ✓' : ''}</td>
+                        <td style="text-align:right;">${t[tablichkaChop] > 0 ? t[tablichkaChop].toLocaleString() + " so'm" : '—'}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
+    }
+
+    function calculateResult_tablichka(type, qty) {
+        let typeName = reklamaStendNames[type] || type;
+        let item = tablichkaTanlangan(type);
+        if (!item) return { details: `${typeName} | Mahsulot kiritilmagan — Admin Panelda kiriting`, baseUnitPrice: 0 };
+        let ruxsat = tablichkaChopRuxsat(item);
+        if (!ruxsat.includes(tablichkaChop)) tablichkaChop = ruxsat[0] || tablichkaChop;
+        renderTablichkaPicker(type);
+        renderTablichkaSpecBox(type, item);
+        renderTablichkaTierBox(item, qty);
+        let t = tablichkaTierFor(item, qty);
+        if (!t || !(t[tablichkaChop] > 0)) return { details: `${typeName} ${item.name} | Narx kiritilmagan (Admin Panel)`, baseUnitPrice: 0 };
+        let unit = t[tablichkaChop];
+        let details = `${typeName} ${item.name} | Chop: ${TABLICHKA_CHOP[tablichkaChop]}`;
+        if (tablichkaTierlar(item).length > 1) details += ` | Oraliq: ${tierLabel(t)}`;
+        if (item.qogozBor) {
+            if (tablichkaQogoz) {
+                let qn = parseFloat(item.qogozNarxi) || 0;
+                unit += qn;
+                details += ` | Ichiga qog'oz: kerak${qn > 0 ? ` (+${qn.toLocaleString()} so'm)` : ''}`;
+            } else {
+                details += " | Ichiga qog'oz: kerak emas";
+            }
+        }
+        return { details, baseUnitPrice: unit };
+    }
+
+    // ---------------- ADMIN tomoni ----------------
+    function renderTablichkaAdmin(type) {
+        let title = document.getElementById('tablichkaAdminSarlavha');
+        if (title) title.innerText = `🪧 ${reklamaStendNames[type] || type} — mahsulotlar`;
+        tablichkaBekorQilish();
+        renderTablichkaAdminGrid(type);
+    }
+
+    function renderTablichkaAdminGrid(type) {
+        let grid = document.getElementById('tablichkaAdminGrid');
+        if (!grid) return;
+        let list = tablichkaMahsulotlari(type);
+        let countEl = document.getElementById('tablichkaAdminCount');
+        if (countEl) countEl.textContent = list.length > 0 ? `${list.length} ta mahsulot` : '';
+        if (list.length === 0) {
+            grid.innerHTML = `<div class="model-grid-empty">📭 Hozircha mahsulot qo'shilmagan.<br>Yuqoridagi formadan birinchisini qo'shing.</div>`;
+            return;
+        }
+        grid.innerHTML = list.map(item => {
+            let t0 = tablichkaTierlar(item)[0];
+            let narx = t0 ? Math.max(t0.uf, t0.gravirovka) : 0;
+            return `
+            <div class="model-card">
+                <div class="model-card-top">
+                    <div class="model-card-thumb"><img src="${item.imageUrl || placeholderImg('No Img', 80, 80)}" onerror="this.src='${placeholderImg('No Img', 80, 80)}'"></div>
+                    <div class="model-card-head"><div class="model-card-name" title="${tbEsc(item.name)}">${tbEsc(item.name)}</div></div>
+                    <div class="action-btns model-card-actions">
+                        <button class="btn btn-warning" title="Tahrirlash" onclick="tablichkaTahrirlash('${item.id}')">✏️</button>
+                        <button class="btn btn-danger" title="O'chirish" onclick="tablichkaOchirish('${item.id}')">🗑️</button>
+                    </div>
+                </div>
+                <div class="model-card-body"><div class="model-card-price">${narx > 0 ? narx.toLocaleString() + " so'm" + (tablichkaTierlar(item).length > 1 ? ' dan' : '') : '—'}</div></div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderTablichkaTierRows() {
+        let box = document.getElementById('tablichkaTierRows');
+        if (!box) return;
+        box.innerHTML = tablichkaAdminTierlar.map((t, i) => `
+            <div class="bayroq-tier-row">
+                <div class="form-group"><label>Dan (dona)</label><input type="number" id="tbTier_from_${i}" min="1" value="${t.from}"></div>
+                <div class="form-group"><label>Gacha (0 = cheksiz)</label><input type="number" id="tbTier_to_${i}" min="0" value="${t.to}"></div>
+                <div class="form-group"><label>UF pechat narxi (so'm)</label><input type="number" id="tbTier_uf_${i}" min="0" value="${t.uf}"></div>
+                <div class="form-group"><label>Gravirovka narxi (so'm)</label><input type="number" id="tbTier_grav_${i}" min="0" value="${t.gravirovka}"></div>
+                <button type="button" class="btn btn-danger" title="Oraliqni o'chirish" onclick="tablichkaOraliqOchir(${i})">✕</button>
+            </div>
+        `).join('');
+        let warn = document.getElementById('tablichkaTierWarn');
+        if (warn) warn.innerHTML = tierValidationMessages(tablichkaAdminTierlar).map(m => `<div>⚠️ ${m}</div>`).join('');
+    }
+
+    function tablichkaOraliqlarniOqi() {
+        return tablichkaAdminTierlar.map((t, i) => {
+            let q = id => document.getElementById(id);
+            if (!q(`tbTier_from_${i}`)) return t;
+            return {
+                from: Math.max(1, parseInt(q(`tbTier_from_${i}`).value) || 1),
+                to: Math.max(0, parseInt(q(`tbTier_to_${i}`).value) || 0),
+                uf: Math.max(0, parseFloat(q(`tbTier_uf_${i}`).value) || 0),
+                gravirovka: Math.max(0, parseFloat(q(`tbTier_grav_${i}`).value) || 0)
+            };
+        });
+    }
+
+    function tablichkaOraliqQosh() {
+        tablichkaAdminTierlar = tablichkaOraliqlarniOqi();
+        let last = tablichkaAdminTierlar[tablichkaAdminTierlar.length - 1];
+        let from = last ? (last.to > 0 ? last.to + 1 : last.from + 1) : 1;
+        if (last && last.to === 0) last.to = Math.max(last.from, from - 1); // oldingi cheksiz oraliqni yopamiz
+        tablichkaAdminTierlar.push({ from, to: 0, uf: last ? last.uf : 0, gravirovka: last ? last.gravirovka : 0 });
+        renderTablichkaTierRows();
+    }
+
+    function tablichkaOraliqOchir(i) {
+        tablichkaAdminTierlar = tablichkaOraliqlarniOqi();
+        if (tablichkaAdminTierlar.length <= 1) { showToast("⚠️ Kamida bitta oraliq bo'lishi kerak"); return; }
+        tablichkaAdminTierlar.splice(i, 1);
+        renderTablichkaTierRows();
+    }
+
+    function tablichkaQogozBorOzgardi() {
+        let bor = !!document.getElementById('tablichkaQogozBor')?.checked;
+        let box = document.getElementById('tablichkaQogozMaydonlar');
+        if (box) box.style.display = bor ? '' : 'none';
+    }
+
+    async function tablichkaRasmTanlash(inputEl) {
+        const img = document.getElementById('tablichkaImagePreview');
+        const placeholder = document.getElementById('tablichkaImagePreviewPlaceholder');
+        if (!img || !inputEl.files || !inputEl.files[0]) return;
+        img.src = await convertBase64(inputEl.files[0]);
+        img.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+    }
+
+    function tablichkaFormaniToldir(item) {
+        let q = id => document.getElementById(id);
+        q('tablichkaFormTitle').innerText = item ? '✏️ Mahsulotni tahrirlash' : "➕ Yangi mahsulot qo'shish";
+        q('tablichkaNameInput').value = item ? item.name : '';
+        let info = q('tablichkaInfoInput');
+        info.value = item ? (item.info || '') : '';
+        info.style.height = 'auto';
+        info.style.height = Math.max(200, info.scrollHeight) + 'px';
+        q('tablichkaStandart').checked = !!(item && item.standart);
+        q('tablichkaQogozBor').checked = !!(item && item.qogozBor);
+        q('tablichkaQogozKerak').checked = !!(item && item.qogozKerak);
+        q('tablichkaQogozNarxi').value = item ? (item.qogozNarxi || 0) : 0;
+        tablichkaQogozBorOzgardi();
+        tablichkaAdminTierlar = item ? tablichkaTierlar(item) : [{ from: 1, to: 0, uf: 0, gravirovka: 0 }];
+        if (tablichkaAdminTierlar.length === 0) tablichkaAdminTierlar = [{ from: 1, to: 0, uf: 0, gravirovka: 0 }];
+        renderTablichkaTierRows();
+        let img = q('tablichkaImagePreview'), placeholder = q('tablichkaImagePreviewPlaceholder');
+        if (item && item.imageUrl) { img.src = item.imageUrl; img.style.display = 'block'; placeholder.style.display = 'none'; }
+        else { img.removeAttribute('src'); img.style.display = 'none'; placeholder.style.display = 'block'; }
+        q('tablichkaFileInput').value = '';
+        q('btnTablichkaBekor').style.display = item ? 'inline-flex' : 'none';
+    }
+
+    function tablichkaTahrirlash(id) {
+        let item = tablichkaMahsulotlari(currentManagingProduct).find(it => it.id === id);
+        if (!item) return;
+        tablichkaEditId = id;
+        tablichkaFormaniToldir(item);
+        document.getElementById('tablichkaNameInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function tablichkaBekorQilish() {
+        tablichkaEditId = null;
+        if (document.getElementById('tablichkaNameInput')) tablichkaFormaniToldir(null);
+    }
+
+    function saveTablichkaItem() {
+        let type = currentManagingProduct;
+        if (!tablichkaMi(type)) return;
+        let q = id => document.getElementById(id);
+        let name = q('tablichkaNameInput').value.trim();
+        let info = q('tablichkaInfoInput').value.trim();
+        let tierlar = tablichkaOraliqlarniOqi().sort((a, b) => a.from - b.from);
+        let imageUrl = q('tablichkaImagePreview').src || '';
+        if (!imageUrl.startsWith('data:') && !imageUrl.startsWith('http')) imageUrl = '';
+        if (typeof rasmManzilNisbiy === 'function') imageUrl = rasmManzilNisbiy(imageUrl);
+        let standart = q('tablichkaStandart').checked;
+        let qogozBor = q('tablichkaQogozBor').checked;
+        let qogozKerak = qogozBor && q('tablichkaQogozKerak').checked;
+        let qogozNarxi = qogozBor ? Math.max(0, parseFloat(q('tablichkaQogozNarxi').value) || 0) : 0;
+
+        if (!name) { showToast("⚠️ Mahsulot nomini kiriting!"); return; }
+        if (!tierlar.some(t => t.uf > 0 || t.gravirovka > 0)) { showToast("⚠️ Kamida bitta oraliqqa narx kiriting!"); return; }
+
+        let list = tablichkaMahsulotlari(type);
+        let item = tablichkaEditId ? list.find(it => it.id === tablichkaEditId) : null;
+        if (item) {
+            Object.assign(item, { name, info, tierlar, standart, qogozBor, qogozKerak, qogozNarxi });
+            if (imageUrl) item.imageUrl = imageUrl;
+            if (typeof logAudit === 'function') logAudit("Tablichka mahsuloti tahrirlandi", `${type}: ${name}`);
+        } else {
+            item = { id: tbId(), name, info, imageUrl, tierlar, standart, qogozBor, qogozKerak, qogozNarxi };
+            list.push(item);
+            if (typeof logAudit === 'function') logAudit("Tablichka mahsuloti qo'shildi", `${type}: ${name}`);
+        }
+        if (standart) list.forEach(it => { if (it !== item) it.standart = false; }); // standart bitta bo'ladi
+        tablichkaDatabase[type] = list;
+        saqlaTablichka();
+        if (typeof narxTasdiqla === 'function') narxTasdiqla('reklama_' + type);
+        tablichkaBekorQilish();
+        renderTablichkaAdminGrid(type);
+        showToast("✅ Saqlandi!");
+    }
+
+    function tablichkaOchirish(id) {
+        let type = currentManagingProduct;
+        let item = tablichkaMahsulotlari(type).find(it => it.id === id);
+        if (!item || !confirm(`"${item.name}" o'chirilsinmi?`)) return;
+        tablichkaDatabase[type] = tablichkaMahsulotlari(type).filter(it => it.id !== id);
+        saqlaTablichka();
+        if (typeof logAudit === 'function') logAudit("Tablichka mahsuloti o'chirildi", `${type}: ${item.name}`);
+        if (tablichkaEditId === id) tablichkaBekorQilish();
+        renderTablichkaAdminGrid(type);
+        showToast("🗑️ O'chirildi!");
+    }
+
     // ====================== BO'LIMNI RO'YXATDAN O'TKAZISH ======================
     // Bu chaqiruv fayl OXIRIDA turishi shart: fayl oxirigacha xatosiz yuklangandagina
     // bo'lim "ishlayapti" deb belgilanadi. init() — saqlangan (localStorage) ma'lumotlarni
@@ -1040,6 +1421,23 @@ function calculateResult_reklama(activeProductTypeParam, qty, baseCost) {
                 try {
                     reklamaStendQtyTiers = { ...reklamaStendQtyTiers, ...JSON.parse(savedReklamaStendQtyTiers) };
                 } catch (e) {}
+            }
+
+            // Tablichka mahsulotlari (Bayroqlar kabi katalog): saqlangani bo'lmasa — eski modellardan bir martalik o'tkazish
+            let savedTablichka = localStorage.getItem('erp_tablichka_db');
+            let tablichkaOqildi = false;
+            if (savedTablichka) {
+                try {
+                    let p = JSON.parse(savedTablichka);
+                    if (p && typeof p === 'object') {
+                        tablichkaTurlar.forEach(t => { tablichkaDatabase[t] = Array.isArray(p[t]) ? p[t] : []; });
+                        tablichkaOqildi = true;
+                    }
+                } catch (e) {}
+            }
+            if (!tablichkaOqildi) {
+                tablichkaEskidanOtkazish();
+                saqlaTablichka();
             }
         }
     });

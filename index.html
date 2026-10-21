@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 9106cc252ca28a32 -->
+<!-- DIQQAT: bu fayl AVTOMATIK yig'ilgan (.deploy/yigish.py). To'g'ridan-to'g'ri tahrirlamang - o'zgarishlarni umumiy/ va bolimlar/ papkalarida qiling, so'ng python3 .deploy/yigish.py ni ishga tushiring. yigish-hash: 91be8e1e025a6f34 -->
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="umumiy/core.css?v=3ef894a1">
     <link rel="stylesheet" href="bolimlar/poligrafiya/poligrafiya.css?v=f2eaed61">
     <link rel="stylesheet" href="bolimlar/suvenir/suvenir.css?v=1a1321ee">
-    <link rel="stylesheet" href="bolimlar/textile/textile.css?v=4f60a717">
+    <link rel="stylesheet" href="bolimlar/textile/textile.css?v=ea876762">
     <link rel="stylesheet" href="bolimlar/sifravoy/sifravoy.css?v=0813f0c4">
     <link rel="stylesheet" href="bolimlar/ofset/ofset.css?v=4e4b736d">
     <link rel="stylesheet" href="bolimlar/reklama/reklama.css?v=c12511e4">
@@ -1419,6 +1419,87 @@
                 </div>
             </div>
 
+            <!-- TABLICHKA / NASTOLNIY TABLICHKA ADMIN PANEL BLOKI (Bayroqlar kabi mahsulotlar katalogi) -->
+            <div id="tablichkaAdminBox" style="display: none; margin-bottom: 28px;">
+                <div class="add-pen-card" id="tablichkaAddForm">
+                    <div class="add-pen-card-head">
+                        <div class="add-pen-card-title" id="tablichkaFormTitle">➕ Yangi mahsulot qo'shish</div>
+                        <div class="add-pen-card-sub" id="tablichkaAdminSarlavha"></div>
+                    </div>
+                    <div class="model-form-section">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:2; min-width:260px;">
+                                <label>Mahsulot nomi (title):</label>
+                                <input type="text" id="tablichkaNameInput" placeholder="Masalan: Tablichka 300x400mm">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1; min-width:280px;">
+                                <label>Ma'lumot (mijozga ko'rsatiladi — o'lcham, material va h.k.):</label>
+                                <textarea id="tablichkaInfoInput" rows="8" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" placeholder="Razmerlari: 20x30, 30x40 sm&#10;Material: ..." style="width:100%; min-height:200px; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.9rem; line-height:1.5; resize:vertical;"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>Narx oraliqlari (tiraj bo'yicha) — UF pechat va Gravirovka narxlari alohida:</label>
+                                <div id="tablichkaTierRows"></div>
+                                <div id="tablichkaTierWarn" class="admin-hint" style="margin-top:6px;"></div>
+                                <button type="button" class="btn" style="background:#4f46e5; margin-top:6px;" onclick="tablichkaOraliqQosh()">+ Oraliq qo'shish</button>
+                                <small>Narxi 0 qoldirilgan chop turi bu mahsulotda mijozga o'chiq (tanlab bo'lmaydigan) ko'rinadi. Marja keyin qo'shiladi.</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="tablichkaStandart" style="width:auto; height:auto;">
+                                    Standart mahsulot (kalkulyator ochilganda shu tanlangan turadi)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="tablichkaQogozBor" onchange="tablichkaQogozBorOzgardi()" style="width:auto; height:auto;">
+                                    Ichiga soladigan qog'oz mumkin (mijoz «kerak / kerak emas» tanlaydi)
+                                </label>
+                                <div id="tablichkaQogozMaydonlar" style="display:none; margin-top:8px;">
+                                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                        <input type="checkbox" id="tablichkaQogozKerak" style="width:auto; height:auto;"> Standart holatda «kerak»
+                                    </label>
+                                    <div class="input-unit" style="margin-top:6px; max-width:260px;"><input type="number" min="0" id="tablichkaQogozNarxi" value="0"><span>so'm/dona</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Rasm Yuklash (Lokal):</label>
+                                <div class="image-upload-row">
+                                    <div class="image-upload-preview">
+                                        <img id="tablichkaImagePreview" alt="" style="display:none;">
+                                        <span id="tablichkaImagePreviewPlaceholder">🪧</span>
+                                    </div>
+                                    <input type="file" id="tablichkaFileInput" accept="image/*" onchange="tablichkaRasmTanlash(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-outline" id="btnTablichkaBekor" style="display:none;" onclick="tablichkaBekorQilish()">Bekor qilish</button>
+                        <button class="btn" onclick="saveTablichkaItem()">💾 Saqlash</button>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="model-list-head">
+                        <div class="model-list-head-left">
+                            <h3>📋 Mahsulotlar ro'yxati</h3>
+                            <span class="model-list-count" id="tablichkaAdminCount"></span>
+                        </div>
+                    </div>
+                    <div class="model-grid" id="tablichkaAdminGrid"></div>
+                </div>
+            </div>
+
             <!-- TEXTILE ADMIN PANEL BLOKI -->
             <div id="adminTextileBox" style="display: none; margin-bottom: 28px;">
                 <div class="add-pen-card" style="margin-bottom: 16px;">
@@ -1500,17 +1581,37 @@
                 <div class="add-pen-card" id="bayroqAddForm">
                     <div class="add-pen-card-head">
                         <div class="add-pen-card-title" id="bayroqFormTitle">➕ Yangi Bayroq Qo'shish</div>
-                        <div class="add-pen-card-sub">Nomi/texnik xususiyatlari, narxi va rasmini kiriting.</div>
+                        <div class="add-pen-card-sub">Nomi, rasmi, ma'lumoti va narx oraliqlarini (konstruksiya + bayroq) kiriting.</div>
                     </div>
                     <div class="model-form-section">
                         <div class="form-row">
-                            <div class="form-group" style="flex:2; min-width:280px;">
-                                <label>Nomi / texnik xususiyatlari:</label>
-                                <textarea id="bayroqNameInput" rows="4" placeholder="Masalan: Настольный флаг с одинарным флагштоком&#10;Размер флага: 0,15х0,25 см&#10;..." style="width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.9rem; resize:vertical;"></textarea>
+                            <div class="form-group" style="flex:2; min-width:260px;">
+                                <label>Mahsulot turi (nomi):</label>
+                                <input type="text" id="bayroqNameInput" placeholder="Masalan: Парус уличный флаг">
                             </div>
-                            <div class="form-group">
-                                <label>Narxi (so'm):</label>
-                                <input type="number" id="bayroqPriceInput" placeholder="150000">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1; min-width:280px;">
+                                <label>Ma'lumot (mijozga ko'rsatiladi — o'lcham, mato, pechat va h.k.):</label>
+                                <textarea id="bayroqInfoInput" rows="12" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" placeholder="Размер флага: 0,60х2,20 м&#10;Ткань флага: Полиэстер 135гр.&#10;..." style="width:100%; min-height:280px; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:inherit; font-size:0.9rem; line-height:1.5; resize:vertical;"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="bayroqKonsBor" checked onchange="onBayroqKonsBorChange()" style="width:auto; height:auto;">
+                                    Bu mahsulotda konstruksiya bor (mijoz «konstruksiya bilan» yoki «konstruksiyasiz» tanlay oladi)
+                                </label>
+                                <small>Belgi olib tashlansa — konstruksiyasiz mahsulot (masalan yostiq, vimpel): faqat bayroq narxi kiritiladi.</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label>Narx oraliqlari (tiraj bo'yicha): narx = konstruksiya + bayroq, so'ng marja qo'shiladi</label>
+                                <div id="bayroqTierRows"></div>
+                                <div id="bayroqTierWarn" class="admin-hint" style="margin-top:6px;"></div>
+                                <button type="button" class="btn" style="background:#4f46e5; margin-top:6px;" onclick="addBayroqTierRow()">+ Oraliq qo'shish</button>
+                                <small>Konstruksiya bor bo'lsa mijoz standart holatda «konstruksiya bilan» narxini ko'radi; «konstruksiyasiz» tanlasa faqat bayroq narxi olinadi.</small>
                             </div>
                         </div>
                         <div class="form-row">
@@ -1518,7 +1619,7 @@
                                 <label>Rasm Yuklash (Lokal):</label>
                                 <div class="image-upload-row">
                                     <div class="image-upload-preview" id="bayroqImagePreviewBox">
-                                        <img id="bayroqImagePreview" alt="" style="display:none;" onerror="this.src=placeholderImg('Rasm yo\'q', 150, 150)">
+                                        <img id="bayroqImagePreview" alt="" style="display:none;" onerror="this.src=placeholderImg('Rasm yo'q', 150, 150)">
                                         <span id="bayroqImagePreviewPlaceholder">🚩</span>
                                     </div>
                                     <input type="file" id="bayroqFileInput" accept="image/*" onchange="previewBayroqImage(this)">
@@ -1885,7 +1986,7 @@
 
 <!-- Skriptlar: har bir fayl alohida yuklanadi — bittasida xato bo'lsa, qolganlari baribir ishlaydi -->
 <script src="umumiy/yordamchi.js?v=333a4bc1"></script>
-<script src="umumiy/core.js?v=578ef26d"></script>
+<script src="umumiy/core.js?v=dd6a8008"></script>
 <script src="bolimlar/ofset/ofset.js?v=788efad9"></script>
 <script src="bolimlar/sifravoy/sifravoy.js?v=b0547654"></script>
 <script src="bolimlar/qogoz/qogoz.js?v=8ff2dcb5"></script>
@@ -1902,15 +2003,15 @@
 <script src="bolimlar/poligrafiya/stiker.js?v=42a89197"></script>
 <script src="bolimlar/poligrafiya/dvigatel.js?v=59b53255"></script>
 <script src="bolimlar/poligrafiya/poligrafiya.js?v=0c491b11"></script>
-<script src="bolimlar/textile/textile.js?v=5932e434"></script>
+<script src="bolimlar/textile/textile.js?v=9137e4be"></script>
 <script src="bolimlar/suvenir/suvenir.js?v=d6ec351e"></script>
-<script src="bolimlar/reklama/reklama.js?v=ea8e461a"></script>
+<script src="bolimlar/reklama/reklama.js?v=638741f0"></script>
 <script src="umumiy/custom-products.js?v=09afcfda"></script>
 <script src="umumiy/full-calc.js?v=4ef1771f"></script>
 <script src="umumiy/admin-ux.js?v=78336b6d"></script>
-<script src="umumiy/narx-tekshiruv.js?v=e37704da"></script>
+<script src="umumiy/narx-tekshiruv.js?v=a2eb94f1"></script>
 <script src="umumiy/rasm-ombori.js?v=371b0fbc"></script>
-<script src="umumiy/mahsulot-malumoti.js?v=c916af6a"></script>
+<script src="umumiy/mahsulot-malumoti.js?v=152ba9c0"></script>
 <script src="umumiy/marja-nazorat.js?v=26bd8db7"></script>
 <script src="umumiy/bosh-sahifa.js?v=5d4b5c3e"></script>
 <script src="umumiy/ishga-tushirish.js?v=487055e5"></script>

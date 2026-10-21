@@ -571,6 +571,11 @@
         renderQuoteCartItems();
     }
 
+    // Tijoriy taklif/savatchada bir martalik taxi xarajati yozuvi ko'rsatilmaydi (narxga qo'shilgan bo'lib qoladi)
+    function taklifTafsiloti(details) {
+        return String(details == null ? '' : details).replace(/\s*\|\s*Taxi \(bir martalik\)[^|]*/g, '');
+    }
+
     function renderQuoteCartItems() {
         let container = document.getElementById('quoteCartItems');
         if (!container) return;
@@ -583,7 +588,7 @@
                     <div class="quote-cart-item-icon">${item.icon}</div>
                     <div class="quote-cart-item-info">
                         <div class="quote-cart-item-name">${item.name}</div>
-                        <div class="quote-cart-item-details">${item.details}</div>
+                        <div class="quote-cart-item-details">${taklifTafsiloti(item.details)}</div>
                         <div class="quote-cart-item-meta">${item.qty.toLocaleString()} dona × ${item.unitPrice.toLocaleString()} so'm</div>
                     </div>
                     <div class="quote-cart-item-total">${item.totalPrice.toLocaleString()} so'm</div>
@@ -627,7 +632,7 @@
         let rowsHtml = quoteCart.map((item, idx) => `
             <tr>
                 <td>${idx + 1}</td>
-                <td>${item.icon} ${item.name}<div class="quote-offer-details">${item.details}</div></td>
+                <td>${item.icon} ${item.name}<div class="quote-offer-details">${taklifTafsiloti(item.details)}</div></td>
                 <td>${item.qty.toLocaleString()} dona</td>
                 <td>${item.unitPrice.toLocaleString()} so'm</td>
                 <td>${item.totalPrice.toLocaleString()} so'm</td>
@@ -717,7 +722,7 @@
         let rowsHtml = rec.items.map((item, idx) => `
             <tr>
                 <td>${idx + 1}</td>
-                <td>${item.icon || ''} ${item.name}<div class="quote-offer-details">${item.details}</div></td>
+                <td>${item.icon || ''} ${item.name}<div class="quote-offer-details">${taklifTafsiloti(item.details)}</div></td>
                 <td>${item.qty.toLocaleString()} dona</td>
                 <td>${item.unitPrice.toLocaleString()} so'm</td>
                 <td>${item.totalPrice.toLocaleString()} so'm</td>
@@ -1008,7 +1013,8 @@
         let isBayroq = (key === 'bayroqlar');
         let isTextile = textileKeys.includes(key) && !isBayroq;
         let isStend = (key === 'stend');
-        let isReklamaStend = reklamaStendTypes.includes(key) && !isStend;
+        let isTablichka = xavfsizOl(() => tablichkaMi(key), false); // Bayroqlar kabi mahsulotlar katalogi (reklama.js)
+        let isReklamaStend = reklamaStendTypes.includes(key) && !isStend && !isTablichka;
 
         document.getElementById('ofsetAdminPanelBox').style.display = isOfset ? 'block' : 'none';
         document.getElementById('qogozAdminBox').style.display = isQogoz ? 'block' : 'none';
@@ -1029,6 +1035,7 @@
         if (typeof renderAdminReklamaMaxEni === 'function') renderAdminReklamaMaxEni(key);
         document.getElementById('adminTextileBox').style.display = isTextile ? 'block' : 'none';
         document.getElementById('reklamaStendAdminBox').style.display = isReklamaStend ? 'block' : 'none';
+        document.getElementById('tablichkaAdminBox').style.display = isTablichka ? 'block' : 'none';
         document.getElementById('stendAdminBox').style.display = isStend ? 'block' : 'none';
         document.getElementById('bayroqAdminBox').style.display = isBayroq ? 'block' : 'none';
 
@@ -1043,7 +1050,7 @@
             document.getElementById('klisheFeeInput').value = klisheOneTimePrices[key] !== undefined ? klisheOneTimePrices[key] : 0;
         }
 
-        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isDiplom || isKatalog || isStiker || isVizitka || isTextile || isReklamaStend || isStend || isBayroq;
+        let maxsusBolim = isDigital || isOfset || isQogoz || isPoligrafiya || isBloknot || isPapka || isKalendar || isKubarik || isPaket || isVaraqli || isOtkritka || isDiplom || isKatalog || isStiker || isVizitka || isTextile || isReklamaStend || isTablichka || isStend || isBayroq;
         document.getElementById('adminModelAddForm').style.display = maxsusBolim ? 'none' : 'block';
         document.getElementById('adminModelTableCard').style.display = maxsusBolim ? 'none' : 'block';
 
@@ -1071,6 +1078,10 @@
         }
         if (isStend) {
             renderAdminStend();
+            return;
+        }
+        if (isTablichka) {
+            renderTablichkaAdmin(key);
             return;
         }
         if (isReklamaStend) {
@@ -1346,6 +1357,9 @@ function generateForm(type) {
     else if (type === 'stend') {
         html = buildStendForm();
     }
+    else if (xavfsizOl(() => tablichkaMi(type), false)) {
+        html = generateFormHtml_tablichka(type);
+    }
     else if (reklamaStendTypes.includes(type)) {
         html = generateFormHtml_reklamaStend(type);
     }
@@ -1464,6 +1478,11 @@ function generateForm(type) {
         return;
     }
 
+    if (xavfsizOl(() => tablichkaMi(type), false)) {
+        renderTablichkaPicker(type);
+        return;
+    }
+
     if (reklamaStendTypes.includes(type)) {
         renderReklamaStendSizeOptions(type);
         return;
@@ -1538,6 +1557,10 @@ function calculateIchki() {
             details = res.details;
             costItems = res.costItems || [];
             hisobYaroqsiz = !!res.hisobYaroqsiz;
+        }
+        else if (xavfsizOl(() => tablichkaMi(activeProductType), false)) {
+            let r = calculateResult_tablichka(activeProductType, qty);
+            details = r.details; baseUnitPrice = r.baseUnitPrice;
         }
         else if (reklamaStendTypes.includes(activeProductType)) {
             let r = calculateResult_reklamaStend(activeProductType, qty);
